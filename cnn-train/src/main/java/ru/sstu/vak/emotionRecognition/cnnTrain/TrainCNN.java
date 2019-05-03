@@ -243,7 +243,7 @@ public class TrainCNN {
                 .layer(6, conv3x3("cnn3", 384, nonZeroBias))
                 .layer(7, conv3x3("cnn4", 384, nonZeroBias))
                 .layer(8, new LocalResponseNormalization.Builder().name("lrn3").build())
-                .layer(9, maxPool("maxpool3", new int[]{2, 2}))
+                .layer(9, maxPool("maxpool3", new int[]{3, 3}))
                 .layer(10, fullyConnected("ffn1", 2048, nonZeroBias, dropOut))
                 .layer(11, fullyConnected("ffn2", 2048, nonZeroBias, dropOut))
                 .layer(12, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)

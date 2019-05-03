@@ -17,7 +17,7 @@ public class FrameIterator implements AutoCloseable {
 
     private FrameGrabber frameGrabber;
 
-    private FFmpegFrameRecorder recorder;
+    private FFmpegFrameRecorder frameRecorder;
 
     private volatile boolean run = false;
 
@@ -35,11 +35,11 @@ public class FrameIterator implements AutoCloseable {
         void onException(Throwable e);
     }
 
-    public interface RecordListener {
+    public interface RecordFrameListener {
         Frame onNextFrame(Frame frame);
     }
 
-    public interface Listener {
+    public interface FrameListener {
         void onNextFrame(Frame frame);
     }
 
@@ -56,11 +56,11 @@ public class FrameIterator implements AutoCloseable {
         return run;
     }
 
-    public void start(int deviceIndex, Listener listener) throws FrameGrabber.Exception {
+    public void start(int deviceIndex, FrameListener frameListener) throws FrameGrabber.Exception {
         if (frameGrabber == null) {
             log.info("Starting OpenCVFrameGrabber with deviceIndex '{}'", deviceIndex);
             frameGrabber = OpenCVFrameGrabber.createDefault(deviceIndex);
-            core(listener);
+            core(frameListener);
         } else {
             IteratorAlreadyRunningException e = new IteratorAlreadyRunningException();
             log.error(e.getMessage(), e);
@@ -68,11 +68,11 @@ public class FrameIterator implements AutoCloseable {
         }
     }
 
-    public void start(String fileName, Listener listener) throws FrameGrabber.Exception {
+    public void start(String fileName, FrameListener frameListener) throws FrameGrabber.Exception {
         if (frameGrabber == null) {
             log.info("Starting OpenCVFrameGrabber with fileName '{}'", fileName);
             frameGrabber = new FFmpegFrameGrabber(fileName);
-            core(listener);
+            core(frameListener);
         } else {
             IteratorAlreadyRunningException e = new IteratorAlreadyRunningException();
             log.error(e.getMessage(), e);
@@ -80,7 +80,7 @@ public class FrameIterator implements AutoCloseable {
         }
     }
 
-    private void core(Listener listener) {
+    private void core(FrameListener frameListener) {
         run = true;
 
         log.debug("Submit executor service task with frame grabber...");
@@ -96,7 +96,7 @@ public class FrameIterator implements AutoCloseable {
                         break;
                     }
                     if (videoFrame.image != null) {
-                        listener.onNextFrame(videoFrame);
+                        frameListener.onNextFrame(videoFrame);
                         if (!run) {
                             stopGrabber();
                         }
@@ -105,7 +105,7 @@ public class FrameIterator implements AutoCloseable {
             } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
                 log.error(e.getMessage(), e);
                 frameGrabber = null;
-                recorder = null;
+                frameRecorder = null;
                 if (exceptionListener != null) {
                     exceptionListener.onException(e);
                 } else {
@@ -116,7 +116,7 @@ public class FrameIterator implements AutoCloseable {
     }
 
 
-    public void startRecord(int deviceIndex, String videoFile, RecordListener listener) throws FrameGrabber.Exception {
+    public void startRecord(int deviceIndex, String videoFile, RecordFrameListener listener) throws FrameGrabber.Exception {
         if (frameGrabber == null) {
             log.info("Starting OpenCVFrameGrabber with deviceIndex '{}'", deviceIndex);
             frameGrabber = OpenCVFrameGrabber.createDefault(deviceIndex);
@@ -128,7 +128,7 @@ public class FrameIterator implements AutoCloseable {
         }
     }
 
-    public void startRecord(String fileName, String videoFile, RecordListener listener) throws FrameGrabber.Exception {
+    public void startRecord(String fileName, String videoFile, RecordFrameListener listener) throws FrameGrabber.Exception {
         if (frameGrabber == null) {
             log.info("Starting FFmpegFrameGrabber with fileName '{}'", fileName);
             frameGrabber = new FFmpegFrameGrabber(fileName);
@@ -140,7 +140,7 @@ public class FrameIterator implements AutoCloseable {
         }
     }
 
-    private void recordCore(String videoFile, RecordListener listener) {
+    private void recordCore(String videoFile, RecordFrameListener listener) {
         run = true;
 
         log.debug("Submit executor service task with frame grabber...");
@@ -156,12 +156,12 @@ public class FrameIterator implements AutoCloseable {
                         break;
                     }
                     if (videoFrame.image != null) {
-                        if (recorder == null) {
-                            recorder = new FFmpegFrameRecorder(videoFile, frameGrabber.getImageWidth(), frameGrabber.getImageHeight());
-                            recorder.start();
+                        if (frameRecorder == null) {
+                            frameRecorder = new FFmpegFrameRecorder(videoFile, frameGrabber.getImageWidth(), frameGrabber.getImageHeight());
+                            frameRecorder.start();
                             //FIXME recorder не работает
                         }
-                        recorder.record(listener.onNextFrame(videoFrame));
+                        frameRecorder.record(listener.onNextFrame(videoFrame));
                     }
                 }
                 stopGrabber();
@@ -202,11 +202,11 @@ public class FrameIterator implements AutoCloseable {
             frameGrabber.stop();
             frameGrabber = null;
         }
-        if (recorder != null) {
-            recorder.release();
-            recorder.close();
-            recorder.stop();
-            recorder = null;
+        if (frameRecorder != null) {
+            frameRecorder.release();
+            frameRecorder.close();
+            frameRecorder.stop();
+            frameRecorder = null;
         }
         if (onStopListener != null) {
             onStopListener.onIteratorStopped();

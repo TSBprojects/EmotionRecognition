@@ -26,12 +26,14 @@ public class HaarFaceDetector {
 
     private final static String CLASSIFIER_PATH = "/haarcascadeModel/model_alt.xml";
 
-    private CascadeClassifier faceCascade;
+    private CascadeClassifier cascadeClassifier;
+
     private OpenCVFrameConverter.ToMat converterToMat;
+
 
     public HaarFaceDetector() throws IOException {
         log.info("Initialize Haar's cascade classifier...");
-        this.faceCascade = new CascadeClassifier(getClassifierPath(CLASSIFIER_PATH));
+        this.cascadeClassifier = new CascadeClassifier(getClassifierPath(CLASSIFIER_PATH));
         this.converterToMat = new OpenCVFrameConverter.ToMat();
     }
 
@@ -62,7 +64,7 @@ public class HaarFaceDetector {
 
         log.debug("Detecting faces on processed Mat image...");
         RectVector faces = new RectVector();
-        faceCascade.detectMultiScale(matFrameGrayEqualizedHist, faces);
+        cascadeClassifier.detectMultiScale(matFrameGrayEqualizedHist, faces);
 
         log.debug("Crop faces from the Mat image...");
         for (int i = 0; i < faces.size(); i++) {
@@ -127,8 +129,8 @@ public class HaarFaceDetector {
 //        equalizeHist(matFrameGrayEqualizedHist, matFrameGrayEqualizedHist);
 //
 //        RectVector faces = new RectVector();
-//        faceCascade.detectMultiScale(matFrameGrayEqualizedHist, faces);
-////        faceCascade.detectMultiScale(matFrameGrayEqualizedHist, faces,1.1,3,0,new Size(),new Size());
+//        cascadeClassifier.detectMultiScale(matFrameGrayEqualizedHist, faces);
+////        cascadeClassifier.detectMultiScale(matFrameGrayEqualizedHist, faces,1.1,3,0,new Size(),new Size());
 //
 //        for (int i = 0; i < faces.size(); i++) {
 //            Rect face = faces.get(i);
