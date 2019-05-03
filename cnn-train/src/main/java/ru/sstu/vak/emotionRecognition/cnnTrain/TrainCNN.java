@@ -226,8 +226,6 @@ public class TrainCNN {
 
         return new NeuralNetConfiguration.Builder()
                 .seed(SEED)
-                .weightInit(WeightInit.DISTRIBUTION)
-                .dist(new NormalDistribution(0.0, 0.01))
                 .activation(Activation.RELU)
                 .updater(new Nesterovs(new StepSchedule(ScheduleType.ITERATION, 1e-2, 0.1, 100000), 0.9))
                 .biasUpdater(new Nesterovs(new StepSchedule(ScheduleType.ITERATION, 2e-2, 0.1, 100000), 0.9))
