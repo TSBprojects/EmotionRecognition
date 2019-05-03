@@ -1,0 +1,44 @@
+package ru.sstu.vak.emotionRecognition.identifyEmotion.video;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.awt.image.BufferedImage;
+import java.util.List;
+
+public class VideoInfo {
+
+    @JsonProperty("frames")
+    private List<VideoFrame> frames;
+
+
+    public VideoInfo(List<VideoFrame> frames) {
+        this.frames = frames;
+    }
+
+    public List<VideoFrame> getFrames() {
+        return frames;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VideoInfo)) return false;
+
+        VideoInfo videoInfo = (VideoInfo) o;
+
+        return getFrames().equals(videoInfo.getFrames());
+    }
+
+    @Override
+    public int hashCode() {
+        return getFrames().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "VideoInfo{" +
+                "frames=" + frames +
+                '}';
+    }
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ru.sstu.vak.emotionRecognition</groupId>
+    <artifactId>owner-parent</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+
+    <name>OWNER :: Parent</name>
+    <description>OWNER Parent Project</description>
+
+    <modules>
+        <module>ui</module>
+        <module>cnn</module>
+        <module>graphic-prep</module>
+        <module>face-detector</module>
+        <module>common</module>
+        <module>shared-resources</module>
+        <module>cnn-train</module>
+        <module>identify-emotion</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.26</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+    </dependencies>
+
+</project>
