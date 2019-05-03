@@ -45,7 +45,6 @@ public class BoundingBox {
         final int textWidth = textCenterAlignment * 2;
 
         final int fullBackWidth = rect.width() - EDGE_INDENT * 2;
-        if(fullBackWidth < 0) return;
         final int oneSymbolWidth = textWidth / emotionLength;
         final int fittingSymbolsCount = fullBackWidth / oneSymbolWidth;
         final int extraSymbolsCount = emotionLength - fittingSymbolsCount;
@@ -64,7 +63,7 @@ public class BoundingBox {
                         "fittingSymbolsCount = {}\n" +
                         "extraSymbolsCount = {}\n" +
                         "extraNameWidth = {}",
-                rect.width(),  rect.height(),
+                rect.width(), rect.height(),
                 emotionName, emotionLength, halfBackHeight, textCenterAlignment, textWidth,
                 fullBackWidth, oneSymbolWidth, fittingSymbolsCount, extraSymbolsCount, extraNameWidth
         );

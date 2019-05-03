@@ -72,7 +72,7 @@ public class HaarFaceDetector {
 
             Mat croppedFaceMat = matFrameGrayEqualizedHist.apply(face);
 
-            detectedFaces.put(face, croppedFaceMat);
+            detectedFaces.put(new Rect(face), croppedFaceMat);
         }
 
         return detectedFaces;

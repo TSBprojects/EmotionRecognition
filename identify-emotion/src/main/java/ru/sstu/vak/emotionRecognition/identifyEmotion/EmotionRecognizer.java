@@ -154,19 +154,15 @@ public class EmotionRecognizer {
         Map<Rect, Mat> faces = haarFaceDetector.detect(ImageConverter.toFrame(image));
         faces.forEach((rect, face) -> {
             try {
+                BufferedImage faceImage = ImageConverter.toBufferedImage(matImage.apply(rect));
+                ImageFace.Location faceLocation = new ImageFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
                 Mat preparedFace = FacePreProcessing.process(face, WIDTH, HEIGHT, false);
                 if (imageNetInputListener != null) {
                     imageNetInputListener.onNextFace(preparedFace);
                 }
                 Emotion emotion = feedForwardCNN.predict(preparedFace);
-                imageFaceList.add(
-                        new ImageFace(
-                                emotion,
-                                new ImageFace.Location(rect.x(), rect.y(), rect.width(), rect.height()),
-                                ImageConverter.toBufferedImage(matImage.apply(rect))
-                        )
-                );
                 BoundingBox.draw(image, rect, emotion, boundingBoxBorderThickness, boundingBoxTopPaneHeight);
+                imageFaceList.add(new ImageFace(emotion, faceLocation, faceImage));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 if (exceptionListener != null) {
@@ -269,19 +265,14 @@ public class EmotionRecognizer {
         BufferedImage image = ImageConverter.toBufferedImage(frame);
         faces.forEach((rect, face) -> {
             try {
-
+                VideoFace.Location videoLocation = new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
                 Mat preparedFace = FacePreProcessing.process(face, WIDTH, HEIGHT, false);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace);
                 }
                 Emotion emotion = feedForwardCNN.predict(preparedFace);
-                videoFacesList.add(
-                        new VideoFace(
-                                emotion,
-                                new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height())
-                        )
-                );
                 BoundingBox.draw(image, rect, emotion, boundingBoxBorderThickness, boundingBoxTopPaneHeight);
+                videoFacesList.add(new VideoFace(emotion, videoLocation));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 if (exceptionListener != null) {
