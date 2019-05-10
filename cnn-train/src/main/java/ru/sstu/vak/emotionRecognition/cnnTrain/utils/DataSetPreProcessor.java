@@ -1,5 +1,7 @@
 package ru.sstu.vak.emotionRecognition.cnnTrain.utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN;
@@ -19,7 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGRA2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
+
 public class DataSetPreProcessor {
+
+    private static final Logger log = LogManager.getLogger(DataSetPreProcessor.class.getName());
 
     private DataSetPreProcessor() {
     }
@@ -50,6 +57,11 @@ public class DataSetPreProcessor {
 
 
                 Mat matFaceImage = matImage.apply(rect);
+                if (matFaceImage.channels() > 1) {
+                    log.debug("Convert Mat image to grayscale format...");
+                    cvtColor(matFaceImage, matFaceImage, COLOR_BGRA2GRAY);
+                }
+
                 Mat resizedFaceImage = ImageConverter.resize(matFaceImage, FeedForwardCNN.WIDTH, FeedForwardCNN.HEIGHT);
                 Mat resizedProcessedFaceImage = ImageConverter.resize(face, FeedForwardCNN.WIDTH, FeedForwardCNN.HEIGHT);
 
@@ -59,7 +71,7 @@ public class DataSetPreProcessor {
                 BufferedImage processedImage = PixelSmoother.smoothImage(
                         ImageConverter.toBufferedImage(resizedProcessedFaceImage),
                         FacePreProcessing.DATA_SET_IMAGE_INDEX,
-                        false
+                        true
                 );
                 writeImage(processedImage, classPathProcessed, imagePath);
             }

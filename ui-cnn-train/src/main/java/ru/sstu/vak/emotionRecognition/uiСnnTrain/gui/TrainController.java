@@ -46,8 +46,6 @@ public class TrainController {
 
     private volatile boolean trainRunning = false;
 
-    private Timer timer = new Timer();
-
     private XYChart.Series chartLine;
 
     @FXML

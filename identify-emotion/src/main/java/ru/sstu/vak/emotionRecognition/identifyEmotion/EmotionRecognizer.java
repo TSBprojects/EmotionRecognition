@@ -152,7 +152,7 @@ public class EmotionRecognizer {
         List<ImageFace> imageFaceList = new ArrayList<>();
 
         Mat matImage = ImageConverter.toMat(image);
-        Map<Rect, Mat> faces = haarFaceDetector.detect(ImageConverter.toFrame(image));
+        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage);
         faces.forEach((rect, face) -> {
             try {
                 BufferedImage faceImage = ImageConverter.toBufferedImage(matImage.apply(rect));
