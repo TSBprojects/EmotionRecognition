@@ -6,6 +6,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import ru.sstu.vak.emotionRecognition.cnnTrain.utils.DataSetPreProcessor;
+
+import java.nio.file.Paths;
 
 public class TrainCnnMain extends Application {
 

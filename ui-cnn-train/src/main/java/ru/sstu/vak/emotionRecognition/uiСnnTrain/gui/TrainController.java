@@ -20,14 +20,14 @@ import java.util.Timer;
 
 public class TrainController {
 
-    private final static int CHECK_EVERY_EPOCH = 0;
+    private final static int CHECK_EVERY_EPOCH = 5;
 
     private final static int EPOCH_COUNT = 320;
 
     private final static double SPLIT_TRAIN_SET = 0.2;
 
 
-    private final static String DATA_SET_PATH = "G:\\Main things\\Study\\DIPLOMA\\My\\datasets\\gray\\emotion_dataset3+2_smoothed_pixels";
+    private final static String DATA_SET_PATH = "G:\\Main things\\Study\\DIPLOMA\\My\\datasets\\gray\\emotion\\emotion_dataset3+2_smoothed_pixels";
 
     @FXML
     private TextArea trainInfo;
@@ -63,6 +63,7 @@ public class TrainController {
         });
 
         emotionRec.setOnScoreListener((epoch, totalScore) -> {
+            printMessage("score - " + totalScore);
             Platform.runLater(() -> {
                 chartLine.getData().add(new XYChart.Data(String.valueOf(epoch), totalScore));
             });

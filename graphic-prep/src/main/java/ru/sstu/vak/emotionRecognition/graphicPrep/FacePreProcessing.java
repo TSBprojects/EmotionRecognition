@@ -10,10 +10,11 @@ public class FacePreProcessing {
 
     private static final Logger log = LogManager.getLogger(FacePreProcessing.class.getName());
 
-    private static final double DATA_SET_IMAGE_INDEX = 0.5059679381184801;
-
     private FacePreProcessing() {
     }
+
+
+    public static final double DATA_SET_IMAGE_INDEX = 0.5059679381184801;
 
     public static Mat process(Mat face, int width, int height, double smoothIndex, boolean equalizeHist) {
         Mat scaledFace = ImageConverter.resize(face, width, height);

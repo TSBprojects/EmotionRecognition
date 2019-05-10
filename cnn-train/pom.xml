@@ -65,6 +65,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv-platform</artifactId>
+            <version>1.4.4</version>
+        </dependency>
+        <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-core</artifactId>
             <version>1.0.0-beta4</version>
@@ -78,6 +83,11 @@
         <dependency>
             <groupId>ru.sstu.vak.emotionRecognition</groupId>
             <artifactId>cnn</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.sstu.vak.emotionRecognition</groupId>
+            <artifactId>face-detector</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>

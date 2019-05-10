@@ -44,12 +44,24 @@ public class HaarFaceDetector {
      * @return A map of faces along with their coordinates in the frame
      */
     public synchronized Map<Rect, Mat> detect(Frame frame) {
+        log.debug("Convert Frame to Mat...");
+        return detect(converterToMat.convert(frame));
+    }
+
+    /**
+     * Detects and returns a map of cropped faces from a given captured frame
+     *
+     * @param frame the frame captured by the {@link org.bytedeco.javacv.FrameGrabber}
+     *                 and converted to {@link org.bytedeco.javacpp.opencv_core.Mat}
+     * @return A map of faces along with their coordinates in the frame
+     */
+    public synchronized Map<Rect, Mat> detect(Mat frame) {
+        Mat matFrame = frame.clone();
+
         log.debug("Detecting faces on frame...");
 
         Map<Rect, Mat> detectedFaces = new HashMap<>();
 
-        log.debug("Convert Frame to Mat...");
-        Mat matFrame = converterToMat.convert(frame);
         Mat matFrameGrayEqualizedHist = new Mat();
 
         if (matFrame.channels() > 1) {
