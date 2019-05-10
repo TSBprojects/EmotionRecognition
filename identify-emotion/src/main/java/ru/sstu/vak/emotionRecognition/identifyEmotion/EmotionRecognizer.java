@@ -53,7 +53,8 @@ public class EmotionRecognizer {
     private List<VideoFrame> frames;
 
 
-    public EmotionRecognizer(String modelPath) throws IOException {
+    public EmotionRecognizer(String modelPath)
+            throws IOException {
         this.frameIterator = new FrameIterator();
         this.haarFaceDetector = new HaarFaceDetector();
         this.feedForwardCNN = new FeedForwardCNN(modelPath);
@@ -116,12 +117,12 @@ public class EmotionRecognizer {
         log.info("Write video info...");
 
         final String fileName = FilenameUtils.removeExtension(videoPath.getFileName().toString());
-
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(new File(videoPath.getParent() + "\\" + fileName + "-videoInfo.json"), videoInfo);
     }
 
-    public void writeImageInfo(ImageInfo imageInfo, Path imagePath, boolean saveFaces) throws IOException {
+    public void writeImageInfo(ImageInfo imageInfo, Path imagePath, boolean saveFaces)
+            throws IOException {
         log.info("Write image info...");
 
         final String fileName = FilenameUtils.removeExtension(imagePath.getFileName().toString());
@@ -175,21 +176,24 @@ public class EmotionRecognizer {
         return new ImageInfo(image, imageFaceList);
     }
 
-    public synchronized void video(int deviceId, FrameListener listener) throws FrameGrabber.Exception {
+    public synchronized void video(int deviceId, FrameListener listener)
+            throws FrameGrabber.Exception {
         log.info("Starting video...");
         frameIterator.start(deviceId, frame -> {
             processedFrame(frame, listener);
         });
     }
 
-    public synchronized void video(String fileName, FrameListener listener) throws FrameGrabber.Exception {
+    public synchronized void video(String fileName, FrameListener listener)
+            throws FrameGrabber.Exception {
         log.info("Starting video...");
         frameIterator.start(fileName, frame -> {
             processedFrame(frame, listener);
         });
     }
 
-    public synchronized void processedVideo(int deviceId, ProcessedFrameListener listener) throws FrameGrabber.Exception {
+    public synchronized void processedVideo(int deviceId, ProcessedFrameListener listener)
+            throws FrameGrabber.Exception {
         log.info("Starting video with emotion recognition...");
         processedFrameListener = listener;
         frameIterator.start(deviceId, frame -> {
@@ -198,7 +202,8 @@ public class EmotionRecognizer {
         });
     }
 
-    public synchronized void processedVideo(String fileName, ProcessedFrameListener listener) throws FrameGrabber.Exception {
+    public synchronized void processedVideo(String fileName, ProcessedFrameListener listener)
+            throws FrameGrabber.Exception {
         log.info("Starting video with emotion recognition...");
         processedFrameListener = listener;
         frameIterator.start(fileName, frame -> {
@@ -207,7 +212,8 @@ public class EmotionRecognizer {
         });
     }
 
-    public synchronized void processedRecordVideo(int deviceId, Path videoFile, ProcessedFrameListener listener) throws FrameGrabber.Exception {
+    public synchronized void processedRecordVideo(int deviceId, Path videoFile, ProcessedFrameListener listener)
+            throws FrameGrabber.Exception {
         log.info("Starting video with emotion recognition...");
         processedFrameListener = listener;
         frameIterator.startRecord(deviceId, videoFile.toString(), frame -> {
@@ -217,7 +223,8 @@ public class EmotionRecognizer {
         });
     }
 
-    public synchronized void processedRecordVideo(String fileName, Path videoFile, ProcessedFrameListener listener) throws FrameGrabber.Exception {
+    public synchronized void processedRecordVideo(String fileName, Path videoFile, ProcessedFrameListener listener)
+            throws FrameGrabber.Exception {
         log.info("Starting video with emotion recognition...");
         processedFrameListener = listener;
         frameIterator.startRecord(fileName, videoFile.toString(), frame -> {

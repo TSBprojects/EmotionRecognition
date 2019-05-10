@@ -9,7 +9,7 @@ public class VideoFrame {
     @JsonProperty("frameIndex")
     private int frameIndex;
 
-    @JsonProperty("videoFaces")
+    @JsonProperty("faces")
     private List<VideoFace> videoFaces;
 
     public VideoFrame(int frameIndex, List<VideoFace> videoFaces) {

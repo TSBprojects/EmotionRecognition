@@ -18,9 +18,13 @@ import org.nd4j.linalg.util.ArrayUtil;
 
 import java.io.IOException;
 
-public class NativeImageLoader extends BaseImageLoader {
+public class NativeImageLoader {
     public static final String[] ALLOWED_FORMATS = new String[]{"bmp", "gif", "jpg", "jpeg", "jp2", "pbm", "pgm", "ppm", "pnm", "png", "tif", "tiff", "exr", "webp", "BMP", "GIF", "JPG", "JPEG", "JP2", "PBM", "PGM", "PPM", "PNM", "PNG", "TIF", "TIFF", "EXR", "WEBP"};
     protected OpenCVFrameConverter.ToMat converter;
+    protected long height = -1L;
+    protected long width = -1L;
+    protected long channels = -1L;
+    protected boolean centerCropIfNeeded = false;
     boolean direct;
 
     public NativeImageLoader() {

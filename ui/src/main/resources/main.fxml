@@ -38,7 +38,7 @@
                               </ImageView>
                            </children>
                         </AnchorPane>
-                        <Button fx:id="recognScreenBtn" layoutX="490.0" layoutY="384.0" mnemonicParsing="false" onAction="#recognizeScreenshot" prefHeight="58.0" prefWidth="267.0" text="Распознать" AnchorPane.rightAnchor="174.0" />
+                        <Button fx:id="recognScreenBtn" layoutX="490.0" layoutY="384.0" mnemonicParsing="false" onAction="#recognizeScreenshot" prefHeight="58.0" prefWidth="181.0" text="Распознать" AnchorPane.rightAnchor="260.0" />
                         <Button fx:id="stopVideoBtn" layoutX="300.0" layoutY="384.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="66.0" text="Стоп" />
                         <AnchorPane layoutX="384.0" layoutY="384.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: firebrick;">
                            <children>
@@ -61,9 +61,10 @@
                         <TextField fx:id="imagePath" disable="true" layoutX="490.0" layoutY="21.0" prefHeight="25.0" prefWidth="337.0" promptText="Путь к изображению" AnchorPane.rightAnchor="104.0" />
                         <Button fx:id="browseImageBtn" layoutX="835.0" layoutY="21.0" mnemonicParsing="false" onAction="#browseImage" prefHeight="25.0" prefWidth="75.0" text="Обзор" AnchorPane.rightAnchor="21.0" />
                         <Button fx:id="saveImageBtn" layoutX="768.0" layoutY="384.0" mnemonicParsing="false" onAction="#saveScreen" prefHeight="58.0" prefWidth="75.0" text="Сохранить" AnchorPane.rightAnchor="88.0" />
-                        <ProgressBar fx:id="recognImageProgressBar" layoutX="490.0" layoutY="384.0" prefHeight="59.0" prefWidth="267.0" visible="false" AnchorPane.rightAnchor="174.0" />
+                        <ProgressBar fx:id="recognImageProgressBar" layoutX="490.0" layoutY="384.0" prefHeight="59.0" prefWidth="181.0" visible="false" AnchorPane.rightAnchor="260.0" />
                         <ProgressBar fx:id="startVideoProgressBar" layoutX="22.0" layoutY="384.0" prefHeight="25.0" prefWidth="344.0" visible="false" />
                         <TextField fx:id="videoPath" layoutX="22.0" layoutY="21.0" prefHeight="25.0" prefWidth="421.0" promptText="ID камеры | Путь к камере | Путь к файлу" />
+                        <Button fx:id="openImageBtn" layoutX="682.0" layoutY="384.0" mnemonicParsing="false" onAction="#openScreen" prefHeight="58.0" prefWidth="75.0" text="Открыть" />
                      </children>
                   </AnchorPane>
             </content>
