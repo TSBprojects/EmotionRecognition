@@ -12,14 +12,17 @@ import java.nio.file.Path;
 
 public interface EmotionRecognizer {
 
+    @FunctionalInterface
     interface StopListener {
         void onVideoStopped(VideoInfo videoInfo);
     }
 
+    @FunctionalInterface
     interface ProcessedFrameListener {
         void onNextFrame(BufferedImage frame);
     }
 
+    @FunctionalInterface
     interface NetInputListener {
         void onNextFace(Mat frame);
     }
@@ -43,6 +46,8 @@ public interface EmotionRecognizer {
     void setBBoxThickness(int boundingBoxBorderThickness);
 
     void setBBoxTopPaneHeight(int boundingBoxTopPaneHeight);
+
+    void setOnExceptionListener(FrameIterator.ExceptionListener exceptionListener);
 
     void setOnStopListener(StopListener stopListener);
 

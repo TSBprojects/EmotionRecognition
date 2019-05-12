@@ -57,6 +57,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     private NetInputListener videoNetInputListener;
     private NetInputListener imageNetInputListener;
     private FrameIterator.FrameListener frameListener;
+    private FrameIterator.ExceptionListener onExceptionListener;
 
     private List<VideoFrame> frames;
 
@@ -70,6 +71,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         this.frames = new ArrayList<>();
         this.toJson = new ObjectMapper();
 
+        this.frameIterator.setOnExceptionListener(this::throwException);
         this.frameIterator.setOnStopListener(() -> {
             if (stopListener != null) {
                 stopListener.onVideoStopped(new VideoInfo(frames));
@@ -81,6 +83,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();
+                throwException(e);
             }
         });
     }
@@ -106,6 +109,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();
+                throwException(e);
             }
         });
         return new ImageInfo(image, imageFaceList);
@@ -191,6 +195,10 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
+    public void setOnExceptionListener(FrameIterator.ExceptionListener exceptionListener) {
+        this.onExceptionListener = exceptionListener;
+    }
+
     @Override
     public void setOnStopListener(StopListener stopListener) {
         this.stopListener = stopListener;
@@ -233,6 +241,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();
+                throwException(e);
             }
         });
 
@@ -253,6 +262,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             e.printStackTrace();
+            throwException(e);
         }
     }
 
@@ -267,6 +277,14 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             e.printStackTrace();
+            throwException(e);
+        }
+    }
+
+
+    private void throwException(Throwable e){
+        if(onExceptionListener != null){
+            onExceptionListener.onException(e);
         }
     }
 }

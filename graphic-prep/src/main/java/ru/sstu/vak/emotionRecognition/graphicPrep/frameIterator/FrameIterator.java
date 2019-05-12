@@ -9,18 +9,28 @@ import java.nio.file.Path;
 
 public interface FrameIterator extends AutoCloseable {
 
+    @FunctionalInterface
+    interface ExceptionListener {
+        void onException(Throwable e);
+    }
+
+    @FunctionalInterface
     interface RecordFrameListener {
         Frame onNextFrame(Frame frame);
     }
 
+    @FunctionalInterface
     interface FrameListener {
         void onNextFrame(Frame frame);
     }
 
+    @FunctionalInterface
     interface StopListener {
         void onIteratorStopped();
     }
 
+
+    void setOnExceptionListener(ExceptionListener onExceptionListener);
 
     void setOnStopListener(StopListener onStopListener);
 

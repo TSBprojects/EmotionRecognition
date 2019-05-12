@@ -126,6 +126,11 @@ public class MainController {
 
             frameIterator = new FrameIteratorBase();
             frameIterator.setOnStopListener(this::onStopAction);
+            frameIterator.setOnExceptionListener(e -> {
+                Platform.runLater(() -> {
+                    showError(e.getMessage());
+                });
+            });
 
             emotionRecognizer = new EmotionRecognizerBase(MODEL_NAME);
             emotionRecognizer.setOnStopListener(videoInfo -> {
@@ -377,7 +382,7 @@ public class MainController {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Ошибка");
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText(message + " \nSee logs: 'logs.log'");
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image("/image/face-ico.png"));
         alert.showAndWait();
@@ -414,7 +419,7 @@ public class MainController {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             Platform.runLater(() -> {
-                showError(e.getMessage() + " \nSee logs: 'logs.log'");
+                showError(e.getMessage());
             });
             if (emotionRecognizer != null) {
                 emotionRecognizer.stop();

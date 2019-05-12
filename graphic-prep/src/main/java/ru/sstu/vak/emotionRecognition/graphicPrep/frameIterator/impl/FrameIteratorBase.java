@@ -34,11 +34,18 @@ public class FrameIteratorBase implements FrameIterator {
 
     private StopListener onStopListener;
 
+    private ExceptionListener onExceptionListener;
+
 
     public FrameIteratorBase() {
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
+
+    @Override
+    public void setOnExceptionListener(ExceptionListener onExceptionListener) {
+        this.onExceptionListener = onExceptionListener;
+    }
 
     @Override
     public void setOnStopListener(StopListener onStopListener) {
@@ -52,7 +59,7 @@ public class FrameIteratorBase implements FrameIterator {
 
     @Override
     public void stop() {
-        log.info("Stopping FrameIteratorT...");
+        log.info("Stopping FrameIterator...");
         run = false;
     }
 
@@ -117,6 +124,8 @@ public class FrameIteratorBase implements FrameIterator {
                     } catch (FrameGrabber.Exception e) {
                         log.error(e.getMessage(), e);
                         e.printStackTrace();
+                        stopGrabber();
+                        throwException(e);
                     }
                     if (videoFrame == null) {
                         run = false;
@@ -134,6 +143,8 @@ public class FrameIteratorBase implements FrameIterator {
             } catch (FrameGrabber.Exception | InterruptedException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();
+                stopGrabber();
+                throwException(e);
             }
         });
     }
@@ -154,6 +165,8 @@ public class FrameIteratorBase implements FrameIterator {
         } catch (FrameRecorder.Exception e) {
             log.error(e.getMessage(), e);
             e.printStackTrace();
+            stopGrabber();
+            throwException(e);
         }
     }
 
@@ -175,10 +188,11 @@ public class FrameIteratorBase implements FrameIterator {
             if (onStopListener != null) {
                 onStopListener.onIteratorStopped();
             }
-            log.info("FrameIteratorT stopped");
+            log.info("FrameIterator stopped");
         } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
             log.error(e.getMessage(), e);
             e.printStackTrace();
+            throwException(e);
         }
     }
 
@@ -186,6 +200,12 @@ public class FrameIteratorBase implements FrameIterator {
         void onNextFrame(Frame frame);
     }
 
+
+    private void throwException(Throwable e){
+        if(onExceptionListener != null){
+            onExceptionListener.onException(e);
+        }
+    }
 
     private boolean isDeviceId(String text) {
         try {
