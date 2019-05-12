@@ -1,12 +1,11 @@
-package ru.sstu.vak.emotionRecognition.identifyEmotion.video;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.DataInfo;
 
-import java.awt.image.BufferedImage;
 import java.util.List;
 
-public class VideoInfo {
+public class VideoInfo extends DataInfo {
 
     @JsonProperty("frames")
     private List<VideoFrame> frames;

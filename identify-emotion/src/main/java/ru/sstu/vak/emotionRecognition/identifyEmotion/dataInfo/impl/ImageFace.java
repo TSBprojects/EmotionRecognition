@@ -1,12 +1,12 @@
-package ru.sstu.vak.emotionRecognition.identifyEmotion.image;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import ru.sstu.vak.emotionRecognition.common.Emotion;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.video.VideoFace;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.DataFace;
 
 import java.awt.image.BufferedImage;
 
-public class ImageFace extends VideoFace {
+public class ImageFace extends DataFace {
 
     @JsonIgnore
     private BufferedImage faceImage;
@@ -19,6 +19,7 @@ public class ImageFace extends VideoFace {
     public BufferedImage getFaceImage() {
         return faceImage;
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -37,5 +38,4 @@ public class ImageFace extends VideoFace {
         result = 31 * result + getFaceImage().hashCode();
         return result;
     }
-
 }

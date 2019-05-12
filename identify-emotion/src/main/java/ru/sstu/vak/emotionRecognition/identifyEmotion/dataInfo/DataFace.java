@@ -1,12 +1,9 @@
-package ru.sstu.vak.emotionRecognition.identifyEmotion.video;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ru.sstu.vak.emotionRecognition.common.Emotion;
 
-import java.awt.image.BufferedImage;
-
-public class VideoFace {
+public abstract class DataFace {
 
     @JsonProperty("emotion")
     private Emotion emotion;
@@ -15,7 +12,7 @@ public class VideoFace {
     private Location location;
 
 
-    public VideoFace(Emotion emotion, Location location) {
+    public DataFace(Emotion emotion, Location location) {
         this.emotion = emotion;
         this.location = location;
     }
@@ -43,6 +40,7 @@ public class VideoFace {
             this.width = width;
             this.height = height;
         }
+
 
         @Override
         public boolean equals(Object o) {
@@ -81,12 +79,12 @@ public class VideoFace {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof VideoFace)) return false;
+        if (!(o instanceof DataFace)) return false;
 
-        VideoFace videoFace = (VideoFace) o;
+        DataFace dataFace = (DataFace) o;
 
-        if (getEmotion() != videoFace.getEmotion()) return false;
-        return getLocation().equals(videoFace.getLocation());
+        if (getEmotion() != dataFace.getEmotion()) return false;
+        return getLocation().equals(dataFace.getLocation());
     }
 
     @Override
@@ -98,7 +96,7 @@ public class VideoFace {
 
     @Override
     public String toString() {
-        return "VideoFace{" +
+        return "DataFace{" +
                 "emotion=" + emotion +
                 ", location=" + location +
                 '}';

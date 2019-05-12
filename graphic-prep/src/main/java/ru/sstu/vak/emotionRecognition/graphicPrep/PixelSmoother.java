@@ -51,9 +51,7 @@ public class PixelSmoother {
         log.debug("Smoothing image...");
 
         if (equalizeHist) {
-            Mat img = ImageConverter.toMat(image);
-            equalizeHist(img, img);
-            image = ImageConverter.toBufferedImage(img);
+            image = ImageConverter.eqHist(image);
         }
 
         int[] bytes = toUnsignedByte(((DataBufferByte) image.getRaster().getDataBuffer()).getData());

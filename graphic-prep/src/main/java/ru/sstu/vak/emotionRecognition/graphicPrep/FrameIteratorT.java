@@ -8,9 +8,9 @@ import ru.sstu.vak.emotionRecognition.graphicPrep.exception.IteratorAlreadyRunni
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class FrameIterator implements AutoCloseable {
+public class FrameIteratorT implements AutoCloseable {
 
-    private static final Logger log = LogManager.getLogger(FrameIterator.class.getName());
+    private static final Logger log = LogManager.getLogger(FrameIteratorT.class.getName());
 
 
     private ExecutorService executorService;
@@ -27,7 +27,7 @@ public class FrameIterator implements AutoCloseable {
     private ExceptionListener exceptionListener;
 
 
-    public FrameIterator() {
+    public FrameIteratorT() {
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
@@ -64,7 +64,11 @@ public class FrameIterator implements AutoCloseable {
         } else {
             IteratorAlreadyRunningException e = new IteratorAlreadyRunningException();
             log.error(e.getMessage(), e);
-            throw e;
+            if (exceptionListener != null) {
+                exceptionListener.onException(e);
+            } else {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -76,7 +80,11 @@ public class FrameIterator implements AutoCloseable {
         } else {
             IteratorAlreadyRunningException e = new IteratorAlreadyRunningException();
             log.error(e.getMessage(), e);
-            throw e;
+            if (exceptionListener != null) {
+                exceptionListener.onException(e);
+            } else {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -178,12 +186,12 @@ public class FrameIterator implements AutoCloseable {
 
 
     public void stop() {
-        log.info("Stopping FrameIterator...");
+        log.info("Stopping FrameIteratorT...");
         run = false;
     }
 
     public void stop(StopListener onStopListener) {
-        log.info("Stopping FrameIterator...");
+        log.info("Stopping FrameIteratorT...");
         this.onStopListener = onStopListener;
         this.run = false;
     }
@@ -211,7 +219,7 @@ public class FrameIterator implements AutoCloseable {
         if (onStopListener != null) {
             onStopListener.onIteratorStopped();
         }
-        log.info("FrameIterator stopped");
+        log.info("FrameIteratorT stopped");
     }
 
 }

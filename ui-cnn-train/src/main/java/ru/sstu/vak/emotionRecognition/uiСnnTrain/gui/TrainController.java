@@ -22,12 +22,12 @@ public class TrainController {
 
     private final static int CHECK_EVERY_EPOCH = 5;
 
-    private final static int EPOCH_COUNT = 320;
+    private final static int EPOCH_COUNT = 50000;
 
     private final static double SPLIT_TRAIN_SET = 0.2;
 
+    private final static String DATA_SET_PATH = "G:\\Main things\\Study\\DIPLOMA\\My\\datasets\\gray\\emotion\\new_dataset";
 
-    private final static String DATA_SET_PATH = "G:\\Main things\\Study\\DIPLOMA\\My\\datasets\\gray\\emotion\\emotion_dataset3+2_smoothed_pixels";
 
     @FXML
     private TextArea trainInfo;

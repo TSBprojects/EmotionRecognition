@@ -25,10 +25,28 @@ public enum Emotion {
         this.emotionId = index;
     }
 
+    public static Emotion valueOf(int index) {
+        switch (index) {
+            case 0:
+                return ANGER;
+            case 1:
+                return DISGUST;
+            case 2:
+                return FEAR;
+            case 3:
+                return HAPPY;
+            case 4:
+                return NEUTRAL;
+            case 5:
+                return SAD;
+            case 6:
+                return SURPRISE;
 
-    public void setProbability(double probability){
-        this.probability = probability;
+            default:
+                throw new UnsupportedOperationException("Unknown or not supported emotion with index: " + index);
+        }
     }
+
 
     @JsonProperty("name")
     public String getValue() {
@@ -110,32 +128,16 @@ public enum Emotion {
     }
 
 
-    public static Emotion valueOf(int index) {
-        switch (index) {
-            case 0:
-                return ANGER;
-            case 1:
-                return DISGUST;
-            case 2:
-                return FEAR;
-            case 3:
-                return HAPPY;
-            case 4:
-                return NEUTRAL;
-            case 5:
-                return SAD;
-            case 6:
-                return SURPRISE;
-
-            default:
-                throw new UnsupportedOperationException("Unknown or not supported emotion with index: " + index);
-        }
+    public void setProbability(double probability){
+        this.probability = probability;
     }
+
 
     @Override
     public String toString() {
         return "Emotion{" +
                 "emotionId=" + emotionId +
+                ", emotionName=" + getValue() +
                 ", probability=" + probability +
                 '}';
     }

@@ -6,9 +6,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,18 +20,18 @@ import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import ru.sstu.vak.emotionRecognition.graphicPrep.ImageConverter;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.EmotionRecognizer;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.image.ImageInfo;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.video.VideoInfo;
+import ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.FrameIterator;
+import ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.impl.FrameIteratorBase;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.ImageInfo;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.EmotionRecognizer;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.impl.EmotionRecognizerBase;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,7 +40,7 @@ public class MainController {
     private static final Logger log = LogManager.getLogger(MainController.class.getName());
 
 
-    private final static String MODEL_NAME = "cnnModel.bin";
+    private final static String MODEL_NAME = "bestModel(0.75).bin";
 
     private final static Image VIDEO_PLACE_HOLDER = new Image("image/videoPlaceHolder.png");
 
@@ -110,6 +109,14 @@ public class MainController {
 
     private EmotionRecognizer emotionRecognizer;
 
+    private FrameIterator frameIterator;
+
+    private void onStopAction() {
+        startVidProgressBarOff();
+        videoImageView.setImage(VIDEO_PLACE_HOLDER);
+        faceFromVideo.setImage(VIDEO_PLACE_HOLDER_FOR_FACE);
+        currentFrame = null;
+    }
 
     @FXML
     public void initialize() {
@@ -117,158 +124,110 @@ public class MainController {
         tryIt(() -> {
             initExit();
 
-            emotionRecognizer = new EmotionRecognizer(MODEL_NAME);
+            frameIterator = new FrameIteratorBase();
+            frameIterator.setOnStopListener(this::onStopAction);
 
-            emotionRecognizer.setOnExceptionListener(e -> {
-                Platform.runLater(() -> {
-                    showError(e.getMessage());
-                    startVidProgressBarOff();
-                });
+            emotionRecognizer = new EmotionRecognizerBase(MODEL_NAME);
+            emotionRecognizer.setOnStopListener(videoInfo -> {
+                onStopAction();
             });
-
             emotionRecognizer.setFrameListener(frame -> {
                 currentFrame = frame;
             });
-
             emotionRecognizer.setImageNetInputListener(face -> {
                 Platform.runLater(() -> {
                     faceFromScreen.setImage(ImageConverter.toJavaFXImage(face));
                 });
             });
-
             emotionRecognizer.setVideoNetInputListener(face -> {
                 Platform.runLater(() -> {
                     faceFromVideo.setImage(ImageConverter.toJavaFXImage(face));
                 });
             });
-
         });
     }
 
     @FXML
     void openScreen(ActionEvent event) {
         if (screenshotFrame != null) {
-            Dimension winSize = Toolkit.getDefaultToolkit().getScreenSize();
+            tryIt(() -> {
+                Dimension winSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("/showImage.fxml"));
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(getClass().getResource("/showImage.fxml"));
 
-            Parent root = null;
-            try {
-                root = loader.load();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                Parent root = null;
+                try {
+                    root = loader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-            ShowImageController progressController = loader.getController();
-            progressController.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
+                ShowImageController progressController = loader.getController();
+                progressController.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
 
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Изображение");
-            stage.setScene(new Scene(root, winSize.width - 150, winSize.height - 150));
-            stage.setResizable(true);
-            stage.getIcons().add(new Image("image/face-ico.png"));
-            stage.showAndWait();
+                Stage stage = new Stage();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setTitle("Изображение");
+                stage.setScene(new Scene(root, winSize.width - 150, winSize.height - 150));
+                stage.setResizable(true);
+                stage.getIcons().add(new Image("image/face-ico.png"));
+                stage.showAndWait();
+            });
         }
     }
 
     @FXML
     void startRecognVideo(ActionEvent event) {
-        if (emotionRecognizer.isRun()) return;
-
-//        tryIt(() -> {
-//            EmotionRecognizer.ProcessedFrameListener callBack =
-//                    new EmotionRecognizer.ProcessedFrameListener() {
-//                        @Override
-//                        public void onNextFrame(BufferedImage frame) {
-//                            startVidProgressBarOff();
-//                            videoImageView.setImage(ImageConverter.toJavaFXImage(frame));
-//                        }
-//
-//                        @Override
-//                        public void onStop(VideoInfo videoInfo) {
-//                            // do something
-//                            try {
-//                                emotionRecognizer.writeVideoInfo(videoInfo, Paths.get(System.getProperty("user.dir") + "\\vid.mp4"));
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    };
-//
-//            String videoPath = this.videoPath.getText();
-//            startVidProgressBarOn();
-//            if (isDeviceId(videoPath)) {
-//                emotionRecognizer.processedVideo(Integer.parseInt(videoPath), callBack);
-//            } else {
-//                emotionRecognizer.processedVideo(videoPath, callBack);
-//            }
-//        });
-
-        Path currentPath = Paths.get(System.getProperty("user.dir") + "\\vid.mp4");
+        if (emotionRecognizer.isRun() || frameIterator.isRun()) return;
 
         tryIt(() -> {
-            EmotionRecognizer.ProcessedFrameListener callBack = new EmotionRecognizer.ProcessedFrameListener() {
-                @Override
-                public void onNextFrame(BufferedImage frame) {
-                    Platform.runLater(() -> {
-                        startVidProgressBarOff();
-                        videoImageView.setImage(ImageConverter.toJavaFXImage(frame));
-                    });
-                }
-
-                @Override
-                public void onStop(VideoInfo videoInfo) {
-                    try {
-                        emotionRecognizer.writeVideoInfo(videoInfo, currentPath);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-
-            String videoPath = this.videoPath.getText();
+            boolean ok = showConfirm(
+                    "Что делать с данными?",
+                    "Сохранить обработанные данные и информацию о них?",
+                    "Нажмите ОК для сохранения и Cancel для отмены"
+            );
             startVidProgressBarOn();
-            if (isDeviceId(videoPath)) {
-                emotionRecognizer.processedRecordVideo(Integer.parseInt(videoPath), currentPath, callBack);
+            if (!ok) {
+                String videoPath = this.videoPath.getText();
+                emotionRecognizer.processVideo(videoPath, frame -> {
+                    startVidProgressBarOff();
+                    videoImageView.setImage(ImageConverter.toJavaFXImage(frame));
+                });
             } else {
-                emotionRecognizer.processedRecordVideo(videoPath, currentPath, callBack);
+                String videoPath = this.videoPath.getText();
+                File videoFile = saveFile("Сохранить медиаданные", "Video", "*.mp4");
+                emotionRecognizer.processVideo(videoPath, videoFile.toPath(), frame -> {
+                    startVidProgressBarOff();
+                    videoImageView.setImage(ImageConverter.toJavaFXImage(frame));
+                });
             }
         });
-
     }
-
 
     @FXML
     void startVideo(ActionEvent event) {
-        if (emotionRecognizer.isRun()) return;
+        if (emotionRecognizer.isRun() || frameIterator.isRun()) return;
         tryIt(() -> {
-            EmotionRecognizer.FrameListener callBack = frame -> Platform.runLater(() -> {
+            startVidProgressBarOn();
+            frameIterator.start(videoPath.getText(), frame -> {
                 startVidProgressBarOff();
+                currentFrame = frame;
                 videoImageView.setImage(ImageConverter.toJavaFXImage(frame));
             });
-
-            String videoPath = this.videoPath.getText();
-            startVidProgressBarOn();
-            if (isDeviceId(videoPath)) {
-                emotionRecognizer.video(Integer.parseInt(videoPath), callBack);
-            } else {
-                emotionRecognizer.video(videoPath, callBack);
-            }
         });
     }
 
     @FXML
     void stopVideo(ActionEvent event) throws FrameGrabber.Exception {
-        if (!emotionRecognizer.isRun()) return;
-
-        startVidProgressBarOn();
-        emotionRecognizer.stop(() -> {
-            startVidProgressBarOff();
-            videoImageView.setImage(VIDEO_PLACE_HOLDER);
-            faceFromVideo.setImage(VIDEO_PLACE_HOLDER_FOR_FACE);
-            currentFrame = null;
+        tryIt(() -> {
+            if (emotionRecognizer.isRun()) {
+                startVidProgressBarOn();
+                emotionRecognizer.stop();
+            } else if (frameIterator.isRun()) {
+                startVidProgressBarOn();
+                frameIterator.stop();
+            }
         });
     }
 
@@ -287,59 +246,52 @@ public class MainController {
     @FXML
     void recognizeScreenshot(ActionEvent event) {
         if (screenshotFrame != null) {
-            recognScreenProgressBar();
-            runTask(() -> {
+            recognScreenProgressBarToggle();
+            executorService.submit(() -> {
                 tryIt(() -> {
                     imageInfo = emotionRecognizer.processImage(ImageConverter.copyBufferedImage(originalScreenShot));
                     screenshotFrame = imageInfo.getProcessedImage();
-                    Platform.runLater(() -> {
-                        screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
-                        recognScreenProgressBar();
-                    });
+                    screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
+                    recognScreenProgressBarToggle();
                 });
             });
         }
     }
 
-
     @FXML
     void browseImage(ActionEvent event) throws IOException {
         log.info("Browse for image...");
-        File image = selectFile("Select image for recognize emotions!",
-                "Image", "*.png", "*.jpeg", "*.jpg", "*.bmp"
-        );
-        if (image != null) {
-            screenshotFrame = ImageIO.read(image);
-            originalScreenShot = ImageConverter.copyBufferedImage(screenshotFrame);
-            screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
-        }
+
+        tryIt(() -> {
+            File image = selectFile("Select image for recognize emotions!",
+                    "Image", "*.png", "*.jpeg", "*.jpg", "*.bmp"
+            );
+            if (image != null) {
+                screenshotFrame = ImageIO.read(image);
+                originalScreenShot = ImageConverter.copyBufferedImage(screenshotFrame);
+                screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
+            }
+        });
     }
 
     @FXML
     void saveScreen(ActionEvent event) throws IOException {
         log.info("Save image...");
+
         if (screenshotFrame != null) {
-            File image = saveFile("Saving image",
-                    "Image", "*.png", "*.jpg", "*.jpeg", "*.bmp"
-            );
-            if (image != null) {
-                emotionRecognizer.writeImageInfo(imageInfo, image.toPath(), true);
-            }
+            tryIt(() -> {
+                File image = saveFile("Saving image",
+                        "Image", "*.png", "*.jpg", "*.jpeg", "*.bmp"
+                );
+                if (image != null) {
+                    emotionRecognizer.writeImageInfo(imageInfo, image.toPath(), true);
+                }
+            });
         }
     }
 
 
-    private boolean isDeviceId(String text) {
-        try {
-            Integer.parseInt(text);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-
-    private void recognScreenProgressBar() {
+    private void recognScreenProgressBarToggle() {
         if (recognScreenBtn.isVisible()) {
             recognScreenBtn.setVisible(false);
             recognImageProgressBar.setVisible(true);
@@ -368,26 +320,21 @@ public class MainController {
     }
 
 
-    private void runTask(Runnable task) {
-        executorService.submit(task);
-    }
-
-
-    private String getModelPath(String path) throws URISyntaxException {
-        return new File(
-                MainController.class.getResource(path).toURI()
-        ).getPath();
-    }
-
     private void initExit() {
         Platform.runLater(() -> {
             tryIt(() -> {
                 currentStage = (Stage) videoImageView.getScene().getWindow();
                 currentStage.setOnCloseRequest(event -> {
                     if (emotionRecognizer != null && emotionRecognizer.isRun()) {
-                        emotionRecognizer.stop(() -> {
+                        emotionRecognizer.setOnStopListener(videoInfo -> {
                             System.exit(0);
                         });
+                        emotionRecognizer.stop();
+                    } else if (frameIterator != null && frameIterator.isRun()) {
+                        frameIterator.setOnStopListener(() -> {
+                            System.exit(0);
+                        });
+                        frameIterator.stop();
                     } else {
                         System.exit(0);
                     }
@@ -408,10 +355,10 @@ public class MainController {
         return fileChooser.showOpenDialog(null);
     }
 
-    private File selectFile(String title) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(title);
-        return fileChooser.showOpenDialog(null);
+    private File selectFolder(String title) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle(title);
+        return directoryChooser.showDialog(null);
     }
 
     private File saveFile(String title, String extDesc, String... extensions) {
@@ -423,13 +370,6 @@ public class MainController {
         );
         fileChooser.getExtensionFilters().add(extFilter);
         return fileChooser.showSaveDialog(null);
-
-    }
-
-    private File selectFolder(String title) {
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle(title);
-        return directoryChooser.showDialog(null);
     }
 
 
@@ -451,6 +391,23 @@ public class MainController {
         alert.showAndWait();
     }
 
+    private static boolean showConfirm(String title, String headerText, String contentText) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.setContentText(contentText);
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image("/image/face-ico.png"));
+
+        Optional<ButtonType> option = alert.showAndWait();
+
+        if (option.get() == ButtonType.OK) {
+            return true;
+        }
+        return false;
+    }
+
+
     private void tryIt(TryItCallback tryCode) {
         try {
             tryCode.executableCode();
@@ -462,14 +419,14 @@ public class MainController {
             if (emotionRecognizer != null) {
                 emotionRecognizer.stop();
             }
-
+            if (frameIterator != null) {
+                frameIterator.stop();
+            }
         }
     }
 
     private interface TryItCallback {
         void executableCode() throws Exception;
     }
-
-
 }
 

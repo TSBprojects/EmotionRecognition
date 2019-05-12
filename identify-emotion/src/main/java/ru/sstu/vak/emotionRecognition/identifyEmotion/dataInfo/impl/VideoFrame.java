@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionRecognition.identifyEmotion.video;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
