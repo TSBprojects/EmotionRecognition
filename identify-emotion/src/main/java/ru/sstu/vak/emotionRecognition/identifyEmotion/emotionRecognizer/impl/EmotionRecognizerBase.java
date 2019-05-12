@@ -71,7 +71,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         this.frames = new ArrayList<>();
         this.toJson = new ObjectMapper();
 
-        this.frameIterator.setOnExceptionListener(this::throwException);
+        this.frameIterator.setOnExceptionListener(onExceptionListener);
         this.frameIterator.setOnStopListener(() -> {
             if (stopListener != null) {
                 stopListener.onVideoStopped(new VideoInfo(frames));
@@ -80,6 +80,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             try {
                 fileOutputStream.write("]}".getBytes());
                 fileOutputStream.close();
+                fileOutputStream = null;
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();
@@ -220,7 +221,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
-    private BufferedImage processedFrame(Frame frame) {
+    private BufferedImage processedFrame(Frame frame)  {
         if (frameListener != null) {
             frameListener.onNextFrame(frame);
         }

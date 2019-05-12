@@ -149,6 +149,11 @@ public class MainController {
                     faceFromVideo.setImage(ImageConverter.toJavaFXImage(face));
                 });
             });
+            emotionRecognizer.setOnExceptionListener(e -> {
+                Platform.runLater(() -> {
+                    showError(e.getMessage());
+                });
+            });
         });
     }
 
@@ -213,6 +218,7 @@ public class MainController {
     @FXML
     void startVideo(ActionEvent event) {
         if (emotionRecognizer.isRun() || frameIterator.isRun()) return;
+
         tryIt(() -> {
             startVidProgressBarOn();
             frameIterator.start(videoPath.getText(), frame -> {

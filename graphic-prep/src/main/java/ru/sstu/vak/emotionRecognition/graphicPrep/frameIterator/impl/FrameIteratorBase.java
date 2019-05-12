@@ -1,5 +1,6 @@
 package ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.impl;
 
+import com.google.common.base.Stopwatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacv.*;
@@ -7,8 +8,12 @@ import ru.sstu.vak.emotionRecognition.graphicPrep.exception.IteratorAlreadyRunni
 import ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.FrameIterator;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class FrameIteratorBase implements FrameIterator {
 
@@ -18,9 +23,6 @@ public class FrameIteratorBase implements FrameIterator {
     private static final int DEVICE_FRAME_RATE = 0; // unlimited
 
     private static final int VIDEO_FILE_FRAME_RATE = 30;
-
-    private static final int DEVICE_RECORD_FRAME_RATE = 24;
-
 
 
     private ExecutorService executorService;
@@ -35,6 +37,13 @@ public class FrameIteratorBase implements FrameIterator {
     private StopListener onStopListener;
 
     private ExceptionListener onExceptionListener;
+
+
+    private Stopwatch stopwatch;
+
+    private final int fpsSamplingLimit = 50;
+
+    private List<Frame> framesToRec = new ArrayList<>(fpsSamplingLimit);
 
 
     public FrameIteratorBase() {
@@ -87,13 +96,17 @@ public class FrameIteratorBase implements FrameIterator {
         if (isDeviceId(readFrom)) {
             int deviceId = Integer.parseInt(readFrom);
             log.info("Starting OpenCVFrameGrabber with deviceIndex '{}'", deviceId);
+
+            stopwatch = Stopwatch.createStarted();
             core(OpenCVFrameGrabber.createDefault(deviceId), frame -> {
-                recordCore(frameListener.onNextFrame(frame), writeTo, DEVICE_RECORD_FRAME_RATE);
+                recordCore(frameListener.onNextFrame(frame), writeTo);
             }, DEVICE_FRAME_RATE);
         } else {
             log.info("Starting OpenCVFrameGrabber with fileName '{}'", readFrom);
+
+            stopwatch = Stopwatch.createStarted();
             core(new FFmpegFrameGrabber(readFrom), frame -> {
-                recordCore(frameListener.onNextFrame(frame), writeTo, VIDEO_FILE_FRAME_RATE);
+                recordCore(frameListener.onNextFrame(frame), writeTo);
             }, VIDEO_FILE_FRAME_RATE);
         }
     }
@@ -132,6 +145,7 @@ public class FrameIteratorBase implements FrameIterator {
                         break;
                     }
                     if (videoFrame.image != null) {
+                        videoFrame.opaque = null;
                         listener.onNextFrame(videoFrame.clone());
                     }
                     if (frameRate > 0) {
@@ -149,25 +163,61 @@ public class FrameIteratorBase implements FrameIterator {
         });
     }
 
-    private void recordCore(Frame videoFrame, Path videoFile, int frameRate) {
-        try {
-            if (frameRecorder == null) {
 
-                frameRecorder = new OpenCVFrameRecorder(
-                        videoFile.toString(),
-                        frameGrabber.getImageWidth(),
-                        frameGrabber.getImageHeight()
-                );
-                frameRecorder.setFrameRate(frameRate);
-                frameRecorder.start();
+    private void recordCore(Frame videoFrame, Path videoFile) {
+        try {
+            if (framesToRec.size() >= fpsSamplingLimit) {
+                if (frameRecorder == null) {
+                    stopwatch.stop();
+                    int frameRate = (int) (fpsSamplingLimit / stopwatch.elapsed(SECONDS)) + 3;
+
+                    frameRecorder = new OpenCVFrameRecorder(
+                            videoFile.toString(),
+                            frameGrabber.getImageWidth(),
+                            frameGrabber.getImageHeight()
+                    );
+                    frameRecorder.setFormat("mp4");
+                    frameRecorder.setPixelFormat(1);
+                    frameRecorder.setFrameRate(frameRate);
+                    frameRecorder.start();
+
+                    for (Frame frame : framesToRec) {
+                        frameRecorder.record(frame);
+                    }
+                }
+
+                frameRecorder.record(videoFrame);
+
+            } else {
+                framesToRec.add(videoFrame);
             }
-            frameRecorder.record(videoFrame);
+
         } catch (FrameRecorder.Exception e) {
             log.error(e.getMessage(), e);
             e.printStackTrace();
             stopGrabber();
             throwException(e);
         }
+
+//        try {
+//            if (frameRecorder == null) {
+//                frameRecorder = new OpenCVFrameRecorder(
+//                        videoFile.toString(),
+//                        frameGrabber.getImageWidth(),
+//                        frameGrabber.getImageHeight()
+//                );
+//                frameRecorder.setFormat("mp4");
+//                frameRecorder.setPixelFormat(1);
+//                frameRecorder.setFrameRate(15);
+//                frameRecorder.start();
+//            }
+//            frameRecorder.record(videoFrame);
+//        } catch (FrameRecorder.Exception e) {
+//            log.error(e.getMessage(), e);
+//            e.printStackTrace();
+//            stopGrabber();
+//            throwException(e);
+//        }
     }
 
     private void stopGrabber() {
@@ -188,6 +238,7 @@ public class FrameIteratorBase implements FrameIterator {
             if (onStopListener != null) {
                 onStopListener.onIteratorStopped();
             }
+            framesToRec.clear();
             log.info("FrameIterator stopped");
         } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
             log.error(e.getMessage(), e);
@@ -201,8 +252,8 @@ public class FrameIteratorBase implements FrameIterator {
     }
 
 
-    private void throwException(Throwable e){
-        if(onExceptionListener != null){
+    private void throwException(Throwable e) {
+        if (onExceptionListener != null) {
             onExceptionListener.onException(e);
         }
     }
@@ -215,5 +266,4 @@ public class FrameIteratorBase implements FrameIterator {
             return false;
         }
     }
-
 }
