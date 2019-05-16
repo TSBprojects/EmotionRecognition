@@ -71,6 +71,8 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         this.frames = new ArrayList<>();
         this.toJson = new ObjectMapper();
 
+        this.frameIterator.setDeviceFrameRate(null);
+        this.frameIterator.setFileFrameRate(30);
         this.frameIterator.setOnExceptionListener(onExceptionListener);
         this.frameIterator.setOnStopListener(() -> {
             if (stopListener != null) {
@@ -119,9 +121,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     @Override
     public synchronized void processVideo(String readFrom, ProcessedFrameListener listener) throws FrameGrabber.Exception {
         log.info("Starting video with emotion recognition...");
-        frameIterator.start(readFrom, frame -> {
-            listener.onNextFrame(processedFrame(frame));
-        });
+        frameIterator.start(readFrom, frame -> listener.onNextFrame(processedFrame(frame)));
     }
 
     @Override
@@ -184,7 +184,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
-
     @Override
     public void setBBoxThickness(int boundingBoxBorderThickness) {
         this.boundingBoxBorderThickness = boundingBoxBorderThickness;
@@ -221,7 +220,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
-    private BufferedImage processedFrame(Frame frame)  {
+    private BufferedImage processedFrame(Frame frame) {
         if (frameListener != null) {
             frameListener.onNextFrame(frame);
         }
@@ -283,8 +282,8 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
-    private void throwException(Throwable e){
-        if(onExceptionListener != null){
+    private void throwException(Throwable e) {
+        if (onExceptionListener != null) {
             onExceptionListener.onException(e);
         }
     }

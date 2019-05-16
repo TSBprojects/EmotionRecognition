@@ -5,11 +5,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Rect;
-import ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN;
 import ru.sstu.vak.emotionRecognition.faceDetector.HaarFaceDetector;
 import ru.sstu.vak.emotionRecognition.graphicPrep.FacePreProcessing;
 import ru.sstu.vak.emotionRecognition.graphicPrep.ImageConverter;
-import ru.sstu.vak.emotionRecognition.graphicPrep.PixelSmoother;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -25,6 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+
+import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
+import static ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN.HEIGHT;
+import static ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN.WIDTH;
 
 public class DataSetPreProcessor {
 
@@ -64,33 +66,25 @@ public class DataSetPreProcessor {
 
             for (Map.Entry<Rect, Mat> entry : faces.entrySet()) {
                 Rect rect = entry.getKey();
-                Mat face = entry.getValue();
+                Mat eqHistFace = entry.getValue();
 
 
                 Mat matFaceImage = matImage.apply(rect);
                 if (matFaceImage.channels() > 1) {
-                    matFaceImage = ImageConverter.toGrayScale(matFaceImage);
+                    ImageConverter.toGrayScale(matFaceImage);
                 }
 
-                Mat resizedFaceImage = ImageConverter.resize(matFaceImage, FeedForwardCNN.WIDTH, FeedForwardCNN.HEIGHT);
-                Mat resizedProcessedFaceImage = ImageConverter.resize(face, FeedForwardCNN.WIDTH, FeedForwardCNN.HEIGHT);
+                Mat resizedFaceImage = ImageConverter.resize(matFaceImage, WIDTH, HEIGHT);
+                imwrite(classPathOriginal + "\\" + imagePath.getFileName(), resizedFaceImage);
 
-                BufferedImage faceImage = ImageConverter.toBufferedImage(resizedFaceImage);
-                writeImage(faceImage, classPathOriginal, imagePath);
-
-                BufferedImage processedImage = PixelSmoother.smoothImage(
-                        ImageConverter.toBufferedImage(resizedProcessedFaceImage),
-                        FacePreProcessing.DATA_SET_IMAGE_INDEX,
-                        true
-                );
-                writeImage(processedImage, classPathProcessed, imagePath);
+                Mat resizedProcessedFaceImage = FacePreProcessing.process(eqHistFace, WIDTH, HEIGHT, false);
+                imwrite(classPathProcessed + "\\" + imagePath.getFileName(), resizedProcessedFaceImage);
             }
         }
-
     }
 
 
-    private static void processDataSet(Path dataSet, String prefix, ImageProcessor imageProcessor) throws IOException {
+    private static void processDataSet(Path dataSet, String postfix, ImageProcessor imageProcessor) throws IOException {
         Files.walk(dataSet).filter(Files::isRegularFile).forEach(imagePath -> {
             try {
                 final String imageParentName = imagePath.getParent().getFileName().toString();
@@ -98,7 +92,7 @@ public class DataSetPreProcessor {
                 ImageIO.write(
                         imageProcessor.process(ImageIO.read(imagePath.toFile())),
                         "png",
-                        new File(dataSet + "\\" + imageParentName + "\\" + fileName + prefix + ".png")
+                        new File(dataSet + "\\" + imageParentName + "\\" + fileName + postfix + ".png")
                 );
             } catch (IOException e) {
                 e.printStackTrace();
@@ -125,7 +119,7 @@ public class DataSetPreProcessor {
 
         Mat matImage = ImageConverter.toMat(croppedImage);
         if (matImage.channels() > 1) {
-            matImage = ImageConverter.toGrayScale(matImage);
+            ImageConverter.toGrayScale(matImage);
         }
         return ImageConverter.toBufferedImage(ImageConverter.eqHist(matImage));
     }
@@ -139,14 +133,6 @@ public class DataSetPreProcessor {
         tx.translate(-image.getWidth(null), 0);
         AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         return op.filter(image, null);
-    }
-
-    private static void writeImage(BufferedImage image, Path dirPath, Path imagePath) throws IOException {
-        ImageIO.write(
-                image,
-                "png",
-                new File(dirPath + "\\" + String.valueOf(imagePath.getFileName()))
-        );
     }
 
     private static Path createDir(Path dirPath) throws IOException {

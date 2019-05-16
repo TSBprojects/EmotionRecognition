@@ -20,11 +20,6 @@ public class FrameIteratorBase implements FrameIterator {
     private static final Logger log = LogManager.getLogger(FrameIteratorBase.class.getName());
 
 
-    private static final int DEVICE_FRAME_RATE = 0; // unlimited
-
-    private static final int VIDEO_FILE_FRAME_RATE = 30;
-
-
     private ExecutorService executorService;
 
     private FrameGrabber frameGrabber;
@@ -39,17 +34,37 @@ public class FrameIteratorBase implements FrameIterator {
     private ExceptionListener onExceptionListener;
 
 
+    private int deviceFrameRate = 0; // 0 - unlimited
+
+    private int videoFileFrameRate = 0; // 0 - unlimited
+
+
     private Stopwatch stopwatch;
 
-    private final int fpsSamplingLimit = 50;
+    private final int SAMPLING_COUNT_FOR_FPS_MEASURE = 50;
 
-    private List<Frame> framesToRec = new ArrayList<>(fpsSamplingLimit);
+    private int sampleFrameCount = 0;
+
+    private List<Frame> framesToRec = new ArrayList<>(SAMPLING_COUNT_FOR_FPS_MEASURE);
 
 
     public FrameIteratorBase() {
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
+    @Override
+    public void setDeviceFrameRate(Integer deviceFrameRate) {
+        if (deviceFrameRate != null && deviceFrameRate > 0) {
+            this.deviceFrameRate = deviceFrameRate;
+        }
+    }
+
+    @Override
+    public void setFileFrameRate(Integer videoFileFrameRate) {
+        if (videoFileFrameRate != null && videoFileFrameRate > 0) {
+            this.videoFileFrameRate = videoFileFrameRate;
+        }
+    }
 
     @Override
     public void setOnExceptionListener(ExceptionListener onExceptionListener) {
@@ -62,8 +77,8 @@ public class FrameIteratorBase implements FrameIterator {
     }
 
     @Override
-    public boolean isRun() {
-        return run;
+    public synchronized boolean isRun() {
+        return frameGrabber != null || frameRecorder != null || run;
     }
 
     @Override
@@ -73,7 +88,7 @@ public class FrameIteratorBase implements FrameIterator {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         log.debug("Shutdown executor service...");
         this.executorService.shutdown();
     }
@@ -84,10 +99,10 @@ public class FrameIteratorBase implements FrameIterator {
         if (isDeviceId(readFrom)) {
             int deviceId = Integer.parseInt(readFrom);
             log.info("Starting OpenCVFrameGrabber with deviceIndex '{}'", deviceId);
-            core(OpenCVFrameGrabber.createDefault(deviceId), frameListener::onNextFrame, DEVICE_FRAME_RATE);
+            core(OpenCVFrameGrabber.createDefault(deviceId), frameListener::onNextFrame, deviceFrameRate);
         } else {
             log.info("Starting OpenCVFrameGrabber with fileName '{}'", readFrom);
-            core(new FFmpegFrameGrabber(readFrom), frameListener::onNextFrame, VIDEO_FILE_FRAME_RATE);
+            core(new FFmpegFrameGrabber(readFrom), frameListener::onNextFrame, videoFileFrameRate);
         }
     }
 
@@ -98,19 +113,14 @@ public class FrameIteratorBase implements FrameIterator {
             log.info("Starting OpenCVFrameGrabber with deviceIndex '{}'", deviceId);
 
             stopwatch = Stopwatch.createStarted();
-            core(OpenCVFrameGrabber.createDefault(deviceId), frame -> {
-                recordCore(frameListener.onNextFrame(frame), writeTo);
-            }, DEVICE_FRAME_RATE);
+            core(OpenCVFrameGrabber.createDefault(deviceId), frame -> recordCore(frameListener.onNextFrame(frame), writeTo), deviceFrameRate);
         } else {
             log.info("Starting OpenCVFrameGrabber with fileName '{}'", readFrom);
 
             stopwatch = Stopwatch.createStarted();
-            core(new FFmpegFrameGrabber(readFrom), frame -> {
-                recordCore(frameListener.onNextFrame(frame), writeTo);
-            }, VIDEO_FILE_FRAME_RATE);
+            core(new FFmpegFrameGrabber(readFrom), frame -> recordCore(frameListener.onNextFrame(frame), writeTo), videoFileFrameRate);
         }
     }
-
 
     private void core(FrameGrabber grabber, CoreFrameListener listener, int frameRate) {
         if (frameGrabber == null) {
@@ -122,7 +132,9 @@ public class FrameIteratorBase implements FrameIterator {
         }
 
         log.debug("Submit executor service task with frame grabber...");
+
         executorService.submit(() -> {
+
             try {
                 log.debug("Start frame grabber");
                 frameGrabber.start();
@@ -166,10 +178,10 @@ public class FrameIteratorBase implements FrameIterator {
 
     private void recordCore(Frame videoFrame, Path videoFile) {
         try {
-            if (framesToRec.size() >= fpsSamplingLimit) {
+            if (sampleFrameCount >= SAMPLING_COUNT_FOR_FPS_MEASURE) {
                 if (frameRecorder == null) {
                     stopwatch.stop();
-                    int frameRate = (int) (fpsSamplingLimit / stopwatch.elapsed(SECONDS)) + 3;
+                    int frameRate = (int) (SAMPLING_COUNT_FOR_FPS_MEASURE / stopwatch.elapsed(SECONDS)) + 3;
 
                     frameRecorder = new OpenCVFrameRecorder(
                             videoFile.toString(),
@@ -184,11 +196,14 @@ public class FrameIteratorBase implements FrameIterator {
                     for (Frame frame : framesToRec) {
                         frameRecorder.record(frame);
                     }
+
+                    framesToRec.clear();
                 }
 
                 frameRecorder.record(videoFrame);
 
             } else {
+                sampleFrameCount++;
                 framesToRec.add(videoFrame);
             }
 
@@ -238,7 +253,7 @@ public class FrameIteratorBase implements FrameIterator {
             if (onStopListener != null) {
                 onStopListener.onIteratorStopped();
             }
-            framesToRec.clear();
+            sampleFrameCount = 0;
             log.info("FrameIterator stopped");
         } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
             log.error(e.getMessage(), e);

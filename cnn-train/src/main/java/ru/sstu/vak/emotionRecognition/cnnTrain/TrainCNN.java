@@ -165,6 +165,7 @@ public class TrainCNN {
     }
 
 
+    @SuppressWarnings("all")
     private double validateModel(Path saveModelTo, DataSetIterator testDataIter) {
         log.info("Validate model....");
         Evaluation eval = model.evaluate(testDataIter);
@@ -210,7 +211,7 @@ public class TrainCNN {
         return recordReader;
     }
 
-    private DataSetIterator initDataSetIterator(ImageRecordReader recordReader) throws IOException {
+    private DataSetIterator initDataSetIterator(ImageRecordReader recordReader) {
         return new RecordReaderDataSetIterator(recordReader, BATCH_SIZE, 1, numLabels);
     }
 

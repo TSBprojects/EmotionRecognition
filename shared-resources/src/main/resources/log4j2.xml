@@ -22,7 +22,7 @@
 
     </Appenders>
     <Loggers>
-        <Logger name="ru.sstu.vak.emotionRecognition" level="debug" additivity="false">
+        <Logger name="ru.sstu.vak.emotionRecognition" level="info" additivity="false">
             <AppenderRef ref="RollingFile"/>
             <!--<AppenderRef ref="Console" />-->
         </Logger>

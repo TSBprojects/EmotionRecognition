@@ -1,9 +1,7 @@
 package ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator;
 
-import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.OpenCVFrameGrabber;
 
 import java.nio.file.Path;
 
@@ -29,6 +27,10 @@ public interface FrameIterator extends AutoCloseable {
         void onIteratorStopped();
     }
 
+
+    void setDeviceFrameRate(Integer deviceFrameRate);
+
+    void setFileFrameRate(Integer videoFileFrameRate);
 
     void setOnExceptionListener(ExceptionListener onExceptionListener);
 
