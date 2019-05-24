@@ -37,7 +37,7 @@
     <orderEntry type="library" name="Maven: org.nd4j:nd4j-context:1.0.0-beta4" level="project" />
     <orderEntry type="library" name="Maven: net.ericaro:neoitertools:1.0.0" level="project" />
     <orderEntry type="module" module-name="common" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.8" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.9" level="project" />
     <orderEntry type="module" module-name="shared-resources" />
     <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-nn:1.0.0-beta4" level="project" />
     <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-utility-iterators:1.0.0-beta4" level="project" />

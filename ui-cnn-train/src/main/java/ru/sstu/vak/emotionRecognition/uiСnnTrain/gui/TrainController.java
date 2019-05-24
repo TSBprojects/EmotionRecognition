@@ -12,21 +12,19 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import ru.sstu.vak.emotionRecognition.cnnTrain.TrainCNN;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Timer;
 
 public class TrainController {
 
-    private final static int CHECK_EVERY_EPOCH = 5;
+    private final static int CHECK_EVERY_EPOCH = 3;
 
-    private final static int EPOCH_COUNT = 50000;
+    private final static int EPOCH_COUNT = 300;
 
     private final static double SPLIT_TRAIN_SET = 0.2;
 
-    private final static String DATA_SET_PATH = "G:\\Main things\\Study\\DIPLOMA\\My\\datasets\\gray\\emotion\\new_dataset";
+    private final static String DATA_SET_PATH = "G:\\Main things\\Study\\DIPLOMA\\My\\datasets\\gray\\emotion\\final_dataset";
 
 
     @FXML
@@ -49,7 +47,7 @@ public class TrainController {
     private XYChart.Series chartLine;
 
     @FXML
-    public void initialize() throws IOException {
+    public void initialize() {
 
         initStatusChart();
 

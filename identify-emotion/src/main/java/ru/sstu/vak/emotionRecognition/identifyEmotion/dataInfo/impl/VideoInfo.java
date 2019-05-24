@@ -2,6 +2,7 @@ package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.DataInfo;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.VideoFrame;
 
 import java.util.List;
 

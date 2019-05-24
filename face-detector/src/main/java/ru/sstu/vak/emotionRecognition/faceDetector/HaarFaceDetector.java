@@ -16,7 +16,6 @@ import java.util.Map;
 
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 
-
 /**
  * Face detector using haar classifier cascades
  */
@@ -37,25 +36,28 @@ public class HaarFaceDetector {
         this.converterToMat = new OpenCVFrameConverter.ToMat();
     }
 
+
     /**
      * Detects and returns a map of cropped faces from a given captured frame
      *
-     * @param frame the frame captured by the {@link org.bytedeco.javacv.FrameGrabber}
+     * @param frame       the frame captured by the {@link org.bytedeco.javacv.FrameGrabber}
+     * @param originFaces if true return cropped origin faces, else return processed faces
      * @return A map of faces along with their coordinates in the frame
      */
-    public synchronized Map<Rect, Mat> detect(Frame frame) {
+    public synchronized Map<Rect, Mat> detect(Frame frame, boolean originFaces) {
         log.debug("Convert Frame to Mat...");
-        return detect(converterToMat.convert(frame));
+        return detect(converterToMat.convert(frame), originFaces);
     }
 
     /**
      * Detects and returns a map of cropped faces from a given captured frame
      *
-     * @param frame the frame captured by the {@link org.bytedeco.javacv.FrameGrabber}
-     *                 and converted to {@link org.bytedeco.javacpp.opencv_core.Mat}
+     * @param frame       the frame captured by the {@link org.bytedeco.javacv.FrameGrabber}
+     *                    and converted to {@link org.bytedeco.javacpp.opencv_core.Mat}
+     * @param originFaces if true return cropped origin faces, else return processed faces
      * @return A map of faces along with their coordinates in the frame
      */
-    public synchronized Map<Rect, Mat> detect(Mat frame) {
+    public synchronized Map<Rect, Mat> detect(Mat frame, boolean originFaces) {
         Mat matFrame = frame.clone();
 
         log.debug("Detecting faces on frame...");
@@ -82,7 +84,12 @@ public class HaarFaceDetector {
         for (int i = 0; i < faces.size(); i++) {
             Rect face = faces.get(i);
 
-            Mat croppedFaceMat = matFrameGrayEqualizedHist.apply(face);
+            Mat croppedFaceMat;
+            if (originFaces) {
+                croppedFaceMat = matFrame.apply(face);
+            } else {
+                croppedFaceMat = matFrameGrayEqualizedHist.apply(face);
+            }
 
             detectedFaces.put(new Rect(face), croppedFaceMat);
         }
@@ -116,46 +123,6 @@ public class HaarFaceDetector {
         }
     }
 
-//    /**
-//     * Detects and returns a map of cropped faces from a given captured frame
-//     *
-//     * @param frame the frame captured by the {@link org.bytedeco.javacv.FrameGrabber}
-//     * @return A map of faces along with their coordinates in the frame
-//     */
-//    public synchronized Map<Rect, Mat> detect(Frame frame) {
-//        log.info("Detecting faces on frame...");
-//
-//        Map<Rect, Mat> detectedFaces = new HashMap<>();
-//
-//        Mat matFrame = converterToMat.convert(frame);
-//        Mat matFrameGrayEqualizedHist = new Mat();
-//        //Mat matFrameGray;
-//
-//        if (matFrame.channels() > 1) {
-//            cvtColor(matFrame, matFrameGrayEqualizedHist, COLOR_BGRA2GRAY);
-//        } else {
-//            matFrameGrayEqualizedHist = matFrame;
-//        }
-//
-//        //matFrameGray = matFrameGrayEqualizedHist.clone();
-//        equalizeHist(matFrameGrayEqualizedHist, matFrameGrayEqualizedHist);
-//
-//        RectVector faces = new RectVector();
-//        cascadeClassifier.detectMultiScale(matFrameGrayEqualizedHist, faces);
-////        cascadeClassifier.detectMultiScale(matFrameGrayEqualizedHist, faces,1.1,3,0,new Size(),new Size());
-//
-//        for (int i = 0; i < faces.size(); i++) {
-//            Rect face = faces.get(i);
-//
-////            Mat croppedFaceMat = matFrameGray.apply(face);
-//
-//            Mat croppedFaceMat = matFrameGrayEqualizedHist.apply(face);
-//
-//            detectedFaces.put(face, croppedFaceMat);
-//        }
-//
-//        return detectedFaces;
-//    }
 }
 
 

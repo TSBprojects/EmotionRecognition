@@ -1,23 +1,18 @@
-package ru.sstu.vak.emotionRecognition.graphicPrep;
+package ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import ru.sstu.vak.emotionRecognition.graphicPrep.imageLoader.NativeImageLoader;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import static org.bytedeco.javacpp.opencv_imgproc.*;
 
 public class ImageConverter {
 
@@ -31,58 +26,6 @@ public class ImageConverter {
     private static JavaFXFrameConverter javaFXFrameConverter = new JavaFXFrameConverter();
 
     private ImageConverter() {
-    }
-
-
-    public static BufferedImage toGrayScale(BufferedImage image){
-        log.debug("Convert BufferedImage image to grayscale format...");
-        Mat img = ImageConverter.toMat(image);
-        cvtColor(img, img, COLOR_BGRA2GRAY);
-        return ImageConverter.toBufferedImage(img);
-    }
-
-    public static BufferedImage eqHist(BufferedImage image){
-        Mat img = ImageConverter.toMat(image);
-        equalizeHist(img, img);
-        return ImageConverter.toBufferedImage(img);
-    }
-
-    public static Mat toGrayScale(Mat img){
-        log.debug("Convert Mat image to grayscale format...");
-        cvtColor(img, img, COLOR_BGRA2GRAY);
-        return img;
-    }
-
-    public static Mat eqHist(Mat img){
-        equalizeHist(img, img);
-        return img;
-    }
-
-
-    public static BufferedImage copyBufferedImage(BufferedImage bufferedImage) {
-        log.debug("Copy buffered image...");
-        BufferedImage b = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
-        Graphics g = b.getGraphics();
-        g.drawImage(bufferedImage, 0, 0, null);
-        g.dispose();
-        return b;
-    }
-
-
-    public static Frame resize(Frame frame, int width, int height) {
-        log.debug("Resizing Frame to {}x{}...", width, height);
-        IplImage origImg = toIplImage(frame);
-        IplImage resizedImage = IplImage.create(width, height, frame.imageDepth, frame.imageChannels);
-        cvResize(origImg, resizedImage);
-        return toFrame(resizedImage);
-    }
-
-    public static Mat resize(Mat mat, int width, int height) {
-        log.debug("Resizing Mat to {}x{}...", width, height);
-        IplImage origImg = toIplImage(mat);
-        IplImage resizedImage = IplImage.create(width, height, origImg.depth(), origImg.nChannels());
-        cvResize(origImg, resizedImage);
-        return toMat(resizedImage);
     }
 
 

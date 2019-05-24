@@ -1,8 +1,7 @@
-package ru.sstu.vak.emotionRecognition.graphicPrep;
+package ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bytedeco.javacpp.opencv_core.Mat;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -15,8 +14,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.bytedeco.javacpp.opencv_imgproc.equalizeHist;
-
+@Deprecated
 public class PixelSmoother {
 
     private static final Logger log = LogManager.getLogger(PixelSmoother.class.getName());
@@ -41,35 +39,34 @@ public class PixelSmoother {
             }
 
             Path newImagePath = Paths.get(classPath + "\\" + imagePath.getFileName());
-            BufferedImage smoothedImage = smoothImage(ImageIO.read(imagePath.toFile()), avgIndex, true);
+            BufferedImage smoothedImage = smoothImage(ImageCorrector.eqHist(ImageIO.read(imagePath.toFile())), avgIndex);
             ImageIO.write(smoothedImage, "png", newImagePath.toFile());
             System.out.println(++count);
         }
     }
 
-    public static BufferedImage smoothImage(BufferedImage image, double index, boolean equalizeHist) {
+    public static BufferedImage smoothImage(BufferedImage image, double index) {
         log.debug("Smoothing image...");
 
-        if (equalizeHist) {
-            image = ImageConverter.eqHist(image);
-        }
-
-        int[] bytes = toUnsignedByte(((DataBufferByte) image.getRaster().getDataBuffer()).getData());
+        byte[] bytes = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        int[] res = new int[bytes.length];
 
         double imageIndex = getImageIndex(bytes);
         double extraScore = index - imageIndex;
 
         for (int i = 0; i < bytes.length; i++) {
-            int newByte = bytes[i] + (int) (255 * extraScore);
+            int originByte = Byte.toUnsignedInt(bytes[i]);
+
+            int newByte = originByte + (int) (255 * extraScore);
             if (newByte > 255) {
                 newByte = 255;
             } else if (newByte < 0) {
                 newByte = 0;
             }
-            bytes[i] = newByte;
+            res[i] = newByte;
         }
 
-        return getImage(bytes);
+        return getImage(res);
     }
 
     public static double getAvgIndex(List<Path> imagePaths) throws IOException {
@@ -84,7 +81,7 @@ public class PixelSmoother {
     }
 
     public static double getImageIndex(BufferedImage image) {
-        int[] bytes = toUnsignedByte(((DataBufferByte) image.getRaster().getDataBuffer()).getData());
+        byte[] bytes = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
         return getImageIndex(bytes);
     }
 
@@ -97,22 +94,12 @@ public class PixelSmoother {
         return outputImage;
     }
 
-    private static double getImageIndex(int[] bytes) {
+    private static double getImageIndex(byte[] bytes) {
         log.debug("Getting image pixel index");
         int sum = 0;
-        for (int aByte : bytes) {
-            sum += aByte;
+        for (byte aByte : bytes) {
+            sum += Byte.toUnsignedInt(aByte);
         }
-        return (sum / bytes.length) / 255.0;
-    }
-
-    private static int[] toUnsignedByte(byte[] array) {
-        log.debug("Converting byte[] array to unsigned byte int[] array...");
-        int[] arr = new int[array.length];
-
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] = Byte.toUnsignedInt(array[i]);
-        }
-        return arr;
+        return (sum / (double) bytes.length) / 255.0;
     }
 }

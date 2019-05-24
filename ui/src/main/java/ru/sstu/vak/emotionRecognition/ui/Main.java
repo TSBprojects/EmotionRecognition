@@ -8,6 +8,10 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.sstu.vak.emotionRecognition.ui.gui.MainController;
+
+import java.net.URL;
+import java.util.List;
 
 public class Main extends Application {
 
@@ -15,7 +19,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/main.fxml"));
+        URL gameControllerUrl = getClass().getResource("/main.fxml");
+
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(gameControllerUrl);
+        Parent root = loader.load();
+        MainController mainController = loader.getController();
+        List<String> parameters = getParameters().getRaw();
+        mainController.setParameters(parameters);
+
         primaryStage.getIcons().add(new Image("image/face-ico.png"));
         primaryStage.setTitle("Emotion recognizer");
         primaryStage.setScene(new Scene(root, 931, 490));

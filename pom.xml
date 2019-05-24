@@ -14,13 +14,14 @@
 
     <modules>
         <module>ui</module>
+        <module>ui-game</module>
+        <module>identify-emotion</module>
         <module>cnn</module>
+        <module>cnn-train</module>
         <module>graphic-prep</module>
         <module>face-detector</module>
         <module>common</module>
         <module>shared-resources</module>
-        <module>cnn-train</module>
-        <module>identify-emotion</module>
     </modules>
 
     <dependencies>

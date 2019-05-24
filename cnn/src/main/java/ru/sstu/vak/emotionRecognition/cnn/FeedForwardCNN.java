@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import ru.sstu.vak.emotionRecognition.common.Emotion;
-import ru.sstu.vak.emotionRecognition.graphicPrep.ImageConverter;
+import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageConverter;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +16,8 @@ public class FeedForwardCNN {
 
     private ConvNetwork model;
 
-    public static final int HEIGHT = 48;
-    public static final int WIDTH = 48;
+    public static final int INPUT_HEIGHT = 48;
+    public static final int INPUT_WIDTH = 48;
 
     public FeedForwardCNN(String modelPath) throws IOException {
         log.info("Restoring CNN model from file...");

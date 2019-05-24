@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane fx:id="mainPain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="914.0" prefWidth="1290.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionRecognition.uiGame.gui.GameController">
+   <children>
+      <TabPane layoutX="14.0" layoutY="14.0" prefHeight="910.0" prefWidth="1162.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <tabs>
+            <Tab text="Покажи их все!">
+               <content>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <VBox alignment="CENTER" minHeight="885.0" prefHeight="885.0" prefWidth="1240.0">
+                                 <children>
+                                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="885.0" prefWidth="434.0">
+                                       <children>
+                                          <AnchorPane fx:id="videoImageViewLayout" layoutX="40.0" layoutY="105.0" prefHeight="496.0" prefWidth="652.0" style="-fx-padding: 10; -fx-background-color: #0BC5C7;">
+                                             <children>
+                                                <ImageView fx:id="videoImageView" fitHeight="600.0" fitWidth="800.0" layoutX="-12.0" layoutY="-46.0" pickOnBounds="true" preserveRatio="true" style="-fx-background-color: #66CEFF;" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <ImageView fx:id="videoPlaceHolder" fitHeight="600.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <image>
+                                                      <Image url="@image/videoPlaceHolder.png" />
+                                                   </image></ImageView>
+                                                <Text fx:id="ruleText" fill="WHITE" layoutX="40.0" layoutY="91.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Удерживайте каждую эмоцию &#10;не менее 1 секунды!&#10;&#10;&#10;&#10;&#10;&#10;&#10;&#10;Считаются эмоции человека&#10;ближайшего к камере!" textAlignment="CENTER" visible="false" wrappingWidth="740.6279296875">
+                                                   <font>
+                                                      <Font name="System Bold Italic" size="35.0" />
+                                                   </font>
+                                                </Text>
+                                                <AnchorPane fx:id="playBtn" layoutX="302.0" layoutY="233.0" onMouseClicked="#onStartGame" prefHeight="146.0" prefWidth="217.0">
+                                                   <children>
+                                                      <ImageView fx:id="cameraImage" fitHeight="150.0" fitWidth="200.0" layoutX="9.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@image/camera1.png" />
+                                                         </image>
+                                                         <cursor>
+                                                            <Cursor fx:constant="DEFAULT" />
+                                                         </cursor>
+                                                      </ImageView>
+                                                      <ImageView fx:id="imageOnCamera" fitHeight="91.0" fitWidth="120.0" layoutX="43.0" layoutY="35.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@image/playGiff.gif" />
+                                                         </image>
+                                                         <cursor>
+                                                            <Cursor fx:constant="HAND" />
+                                                         </cursor>
+                                                      </ImageView>
+                                                   </children>
+                                                   <cursor>
+                                                      <Cursor fx:constant="DEFAULT" />
+                                                   </cursor>
+                                                </AnchorPane>
+                                                <ImageView fx:id="catProgressBar" fitHeight="370.0" fitWidth="549.0" layoutX="136.0" layoutY="159.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                                   <image>
+                                                      <Image url="@image/catLoad.gif" />
+                                                   </image>
+                                                </ImageView>
+                                                <ImageView fx:id="stopBtn" fitHeight="65.0" fitWidth="65.0" layoutX="727.0" layoutY="24.0" onMouseClicked="#onStopGame" pickOnBounds="true" preserveRatio="true" visible="false">
+                                                   <image>
+                                                      <Image url="@image/close.gif" />
+                                                   </image>
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                </ImageView>
+                                                <ImageView fx:id="fireworkImage1" fitHeight="264.0" fitWidth="263.0" layoutX="-68.0" layoutY="-104.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                                   <image>
+                                                      <Image url="@image/fireworks.gif" />
+                                                   </image>
+                                                </ImageView>
+                                             </children>
+                                          </AnchorPane>
+                                          <VBox layoutX="901.0" layoutY="105.0" minWidth="320.0" prefHeight="749.0" prefWidth="320.0">
+                                             <children>
+                                                <AnchorPane minHeight="107.0" minWidth="139.0" prefHeight="90.0" prefWidth="139.0" style="-fx-padding: 5; -fx-background-color: #0BC5C7;">
+                                                   <children>
+                                                      <AnchorPane fx:id="happyBackgr" prefHeight="87.0" prefWidth="140.0" style="-fx-background-color: E5E5E5;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Label fx:id="happyText" layoutX="63.0" layoutY="21.0" text="СЧАСТЬЕ">
+                                                               <font>
+                                                                  <Font name="Segoe Script Bold" size="32.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                         <padding>
+                                                            <Insets top="15.0" />
+                                                         </padding>
+                                                      </AnchorPane>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane minHeight="107.0" minWidth="139.0" prefHeight="90.0" prefWidth="139.0" style="-fx-padding: 0 5 5 5; -fx-background-color: #0BC5C7;">
+                                                   <children>
+                                                      <AnchorPane fx:id="sadBackgr" prefHeight="87.0" prefWidth="140.0" style="-fx-background-color: E5E5E5;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Label fx:id="sadText" layoutX="79.0" layoutY="23.0" text="ПЕЧАЛЬ">
+                                                               <font>
+                                                                  <Font name="Segoe Script Bold" size="32.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                         <padding>
+                                                            <Insets top="15.0" />
+                                                         </padding>
+                                                      </AnchorPane>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane minHeight="107.0" minWidth="139.0" prefHeight="90.0" prefWidth="139.0" style="-fx-padding: 0 5 5 5; -fx-background-color: #0BC5C7;">
+                                                   <children>
+                                                      <AnchorPane fx:id="neutralBackgr" prefHeight="87.0" prefWidth="140.0" style="-fx-background-color: E5E5E5;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Label fx:id="neutralText" layoutX="9.0" layoutY="23.0" text="НЕЙТРАЛЬНЫЙ">
+                                                               <font>
+                                                                  <Font name="Segoe Script Bold" size="32.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                         <padding>
+                                                            <Insets top="15.0" />
+                                                         </padding>
+                                                      </AnchorPane>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane minHeight="107.0" minWidth="139.0" prefHeight="90.0" prefWidth="139.0" style="-fx-padding: 0 5 5 5; -fx-background-color: #0BC5C7;">
+                                                   <children>
+                                                      <AnchorPane fx:id="surpriseBackgr" prefHeight="87.0" prefWidth="140.0" style="-fx-background-color: E5E5E5;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Label fx:id="surpriseText" layoutX="40.0" layoutY="23.0" text="УДИВЛЕНИЕ">
+                                                               <font>
+                                                                  <Font name="Segoe Script Bold" size="32.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                         <padding>
+                                                            <Insets top="15.0" />
+                                                         </padding>
+                                                      </AnchorPane>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane minHeight="107.0" minWidth="139.0" prefHeight="90.0" prefWidth="139.0" style="-fx-padding: 0 5 5 5; -fx-background-color: #0BC5C7;">
+                                                   <children>
+                                                      <AnchorPane fx:id="disgustBackgr" prefHeight="87.0" prefWidth="140.0" style="-fx-background-color: E5E5E5;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Label fx:id="disgustText" layoutX="19.0" layoutY="22.0" text="ОТВРАЩЕНИЕ">
+                                                               <font>
+                                                                  <Font name="Segoe Script Bold" size="32.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                         <padding>
+                                                            <Insets top="15.0" />
+                                                         </padding>
+                                                      </AnchorPane>
+                                                   </children>
+                                                   <VBox.margin>
+                                                      <Insets />
+                                                   </VBox.margin>
+                                                </AnchorPane>
+                                                <AnchorPane minHeight="107.0" minWidth="139.0" prefHeight="90.0" prefWidth="139.0" style="-fx-padding: 0 5 5 5; -fx-background-color: #0BC5C7;">
+                                                   <children>
+                                                      <AnchorPane fx:id="angryBackgr" prefHeight="87.0" prefWidth="140.0" style="-fx-background-color: E5E5E5;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Label fx:id="angryText" layoutX="77.0" layoutY="23.0" text="ЗЛОСТЬ">
+                                                               <font>
+                                                                  <Font name="Segoe Script Bold" size="32.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane minHeight="107.0" minWidth="139.0" prefHeight="90.0" prefWidth="139.0" style="-fx-padding: 0 5 5 5; -fx-background-color: #0BC5C7;">
+                                                   <children>
+                                                      <AnchorPane fx:id="fearBackgr" prefHeight="87.0" prefWidth="140.0" style="-fx-background-color: E5E5E5;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                         <children>
+                                                            <Label fx:id="fearText" layoutX="89.0" layoutY="23.0" prefWidth="132.0" text="СТРАХ">
+                                                               <font>
+                                                                  <Font name="Segoe Script Bold" size="32.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                         <padding>
+                                                            <Insets top="15.0" />
+                                                         </padding>
+                                                      </AnchorPane>
+                                                   </children>
+                                                </AnchorPane>
+                                             </children>
+                                          </VBox>
+                                          <Label fx:id="timeLabel" layoutX="1010.0" layoutY="14.0" prefHeight="66.0" prefWidth="49.0" text="...">
+                                             <font>
+                                                <Font name="Kristen ITC" size="41.0" />
+                                             </font>
+                                          </Label>
+                                          <Label layoutX="1072.0" layoutY="34.0" prefHeight="40.0" prefWidth="49.0" text="sec">
+                                             <font>
+                                                <Font name="Kristen ITC" size="21.0" />
+                                             </font>
+                                          </Label>
+                                          <ProgressBar fx:id="progressBar" layoutX="39.0" layoutY="764.0" prefHeight="78.0" prefWidth="1179.0" visible="false" />
+                                          <Label fx:id="mainHeaderText" contentDisplay="CENTER" layoutX="4.0" layoutY="21.0" prefHeight="65.0" prefWidth="897.0" style="-fx-alignment: center;" text="У вас есть 1 минута чтобы выбить все эмоции!" textAlignment="CENTER">
+                                             <font>
+                                                <Font name="Kristen ITC" size="41.0" />
+                                             </font>
+                                          </Label>
+                                          <ImageView fx:id="happyFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="127.0" pickOnBounds="true" preserveRatio="true" visible="false" />
+                                          <ImageView fx:id="sadFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="218.0" pickOnBounds="true" preserveRatio="true" visible="false" />
+                                          <ImageView fx:id="neutralFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="311.0" pickOnBounds="true" preserveRatio="true" visible="false" />
+                                          <ImageView fx:id="surpriseFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="400.0" pickOnBounds="true" preserveRatio="true" visible="false" />
+                                          <ImageView fx:id="disgustFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="482.0" pickOnBounds="true" preserveRatio="true" visible="false" />
+                                          <ImageView fx:id="angryFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="578.0" pickOnBounds="true" preserveRatio="true" visible="false" />
+                                          <ImageView fx:id="fearFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="665.0" pickOnBounds="true" preserveRatio="true" visible="false" />
+                                          <ImageView fitHeight="103.0" fitWidth="239.0" layoutX="439.0" layoutY="752.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@image/инпит.png" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fitHeight="114.0" fitWidth="315.0" layoutX="69.0" layoutY="746.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@image/неофлекс.png" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fx:id="fireworkImage2" fitHeight="264.0" fitWidth="263.0" layoutX="693.0" layoutY="-1.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                             <image>
+                                                <Image url="@image/fireworks.gif" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fitHeight="130.0" fitWidth="141.0" layoutX="708.0" layoutY="739.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@image/mayCareer.png" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </AnchorPane>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>

@@ -1,11 +1,11 @@
-package ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.impl;
+package ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator.impl;
 
 import com.google.common.base.Stopwatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacv.*;
 import ru.sstu.vak.emotionRecognition.graphicPrep.exception.IteratorAlreadyRunningException;
-import ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.FrameIterator;
+import ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator.FrameIterator;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -125,6 +125,8 @@ public class FrameIteratorBase implements FrameIterator {
     private void core(FrameGrabber grabber, CoreFrameListener listener, int frameRate) {
         if (frameGrabber == null) {
             frameGrabber = grabber;
+            frameGrabber.setImageWidth(FRAME_WIDTH);
+            frameGrabber.setImageHeight(FRAME_HEIGHT);
         } else {
             IteratorAlreadyRunningException e = new IteratorAlreadyRunningException();
             log.error(e.getMessage(), e);

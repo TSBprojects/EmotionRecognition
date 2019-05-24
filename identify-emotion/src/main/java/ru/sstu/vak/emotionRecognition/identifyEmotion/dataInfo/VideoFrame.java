@@ -1,16 +1,17 @@
-package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
 
 import java.util.List;
 
 public class VideoFrame {
 
     @JsonProperty("frameIndex")
-    private int frameIndex;
+    protected int frameIndex;
 
     @JsonProperty("faces")
-    private List<VideoFace> videoFaces;
+    protected List<VideoFace> videoFaces;
 
     public VideoFrame(int frameIndex, List<VideoFace> videoFaces) {
         this.frameIndex = frameIndex;

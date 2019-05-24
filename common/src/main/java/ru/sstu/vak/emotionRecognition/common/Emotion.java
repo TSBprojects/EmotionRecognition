@@ -3,25 +3,24 @@ package ru.sstu.vak.emotionRecognition.common;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.awt.*;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Emotion {
 
-    ANGER(0),
-    DISGUST(1),
-    FEAR(2),
-    HAPPY(3),
-    NEUTRAL(4),
-    SAD(5),
-    SURPRISE(6);
+    HAPPY(0),
+    SAD(1),
+    NEUTRAL(2),
+    SURPRISE(3),
+    DISGUST(4),
+    ANGER(5),
+    FEAR(6);
 
     private int emotionId;
     private double probability;
 
-    private Emotion(int index) {
+    Emotion(int index) {
         this.emotionId = index;
     }
 
@@ -52,19 +51,19 @@ public enum Emotion {
     public String getValue() {
         switch (this) {
             case ANGER:
-                return "ANGER";
+                return "ЗЛОСТЬ";
             case DISGUST:
-                return "DISGUST";
+                return "ОТВРАЩЕНИЕ";
             case FEAR:
-                return "FEAR";
+                return "СТРАХ";
             case HAPPY:
-                return "HAPPY";
+                return "СЧАСТЬЕ";
             case SAD:
-                return "SAD";
+                return "ПЕЧАЛЬ";
             case SURPRISE:
-                return "SURPRISE";
+                return "УДИВЛЕНИЕ";
             case NEUTRAL:
-                return "NEUTRAL";
+                return "НЕЙТРАЛЬНЫЙ";
 
             default:
                 throw new UnsupportedOperationException("Unknown or not supported emotion: " + this);
@@ -128,7 +127,7 @@ public enum Emotion {
     }
 
 
-    public void setProbability(double probability){
+    public void setProbability(double probability) {
         this.probability = probability;
     }
 

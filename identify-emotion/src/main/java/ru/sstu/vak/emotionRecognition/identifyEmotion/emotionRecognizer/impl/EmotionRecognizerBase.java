@@ -13,11 +13,16 @@ import ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN;
 import ru.sstu.vak.emotionRecognition.common.Emotion;
 import ru.sstu.vak.emotionRecognition.faceDetector.BoundingBox;
 import ru.sstu.vak.emotionRecognition.faceDetector.HaarFaceDetector;
-import ru.sstu.vak.emotionRecognition.graphicPrep.FacePreProcessing;
-import ru.sstu.vak.emotionRecognition.graphicPrep.ImageConverter;
-import ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.FrameIterator;
-import ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.impl.FrameIteratorBase;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.*;
+import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.FacePreProcessing;
+import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageConverter;
+import ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator.FrameIterator;
+import ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator.impl.FrameIteratorBase;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.ImageFace;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.VideoFrame;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.ImageInfo;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.VideoInfo;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.EmotionRecognizer;
 
 import javax.imageio.ImageIO;
@@ -32,34 +37,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN.HEIGHT;
-import static ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN.WIDTH;
+import static ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN.INPUT_HEIGHT;
+import static ru.sstu.vak.emotionRecognition.cnn.FeedForwardCNN.INPUT_WIDTH;
 
 public class EmotionRecognizerBase implements EmotionRecognizer {
 
     private static final Logger log = LogManager.getLogger(EmotionRecognizerBase.class.getName());
 
-    private static final String VIDEO_INFO_POSTFIX = "-videoInfo";
-    private static final String IMAGE_INFO_POSTFIX = "-imageInfo";
-    private static final String PROCESSED_IMAGE_POSTFIX = "-processed";
-    private static final String PROCESSED_IMAGE_FACE_POSTFIX = "-face";
+    protected static final String VIDEO_INFO_POSTFIX = "-videoInfo";
+    protected static final String IMAGE_INFO_POSTFIX = "-imageInfo";
+    protected static final String PROCESSED_IMAGE_POSTFIX = "-processed";
+    protected static final String PROCESSED_IMAGE_FACE_POSTFIX = "-face";
 
-    private int boundingBoxBorderThickness;
-    private int boundingBoxTopPaneHeight;
+    protected int boundingBoxBorderThickness;
+    protected int boundingBoxTopPaneHeight;
 
     private ObjectMapper toJson;
     private FileOutputStream fileOutputStream;
-    private FrameIteratorBase frameIterator;
-    private HaarFaceDetector haarFaceDetector;
-    private FeedForwardCNN feedForwardCNN;
 
-    private StopListener stopListener;
-    private NetInputListener videoNetInputListener;
-    private NetInputListener imageNetInputListener;
-    private FrameIterator.FrameListener frameListener;
-    private FrameIterator.ExceptionListener onExceptionListener;
+    protected FrameIterator frameIterator;
+    protected HaarFaceDetector haarFaceDetector;
+    protected FeedForwardCNN feedForwardCNN;
 
-    private List<VideoFrame> frames;
+    protected StopListener stopListener;
+    protected NetInputListener videoNetInputListener;
+    protected NetInputListener imageNetInputListener;
+    protected FrameIterator.FrameListener frameListener;
+    protected FrameIterator.ExceptionListener onExceptionListener;
+
+    protected List<VideoFrame> frames;
 
 
     public EmotionRecognizerBase(String modelPath) throws IOException {
@@ -80,9 +86,11 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             }
             frames.clear();
             try {
-                fileOutputStream.write("]}".getBytes());
-                fileOutputStream.close();
-                fileOutputStream = null;
+                if (fileOutputStream != null) {
+                    fileOutputStream.write("]}".getBytes());
+                    fileOutputStream.close();
+                    fileOutputStream = null;
+                }
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();
@@ -97,12 +105,12 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         List<ImageFace> imageFaceList = new ArrayList<>();
 
         Mat matImage = ImageConverter.toMat(image);
-        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage);
+        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage, false);
         faces.forEach((rect, face) -> {
             try {
                 BufferedImage faceImage = ImageConverter.toBufferedImage(matImage.apply(rect));
                 ImageFace.Location faceLocation = new ImageFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(face, WIDTH, HEIGHT, false);
+                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
                 if (imageNetInputListener != null) {
                     imageNetInputListener.onNextFace(preparedFace.clone());
                 }
@@ -129,9 +137,9 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         log.info("Starting video with emotion recognition...");
         initOutputStream(writeTo);
         frameIterator.start(readFrom, writeTo, frame -> {
-            BufferedImage procImage = processedFrame(frame);
-            Frame procFrame = ImageConverter.toFrame(procImage);
-            listener.onNextFrame(procImage);
+            FrameInfo frameInfo = processedFrame(frame);
+            Frame procFrame = ImageConverter.toFrame(frameInfo.getProcessedImage());
+            listener.onNextFrame(frameInfo);
             return procFrame;
         });
     }
@@ -220,24 +228,24 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
-    private BufferedImage processedFrame(Frame frame) {
+    private FrameInfo processedFrame(Frame frame) {
         if (frameListener != null) {
             frameListener.onNextFrame(frame);
         }
         List<VideoFace> videoFacesList = new ArrayList<>();
 
-        Map<Rect, Mat> faces = haarFaceDetector.detect(frame);
+        Map<Rect, Mat> faces = haarFaceDetector.detect(frame, false);
         BufferedImage image = ImageConverter.toBufferedImage(frame);
         faces.forEach((rect, face) -> {
             try {
-                VideoFace.Location videoLocation = new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(face, WIDTH, HEIGHT, false);
+                VideoFace.Location faceLocation = new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
+                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace);
                 }
                 Emotion emotion = feedForwardCNN.predict(preparedFace);
                 BoundingBox.draw(image, rect, emotion, boundingBoxBorderThickness, boundingBoxTopPaneHeight);
-                videoFacesList.add(new VideoFace(emotion, videoLocation));
+                videoFacesList.add(new VideoFace(emotion, faceLocation));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();
@@ -248,7 +256,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         VideoFrame videoFrame = new VideoFrame(frames.size(), videoFacesList);
         writeVideoFrame(videoFrame);
         frames.add(videoFrame);
-        return image;
+        return new FrameInfo(frames.size(), image, videoFacesList);
     }
 
     private void initOutputStream(Path writeTo) {
@@ -282,7 +290,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
-    private void throwException(Throwable e) {
+    protected void throwException(Throwable e) {
         if (onExceptionListener != null) {
             onExceptionListener.onException(e);
         }

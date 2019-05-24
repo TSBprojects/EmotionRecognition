@@ -2,7 +2,8 @@ package ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer;
 
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacv.FrameGrabber;
-import ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator.FrameIterator;
+import ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator.FrameIterator;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.ImageInfo;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.VideoInfo;
 
@@ -19,7 +20,7 @@ public interface EmotionRecognizer {
 
     @FunctionalInterface
     interface ProcessedFrameListener {
-        void onNextFrame(BufferedImage frame);
+        void onNextFrame(FrameInfo frameInfo);
     }
 
     @FunctionalInterface

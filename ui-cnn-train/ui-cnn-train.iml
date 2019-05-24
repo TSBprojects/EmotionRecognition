@@ -242,7 +242,7 @@
     <orderEntry type="module" module-name="cnn" />
     <orderEntry type="module" module-name="graphic-prep" />
     <orderEntry type="module" module-name="common" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.8" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.9" level="project" />
     <orderEntry type="library" name="Maven: org.nd4j:nd4j-native-platform:1.0.0-beta4" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco:openblas-platform:0.3.5-1.5" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco:openblas:0.3.5-1.5" level="project" />

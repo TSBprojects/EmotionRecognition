@@ -1,7 +1,7 @@
-package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl;
 
 import ru.sstu.vak.emotionRecognition.common.Emotion;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.DataFace;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.DataFace;
 
 public class VideoFace extends DataFace {
 

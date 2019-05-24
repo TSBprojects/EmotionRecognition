@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionRecognition.graphicPrep.frameIterator;
+package ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator;
 
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -6,6 +6,11 @@ import org.bytedeco.javacv.FrameGrabber;
 import java.nio.file.Path;
 
 public interface FrameIterator extends AutoCloseable {
+
+    int FRAME_WIDTH = 640;
+
+    int FRAME_HEIGHT = 480;
+
 
     @FunctionalInterface
     interface ExceptionListener {

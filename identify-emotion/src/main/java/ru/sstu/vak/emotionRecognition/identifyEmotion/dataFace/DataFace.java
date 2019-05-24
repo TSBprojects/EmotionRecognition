@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ru.sstu.vak.emotionRecognition.common.Emotion;
@@ -73,32 +73,5 @@ public abstract class DataFace {
                     ", height=" + height +
                     '}';
         }
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DataFace)) return false;
-
-        DataFace dataFace = (DataFace) o;
-
-        if (getEmotion() != dataFace.getEmotion()) return false;
-        return getLocation().equals(dataFace.getLocation());
-    }
-
-    @Override
-    public int hashCode() {
-        int result = getEmotion().hashCode();
-        result = 31 * result + getLocation().hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "DataFace{" +
-                "emotion=" + emotion +
-                ", location=" + location +
-                '}';
     }
 }

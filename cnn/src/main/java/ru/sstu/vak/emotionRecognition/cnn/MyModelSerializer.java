@@ -1,11 +1,9 @@
 package ru.sstu.vak.emotionRecognition.cnn;
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
 
 import lombok.NonNull;
 import org.apache.commons.io.output.CloseShieldOutputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.Updater;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
@@ -17,7 +15,6 @@ import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.serializer.NormalizerSerializer;
 import org.nd4j.linalg.factory.Nd4j;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
@@ -26,7 +23,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class MyModelSerializer {
-    private static final Logger log = LoggerFactory.getLogger(org.deeplearning4j.util.ModelSerializer.class);
+    private static final Logger log = LogManager.getLogger(MyModelSerializer.class.getName());
 
     private MyModelSerializer() {
     }
