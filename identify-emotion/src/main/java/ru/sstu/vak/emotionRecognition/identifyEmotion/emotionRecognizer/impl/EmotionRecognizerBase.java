@@ -164,10 +164,13 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         if (saveFaces) {
             List<ImageFace> imageFaces = imageInfo.getImageFaces();
             for (int i = 0; i < imageFaces.size(); i++) {
+                ImageFace imageFace = imageFaces.get(i);
                 ImageIO.write(
-                        imageFaces.get(i).getFaceImage(),
+                        imageFace.getFaceImage(),
                         "png",
-                        new File(writeTo.getParent() + "\\" + fileName + PROCESSED_IMAGE_FACE_POSTFIX + i + ".png"));
+                        new File(writeTo.getParent() + "\\" + fileName
+                                + PROCESSED_IMAGE_FACE_POSTFIX + i + "-" + imageFace.getEmotion().getValue() + ".png")
+                );
             }
         }
         ImageIO.write(

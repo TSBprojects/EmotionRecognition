@@ -223,7 +223,10 @@ public class MainController {
                         startVidProgressBarOff();
                         videoImageView.setImage(ImageConverter.toJavaFXImage(frameInfo.getProcessedImage()));
                     });
+                }else{
+                    startVidProgressBarOff();
                 }
+
             }
         });
     }
@@ -291,6 +294,7 @@ public class MainController {
                     "Image", "*.png", "*.jpeg", "*.jpg", "*.bmp"
             );
             if (image != null) {
+                imagePath.setText(image.getPath());
                 screenshotFrame = ImageIO.read(image);
                 originalScreenShot = ImageCorrector.copyBufferedImage(screenshotFrame);
                 screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));

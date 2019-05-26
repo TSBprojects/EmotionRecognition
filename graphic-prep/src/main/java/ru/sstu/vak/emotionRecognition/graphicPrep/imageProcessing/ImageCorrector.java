@@ -86,7 +86,7 @@ public class ImageCorrector {
         // apply the CLAHE algorithm to the L channel
         CLAHE clahe = createCLAHE();
         clahe.setClipLimit(4);
-        clahe.setTilesGridSize(new opencv_core.Size(8, 8));
+        clahe.setTilesGridSize(new opencv_core.Size(5, 5));
 
         clahe.apply(srcArry, dstArry);
 
