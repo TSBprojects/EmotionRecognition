@@ -62,18 +62,13 @@ public class DataSetPreProcessor {
 
                 for (Map.Entry<Rect, Mat> entry : faces.entrySet()) {
                     Rect rect = entry.getKey();
-                    Mat eqHistFace = entry.getValue();
-
 
                     Mat matFaceImage = matImage.apply(rect);
-                    if (matFaceImage.channels() > 1) {
-                        ImageCorrector.toGrayScale(matFaceImage);
-                    }
 
                     Mat resizedFaceImage = ImageCorrector.resize(matFaceImage, INPUT_WIDTH, INPUT_HEIGHT);
                     imwrite(classPathOriginal + "\\" + imagePath.getFileName(), resizedFaceImage);
 
-                    Mat resizedProcessedFaceImage = FacePreProcessing.process(eqHistFace, INPUT_WIDTH, INPUT_HEIGHT);
+                    Mat resizedProcessedFaceImage = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                     imwrite(classPathProcessed + "\\" + imagePath.getFileName(), resizedProcessedFaceImage);
                 }
             }
@@ -86,14 +81,10 @@ public class DataSetPreProcessor {
                 Path classPathOriginal = createDir(Paths.get(writeTo + "\\" + imageParentName));
                 Path classPathProcessed = createDir(Paths.get(preparedData + "\\" + imageParentName));
 
-                if (matFaceImage.channels() > 1) {
-                    ImageCorrector.toGrayScale(matFaceImage);
-                }
-
                 Mat resizedFaceImage = ImageCorrector.resize(matFaceImage, INPUT_WIDTH, INPUT_HEIGHT);
                 imwrite(classPathOriginal + "\\" + imagePath.getFileName(), resizedFaceImage);
 
-                Mat resizedProcessedFaceImage = FacePreProcessing.process(ImageCorrector.eqHist(matFaceImage), INPUT_WIDTH, INPUT_HEIGHT);
+                Mat resizedProcessedFaceImage = FacePreProcessing.process(matFaceImage, INPUT_WIDTH, INPUT_HEIGHT);
                 imwrite(classPathProcessed + "\\" + imagePath.getFileName(), resizedProcessedFaceImage);
             }
         }

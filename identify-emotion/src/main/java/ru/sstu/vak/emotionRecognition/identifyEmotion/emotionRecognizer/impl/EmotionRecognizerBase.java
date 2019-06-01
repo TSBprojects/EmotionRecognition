@@ -110,7 +110,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             try {
                 BufferedImage faceImage = ImageConverter.toBufferedImage(matImage.apply(rect));
                 ImageFace.Location faceLocation = new ImageFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                 if (imageNetInputListener != null) {
                     imageNetInputListener.onNextFace(preparedFace.clone());
                 }
@@ -237,12 +237,14 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         }
         List<VideoFace> videoFacesList = new ArrayList<>();
 
-        Map<Rect, Mat> faces = haarFaceDetector.detect(frame, false);
+        Mat matImage = ImageConverter.toMat(frame);
         BufferedImage image = ImageConverter.toBufferedImage(frame);
+        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage, false);
+
         faces.forEach((rect, face) -> {
             try {
                 VideoFace.Location faceLocation = new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace);
                 }

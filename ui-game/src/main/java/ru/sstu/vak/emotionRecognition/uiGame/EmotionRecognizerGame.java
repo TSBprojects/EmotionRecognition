@@ -53,16 +53,16 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
         Emotion maxEmotion = null;
         VideoFace.Location maxLocation = null;
 
+        Mat matImage = ImageConverter.toMat(frame);
         BufferedImage buffFrame = ImageConverter.toBufferedImage(frame);
-        Map<Rect, Mat> faces = haarFaceDetector.detect(frame, false);
+        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage, false);
 
         for (Map.Entry<Rect, Mat> entry : faces.entrySet()) {
             Rect rect = entry.getKey();
-            Mat processedFace = entry.getValue();
 
             try {
                 VideoFace.Location videoLocation = new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(processedFace, INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace);
                 }

@@ -30,7 +30,7 @@ public class FacePreProcessing {
         IplImage iplFace = ImageConverter.toIplImage(face);
         eqBrightness(iplFace, iplFace);
 
-        return ImageConverter.toMat(iplFace);
+        return ImageCorrector.eqHist(ImageConverter.toMat(iplFace));
     }
 
 }
