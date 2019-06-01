@@ -2,7 +2,6 @@ package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.VideoFrame;
 
 import java.awt.image.BufferedImage;
 import java.util.List;

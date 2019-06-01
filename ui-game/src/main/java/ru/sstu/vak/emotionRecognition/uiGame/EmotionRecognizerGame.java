@@ -13,7 +13,7 @@ import ru.sstu.vak.emotionRecognition.faceDetector.BoundingBox;
 import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.FacePreProcessing;
 import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageConverter;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.VideoFrame;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.VideoFrame;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.impl.EmotionRecognizerBase;
 

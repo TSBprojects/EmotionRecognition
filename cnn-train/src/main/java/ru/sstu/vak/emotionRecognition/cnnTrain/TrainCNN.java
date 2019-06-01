@@ -13,12 +13,8 @@ import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.distribution.NormalDistribution;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.*;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.learning.config.Nesterovs;
@@ -217,7 +213,6 @@ public class TrainCNN {
 
 
     private MultiLayerConfiguration modifiedAlexNetArchitecture() {
-        //TODO обучить новую модель
         /*
            Construct the neural network
         */
@@ -234,53 +229,25 @@ public class TrainCNN {
                 .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer) // normalize to prevent vanishing or exploding gradients
                 .l2(5 * 1e-4)
                 .list()
-                .layer(0, convInit("cnn1", CHANNELS, 24, new int[]{5, 5}, new int[]{1, 1}, new int[]{1, 1}, nonZeroBias))
+                .layer(0, convInit("cnn1", CHANNELS, 96, new int[]{5, 5}, new int[]{1, 1}, new int[]{1, 1}, nonZeroBias))
                 .layer(1, new LocalResponseNormalization.Builder().name("lrn1").build())
                 .layer(2, maxPool("maxpool1", new int[]{2, 2}))
-                .layer(3, conv5x5("cnn2", 64, new int[]{1, 1}, new int[]{2, 2}, nonZeroBias))
+                .layer(3, conv5x5("cnn2", 256, new int[]{1, 1}, new int[]{2, 2}, nonZeroBias))
                 .layer(4, new LocalResponseNormalization.Builder().name("lrn2").build())
                 .layer(5, maxPool("maxpool2", new int[]{2, 2}))
-                .layer(6, conv3x3("cnn3", 96, nonZeroBias))
-                .layer(7, conv3x3("cnn4", 96, nonZeroBias))
+                .layer(6, conv3x3("cnn3", 384, nonZeroBias))
+                .layer(7, conv3x3("cnn4", 384, nonZeroBias))
                 .layer(8, new LocalResponseNormalization.Builder().name("lrn3").build())
                 .layer(9, maxPool("maxpool3", new int[]{3, 3}))
-                .layer(10, fullyConnected("ffn1", 1024, nonZeroBias, dropOut))
-                .layer(11, fullyConnected("ffn2", 1024, nonZeroBias, dropOut))
-                .layer(12, new OutputLayer.Builder(LossFunctions.LossFunction.RECONSTRUCTION_CROSSENTROPY)
+                .layer(10, fullyConnected("ffn1", 2048, nonZeroBias, dropOut))
+                .layer(11, fullyConnected("ffn2", 2048, nonZeroBias, dropOut))
+                .layer(12, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
                         .name("output")
                         .nOut(numLabels)
                         .activation(Activation.SOFTMAX)
                         .build())
                 .setInputType(InputType.convolutional(HEIGHT, WIDTH, CHANNELS))
                 .build();
-
-//        return new NeuralNetConfiguration.Builder()
-//                .seed(SEED)
-//                .activation(Activation.RELU)
-//                .updater(new Nesterovs(new StepSchedule(ScheduleType.ITERATION, 1e-2, 0.1, 100000), 0.9))
-//                .biasUpdater(new Nesterovs(new StepSchedule(ScheduleType.ITERATION, 2e-2, 0.1, 100000), 0.9))
-//                .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer) // normalize to prevent vanishing or exploding gradients
-//                .l2(5 * 1e-4)
-//                .list()
-//                .layer(0, convInit("cnn1", CHANNELS, 96, new int[]{5, 5}, new int[]{1, 1}, new int[]{1, 1}, nonZeroBias))
-//                .layer(1, new LocalResponseNormalization.Builder().name("lrn1").build())
-//                .layer(2, maxPool("maxpool1", new int[]{2, 2}))
-//                .layer(3, conv5x5("cnn2", 256, new int[]{1, 1}, new int[]{2, 2}, nonZeroBias))
-//                .layer(4, new LocalResponseNormalization.Builder().name("lrn2").build())
-//                .layer(5, maxPool("maxpool2", new int[]{2, 2}))
-//                .layer(6, conv3x3("cnn3", 384, nonZeroBias))
-//                .layer(7, conv3x3("cnn4", 384, nonZeroBias))
-//                .layer(8, new LocalResponseNormalization.Builder().name("lrn3").build())
-//                .layer(9, maxPool("maxpool3", new int[]{3, 3}))
-//                .layer(10, fullyConnected("ffn1", 2048, nonZeroBias, dropOut))
-//                .layer(11, fullyConnected("ffn2", 2048, nonZeroBias, dropOut))
-//                .layer(12, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-//                        .name("output")
-//                        .nOut(numLabels)
-//                        .activation(Activation.SOFTMAX)
-//                        .build())
-//                .setInputType(InputType.convolutional(INPUT_HEIGHT, INPUT_WIDTH, CHANNELS))
-//                .build();
     }
 
     private ConvolutionLayer convInit(String name, int in, int out, int[] kernel, int[] stride, int[] pad, double bias) {

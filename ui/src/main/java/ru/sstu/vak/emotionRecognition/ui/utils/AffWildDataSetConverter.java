@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 
-@Deprecated
+
 public class AffWildDataSetConverter {
 
     private static final double MIN_ACCURACY = 0.999;

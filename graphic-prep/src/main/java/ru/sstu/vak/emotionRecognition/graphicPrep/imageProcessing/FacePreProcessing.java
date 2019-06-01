@@ -2,6 +2,7 @@ package ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 
 import static ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageCorrector.eqBrightness;
@@ -21,7 +22,15 @@ public class FacePreProcessing {
 
     public static Mat process(Mat face) {
         log.debug("Pre-processing Mat face...");
-        return ImageConverter.toMat(eqBrightness(ImageConverter.toBufferedImage(face)));
+
+        if (face.channels() > 1) {
+            ImageCorrector.toGrayScale(face);
+        }
+
+        IplImage iplFace = ImageConverter.toIplImage(face);
+        eqBrightness(iplFace, iplFace);
+
+        return ImageConverter.toMat(iplFace);
     }
 
 }

@@ -19,9 +19,9 @@ import ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator.FrameI
 import ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator.impl.FrameIteratorBase;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.ImageFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.VideoFrame;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.ImageInfo;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.VideoFrame;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.VideoInfo;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.EmotionRecognizer;
 

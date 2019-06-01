@@ -223,7 +223,7 @@ public class MainController {
                         startVidProgressBarOff();
                         videoImageView.setImage(ImageConverter.toJavaFXImage(frameInfo.getProcessedImage()));
                     });
-                }else{
+                } else {
                     startVidProgressBarOff();
                 }
 

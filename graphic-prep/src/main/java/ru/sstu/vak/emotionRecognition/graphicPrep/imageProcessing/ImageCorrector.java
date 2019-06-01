@@ -11,6 +11,7 @@ import ru.sstu.vak.emotionRecognition.graphicPrep.iterators.PixelIterator;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageConverter.*;
 
@@ -50,6 +51,41 @@ public class ImageCorrector {
     }
 
 
+    /**
+     * Implementation of retinex
+     */
+    public static void eqBrightness(IplImage src, IplImage dst) {
+
+        final double sigma = 5;
+
+        IplImage[] tmpImages = new IplImage[2];
+        for (int i = 0; i < tmpImages.length; i++) {
+            tmpImages[i] = cvCreateImage(new opencv_core.CvSize(src.width(), src.height()), IPL_DEPTH_32F, src.nChannels());
+            cvZero(tmpImages[i]);
+        }
+
+        // R = w * ( log(I)-log(gauss(I)) )
+
+        cvConvert(src, tmpImages[0]); // конвертируем данные во float
+        cvConvertScale(tmpImages[0], tmpImages[0], 1.0, 1.0); // сдвигаем на 1 для вычисления логарифма
+        cvLog(tmpImages[0], tmpImages[0]); // log(I)
+
+        // сглаживаем и конвертируем данные во float
+        cvSmooth(src, src, CV_GAUSSIAN, 0, 0, sigma, 0);
+        cvConvert(src, tmpImages[1]);
+        cvConvertScale(tmpImages[1], tmpImages[1], 1.0, 1.0); // сдвигаем на 1 для вычисления логарифма
+        cvLog(tmpImages[1], tmpImages[1]); // log(gauss(I))
+
+        cvSub(tmpImages[0], tmpImages[1], tmpImages[0], null); // корректируем освещение
+        cvExp(tmpImages[0], tmpImages[0]);
+
+
+        cvNormalize(tmpImages[0], tmpImages[0], 0.0, 255.0, CV_MINMAX, null); // растягиваем в [0,255]
+        cvConvertScale(tmpImages[0], tmpImages[0], 1, 0.0); // корректируем каналы
+
+        cvConvert(tmpImages[0], dst);
+    }
+
     public static BufferedImage gammaCorrection(BufferedImage img, double gamma) {
         log.debug("Apply gamma correction to BufferedImage image with gamma " + gamma + "...");
         /*
@@ -67,55 +103,6 @@ public class ImageCorrector {
             }
             return pixel;
         });
-    }
-
-    public static BufferedImage eqBrightness(BufferedImage img) {
-        //TODO найти способ выровнять яркость
-        return PixelSmoother.smoothImage(img, 0.5);
-    }
-
-    @Deprecated
-    public static void applyCLAHE(Mat srcArry, Mat dstArry) {
-        //Function that applies the CLAHE algorithm to "dstArry".
-
-
-        // READ RGB color image and convert it to Lab
-        Mat channel = new Mat();
-
-
-        // apply the CLAHE algorithm to the L channel
-        CLAHE clahe = createCLAHE();
-        clahe.setClipLimit(4);
-        clahe.setTilesGridSize(new opencv_core.Size(5, 5));
-
-        clahe.apply(srcArry, dstArry);
-
-
-//
-//        if (srcArry.channels() >= 3) {
-//            // READ RGB color image and convert it to Lab
-//            Mat channel = new Mat();
-//            cvtColor(srcArry, dstArry, COLOR_BGR2Lab);
-//
-//            // Extract the L channel
-//            extractChannel(dstArry, channel, 0);
-//
-//            // apply the CLAHE algorithm to the L channel
-//            CLAHE clahe = createCLAHE();
-//            clahe.setClipLimit(4);
-//            clahe.apply(channel, channel);
-//
-//            // Merge the the color planes back into an Lab image
-//            insertChannel(channel, dstArry, 0);
-//
-//            // convert back to RGB
-//            cvtColor(dstArry, dstArry, COLOR_Lab2BGR);
-//
-//            // Temporary Mat not reused, so release from memory.
-//            channel.release();
-//        }
-
-
     }
 
 

@@ -3,6 +3,7 @@ package ru.sstu.vak.emotionRecognition.uiGame;
 import org.bytedeco.javacv.FrameGrabber;
 import ru.sstu.vak.emotionRecognition.common.Emotion;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.EmotionRecognizer;
 
 import java.awt.image.BufferedImage;
 import java.util.Timer;
@@ -17,6 +18,8 @@ public class GameCore {
 
     private int emotionAchievedTime = 1000; // ms
 
+
+    private int[] emotionOrder = new int[]{3, 5, 4, 6, 1, 0, 2};
 
     private int awaitEmotion = 0;
 
@@ -34,7 +37,7 @@ public class GameCore {
 
     private String pathToVid;
 
-    private EmotionRecognizerGame emotionRecognizer;
+    private EmotionRecognizer emotionRecognizerGame;
 
 
     private Callback callback;
@@ -42,9 +45,9 @@ public class GameCore {
     private FrameInfo currentFrameInfo;
 
 
-    public GameCore(String pathToVid, EmotionRecognizerGame emotionRecognizer) {
+    public GameCore(String pathToVid, EmotionRecognizer emotionRecognizerGame) {
         this.pathToVid = pathToVid;
-        this.emotionRecognizer = emotionRecognizer;
+        this.emotionRecognizerGame = emotionRecognizerGame;
     }
 
     public interface Callback {
@@ -76,9 +79,23 @@ public class GameCore {
         this.emotionAchievedTime = ms;
     }
 
-    public int getAwaitEmotionId() {
-        return awaitEmotion;
+
+    public int getFirstAwaitEmotion() {
+        return emotionOrder[0];
     }
+
+    public int getLastAwaitEmotion() {
+        return emotionOrder[emotionOrder.length-1];
+    }
+
+    public int getNextAwaitEmotion() {
+        return emotionOrder[awaitEmotion+1];
+    }
+
+    public int getAwaitEmotionId() {
+        return emotionOrder[awaitEmotion];
+    }
+
 
     public void start(Callback callback) {
         this.callback = callback;
@@ -88,7 +105,7 @@ public class GameCore {
             @Override
             public void run() {
                 try {
-                    emotionRecognizer.processVideo(pathToVid, frameInfo -> {
+                    emotionRecognizerGame.processVideo(pathToVid, frameInfo -> {
                         currentFrameInfo = frameInfo;
                         if (!isStart) {
                             callback.onStart();
@@ -109,7 +126,7 @@ public class GameCore {
                         callback.onFrameProcessed(frameInfo.getProcessedImage());
 
                         if (frameInfo.getVideoFaces() != null && emotionTimer == null &&
-                                frameInfo.getVideoFaces().get(0).getEmotion().getEmotionId() == awaitEmotion) {
+                                frameInfo.getVideoFaces().get(0).getEmotion().getEmotionId() == emotionOrder[awaitEmotion]) {
 
                             callback.onCorrectEmotion(frameInfo.getVideoFaces().get(0).getEmotion());
                             emotionTimer = new Timer();
@@ -122,14 +139,15 @@ public class GameCore {
 
                                     if (awaitEmotion == 6) {
                                         stop();
+                                    }else{
+                                        awaitEmotion++;
                                     }
-                                    awaitEmotion++;
                                 }
                             }, emotionAchievedTime);
                         }
 
                         if (emotionTimer != null && (frameInfo.getVideoFaces() == null ||
-                                frameInfo.getVideoFaces().get(0).getEmotion().getEmotionId() != awaitEmotion)) {
+                                frameInfo.getVideoFaces().get(0).getEmotion().getEmotionId() != emotionOrder[awaitEmotion])) {
                             callback.onEmotionFailed();
                             emotionTimer.cancel();
                             emotionTimer = null;
@@ -144,7 +162,7 @@ public class GameCore {
     }
 
     public void stop() {
-        emotionRecognizer.setOnStopListener(videoInfo -> {
+        emotionRecognizerGame.setOnStopListener(videoInfo -> {
             if (beforeStartTimer != null) {
                 beforeStartTimer.cancel();
                 beforeStartTimer = null;
@@ -162,11 +180,11 @@ public class GameCore {
             awaitEmotion = 0;
             isStart = false;
         });
-        emotionRecognizer.stop();
+        emotionRecognizerGame.stop();
     }
 
     public boolean isRun() {
-        return emotionRecognizer.isRun();
+        return emotionRecognizerGame.isRun();
     }
 
 

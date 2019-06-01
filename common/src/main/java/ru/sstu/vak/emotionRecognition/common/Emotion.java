@@ -9,13 +9,13 @@ import java.awt.*;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Emotion {
 
-    HAPPY(0),
-    SAD(1),
-    NEUTRAL(2),
-    SURPRISE(3),
-    DISGUST(4),
-    ANGER(5),
-    FEAR(6);
+    ANGER(0),
+    DISGUST(1),
+    FEAR(2),
+    HAPPY(3),
+    NEUTRAL(4),
+    SAD(5),
+    SURPRISE(6);
 
     private int emotionId;
     private double probability;

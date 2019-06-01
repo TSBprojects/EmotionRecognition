@@ -28,6 +28,7 @@ import ru.sstu.vak.emotionRecognition.graphicPrep.iterators.frameIterator.FrameI
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.DataFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.EmotionRecognizer;
 import ru.sstu.vak.emotionRecognition.uiGame.EmotionRecognizerGame;
 import ru.sstu.vak.emotionRecognition.uiGame.GameCore;
 
@@ -184,7 +185,7 @@ public class GameController {
     private Stage currentStage;
 
 
-    private EmotionRecognizerGame emotionRecognizer;
+    private EmotionRecognizer emotionRecognizer;
 
     private GameCore gameCore;
 
@@ -254,9 +255,8 @@ public class GameController {
                     getEmotionCell(emId).emotionBackgr
                             .setStyle("-fx-background-color: #00FF26;");
 
-                    if (emId < 6) {
-                        emId++;
-                        getEmotionCell(emId).emotionBackgr
+                    if (emId != gameCore.getLastAwaitEmotion()) {
+                        getEmotionCell(gameCore.getNextAwaitEmotion()).emotionBackgr
                                 .setStyle("-fx-background-color: yellow;");
                     }
 
@@ -294,7 +294,7 @@ public class GameController {
                         resetVideoView();
                         String message;
                         String style;
-                        if (emId == 7) {
+                        if (emId == gameCore.getLastAwaitEmotion()) {
                             message = "Вы выиграли!";
                             style = "-fx-text-fill: #2DD81E; -fx-alignment: center;";
                             fireworkImage1.setVisible(true);
@@ -592,20 +592,20 @@ public class GameController {
 
     private EmotionCell getEmotionCell(int id) {
         switch (id) {
-            case 5:
-                return new EmotionCell(angryBackgr, angryText, angryFaceImage);
-            case 4:
-                return new EmotionCell(disgustBackgr, disgustText, disgustFaceImage);
-            case 6:
-                return new EmotionCell(fearBackgr, fearText, fearFaceImage);
             case 0:
-                return new EmotionCell(happyBackgr, happyText, happyFaceImage);
+                return new EmotionCell(angryBackgr, angryText, angryFaceImage);
             case 1:
-                return new EmotionCell(sadBackgr, sadText, sadFaceImage);
-            case 3:
-                return new EmotionCell(surpriseBackgr, surpriseText, surpriseFaceImage);
+                return new EmotionCell(disgustBackgr, disgustText, disgustFaceImage);
             case 2:
+                return new EmotionCell(fearBackgr, fearText, fearFaceImage);
+            case 3:
+                return new EmotionCell(happyBackgr, happyText, happyFaceImage);
+            case 4:
                 return new EmotionCell(neutralBackgr, neutralText, neutralFaceImage);
+            case 5:
+                return new EmotionCell(sadBackgr, sadText, sadFaceImage);
+            case 6:
+                return new EmotionCell(surpriseBackgr, surpriseText, surpriseFaceImage);
 
             default:
                 throw new UnsupportedOperationException("Unknown or not supported emotion with id: " + id);
