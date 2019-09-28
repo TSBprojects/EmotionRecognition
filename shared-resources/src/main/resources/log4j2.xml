@@ -20,6 +20,10 @@
             <DefaultRolloverStrategy max="1"/>
         </RollingFile>
 
+        <Async name="AsyncRollingFile">
+            <AppenderRef ref="RollingFile"/>
+        </Async>
+
     </Appenders>
     <Loggers>
         <Logger name="ru.sstu.vak.emotionRecognition" level="info" additivity="false">
