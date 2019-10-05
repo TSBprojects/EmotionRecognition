@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionRecognition.uiGame;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.impl;
 
 
 import org.apache.logging.log4j.LogManager;
@@ -15,7 +15,6 @@ import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageConverter
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.VideoFrame;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.impl.EmotionRecognizerBase;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
