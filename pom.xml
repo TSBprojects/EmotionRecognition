@@ -18,6 +18,7 @@
         <module>identify-emotion</module>
         <module>cnn</module>
         <module>cnn-train</module>
+        <module>ui-cnn-train</module>
         <module>graphic-prep</module>
         <module>face-detector</module>
         <module>common</module>

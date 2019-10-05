@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.Tab?>
@@ -9,15 +10,15 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="488.0" prefWidth="931.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionRecognition.ui.gui.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="488.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionRecognition.ui.gui.MainController">
    <children>
-      <TabPane layoutX="14.0" layoutY="14.0" prefHeight="513.0" prefWidth="931.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <TabPane layoutX="14.0" layoutY="14.0" prefHeight="488.0" prefWidth="470.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <tabs>
           <Tab text="Демонстрация">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="474.0" prefWidth="931.0">
                      <children>
-                        <AnchorPane layoutX="22.0" layoutY="55.0" prefHeight="300.0" prefWidth="400.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;">
+                        <AnchorPane layoutX="24.0" layoutY="89.0" prefHeight="300.0" prefWidth="400.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;">
                            <children>
                               <ImageView fx:id="videoImageView" fitHeight="300.0" fitWidth="400.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <image>
@@ -26,45 +27,14 @@
                               </ImageView>
                            </children>
                         </AnchorPane>
-                        <Button fx:id="startVideoBtn" layoutX="22.0" layoutY="384.0" mnemonicParsing="false" onAction="#startVideo" prefHeight="25.0" prefWidth="95.0" text="Только видео" />
-                        <Button fx:id="startRcognVideoBtn" layoutX="127.0" layoutY="384.0" mnemonicParsing="false" onAction="#startRecognVideo" prefHeight="25.0" prefWidth="163.0" text="Видео с распознаванием" />
-                        <Button fx:id="screenshotBtn" layoutX="23.0" layoutY="417.0" mnemonicParsing="false" onAction="#takeScreenshot" prefHeight="25.0" prefWidth="343.0" text="Скриншот" />
-                        <AnchorPane layoutX="490.0" layoutY="55.0" maxHeight="320.0" maxWidth="420.0" minHeight="320.0" minWidth="420.0" prefHeight="320.0" prefWidth="420.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;" AnchorPane.rightAnchor="21.0">
-                           <children>
-                              <ImageView fx:id="screenImageView" fitHeight="300.0" fitWidth="400.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <image>
-                                    <Image url="@image/videoPlaceHolder.png" />
-                                 </image>
-                              </ImageView>
-                           </children>
-                        </AnchorPane>
-                        <Button fx:id="recognScreenBtn" layoutX="490.0" layoutY="384.0" mnemonicParsing="false" onAction="#recognizeScreenshot" prefHeight="58.0" prefWidth="181.0" text="Распознать" AnchorPane.rightAnchor="260.0" />
-                        <Button fx:id="stopVideoBtn" layoutX="300.0" layoutY="384.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="66.0" text="Стоп" />
-                        <AnchorPane layoutX="384.0" layoutY="384.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;">
-                           <children>
-                              <ImageView fx:id="faceFromVideo" fitHeight="48.0" fitWidth="48.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <image>
-                                    <Image url="@image/videoPlaceHolderForFace.png" />
-                                 </image>
-                              </ImageView>
-                           </children>
-                        </AnchorPane>
-                        <AnchorPane layoutX="852.0" layoutY="384.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;" AnchorPane.rightAnchor="21.0">
-                           <children>
-                              <ImageView fx:id="faceFromScreen" fitHeight="48.0" fitWidth="48.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <image>
-                                    <Image url="@image/videoPlaceHolderForFace.png" />
-                                 </image>
-                              </ImageView>
-                           </children>
-                        </AnchorPane>
-                        <TextField fx:id="imagePath" disable="true" layoutX="490.0" layoutY="21.0" prefHeight="25.0" prefWidth="337.0" promptText="Путь к изображению" AnchorPane.rightAnchor="104.0" />
-                        <Button fx:id="browseImageBtn" layoutX="835.0" layoutY="21.0" mnemonicParsing="false" onAction="#browseImage" prefHeight="25.0" prefWidth="75.0" text="Обзор" AnchorPane.rightAnchor="21.0" />
-                        <Button fx:id="saveImageBtn" layoutX="768.0" layoutY="384.0" mnemonicParsing="false" onAction="#saveScreen" prefHeight="58.0" prefWidth="75.0" text="Сохранить" AnchorPane.rightAnchor="88.0" />
-                        <ProgressBar fx:id="recognImageProgressBar" layoutX="490.0" layoutY="384.0" prefHeight="59.0" prefWidth="181.0" visible="false" AnchorPane.rightAnchor="260.0" />
-                        <ProgressBar fx:id="startVideoProgressBar" layoutX="22.0" layoutY="384.0" prefHeight="25.0" prefWidth="344.0" visible="false" />
-                        <TextField fx:id="videoPath" layoutX="22.0" layoutY="21.0" prefHeight="25.0" prefWidth="421.0" promptText="ID камеры | Путь к камере | Путь к файлу" />
-                        <Button fx:id="openImageBtn" layoutX="682.0" layoutY="384.0" mnemonicParsing="false" onAction="#openScreen" prefHeight="58.0" prefWidth="75.0" text="Открыть" AnchorPane.rightAnchor="174.0" />
+                        <Button fx:id="startRcognVideoBtn" layoutX="23.0" layoutY="420.0" mnemonicParsing="false" onAction="#startRecognVideo" prefHeight="25.0" prefWidth="200.0" text="Старт" />
+                        <Button fx:id="stopVideoBtn" layoutX="245.0" layoutY="420.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="200.0" text="Стоп" />
+                        <ProgressBar fx:id="startVideoProgressBar" layoutX="23.0" layoutY="420.0" prefHeight="25.0" prefWidth="422.0" visible="false">
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets></ProgressBar>
+                        <TextField fx:id="videoPath" layoutX="23.0" layoutY="21.0" prefHeight="25.0" prefWidth="421.0" promptText="ID камеры" />
+                        <TextField fx:id="serverAddressPath" disable="true" layoutX="24.0" layoutY="55.0" prefHeight="25.0" prefWidth="421.0" promptText="адрес сервера" />
                      </children>
                   </AnchorPane>
             </content>

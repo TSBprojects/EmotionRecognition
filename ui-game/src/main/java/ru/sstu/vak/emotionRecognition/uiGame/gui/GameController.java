@@ -29,7 +29,7 @@ import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.DataFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.EmotionRecognizer;
-import ru.sstu.vak.emotionRecognition.uiGame.EmotionRecognizerGame;
+import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.impl.EmotionRecognizerGame;
 import ru.sstu.vak.emotionRecognition.uiGame.GameCore;
 
 import java.awt.image.BufferedImage;

@@ -29,8 +29,8 @@ public class Main extends Application {
         mainController.setParameters(parameters);
 
         primaryStage.getIcons().add(new Image("image/face-ico.png"));
-        primaryStage.setTitle("Emotion recognizer");
-        primaryStage.setScene(new Scene(root, 931, 490));
+        primaryStage.setTitle("Emotional state detector");
+        primaryStage.setScene(new Scene(root, 470, 500));
         primaryStage.show();
     }
 

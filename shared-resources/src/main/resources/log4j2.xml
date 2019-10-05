@@ -27,11 +27,11 @@
     </Appenders>
     <Loggers>
         <Logger name="ru.sstu.vak.emotionRecognition" level="info" additivity="false">
-            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="AsyncRollingFile"/>
             <!--<AppenderRef ref="Console" />-->
         </Logger>
         <Logger name="ru.sstu.vak.emotionRecognition.cnnTrain" level="info" additivity="false">
-            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="AsyncRollingFile"/>
             <AppenderRef ref="Console" />
         </Logger>
         <!-- <Root level="trace">-->

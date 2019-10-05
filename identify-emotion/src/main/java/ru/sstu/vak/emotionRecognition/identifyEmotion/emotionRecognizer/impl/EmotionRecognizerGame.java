@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionRecognition.uiGame;
+package ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.impl;
 
 
 import org.apache.logging.log4j.LogManager;
@@ -15,7 +15,6 @@ import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageConverter
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.VideoFrame;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl.FrameInfo;
-import ru.sstu.vak.emotionRecognition.identifyEmotion.emotionRecognizer.impl.EmotionRecognizerBase;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -59,7 +58,6 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
 
         for (Map.Entry<Rect, Mat> entry : faces.entrySet()) {
             Rect rect = entry.getKey();
-
             try {
                 VideoFace.Location videoLocation = new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
                 Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
@@ -81,18 +79,14 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
                 throwException(e);
             }
         }
-        videoFacesList.add(new VideoFace(maxEmotion, maxLocation));
 
-        FrameInfo frameInfo;
-        if (maxEmotion == null) {
-            frameInfo = new FrameInfo(frames.size(), buffFrame, null);
-        } else {
-            frameInfo = new FrameInfo(frames.size(), buffFrame, videoFacesList);
+        if (maxEmotion != null) {
+            videoFacesList.add(new VideoFace(maxEmotion, maxLocation));
         }
 
-        VideoFrame videoFrame = new VideoFrame(frames.size(), videoFacesList);
-        frames.add(videoFrame);
-        return frameInfo;
+        frames.add(new VideoFrame(frames.size(), videoFacesList));
+
+        return new FrameInfo(frames.size(), buffFrame, videoFacesList);
     }
 
 }
