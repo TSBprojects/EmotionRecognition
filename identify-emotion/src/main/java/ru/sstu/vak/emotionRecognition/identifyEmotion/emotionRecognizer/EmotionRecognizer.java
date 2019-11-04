@@ -44,10 +44,6 @@ public interface EmotionRecognizer {
     void stop();
 
 
-    void setBBoxThickness(int boundingBoxBorderThickness);
-
-    void setBBoxTopPaneHeight(int boundingBoxTopPaneHeight);
-
     void setOnExceptionListener(FrameIterator.ExceptionListener exceptionListener);
 
     void setOnStopListener(StopListener stopListener);

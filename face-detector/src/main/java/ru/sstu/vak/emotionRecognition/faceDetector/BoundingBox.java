@@ -8,6 +8,7 @@ import ru.sstu.vak.emotionRecognition.common.Emotion;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.function.Function;
 
 public class BoundingBox {
 
@@ -17,10 +18,22 @@ public class BoundingBox {
     private static final String FONT_NAME = "Consolas";
     private static final double FONT_HEIGHT_COEFFICIENT = 0.33;
     private static final double FONT_WIDTH_COEFFICIENT = 0.27;
+    private static final int BORDER_THICKNESS_MIN = 2;
+    private static final int BB_TOP_PANE_HEIGHT_MIN = 20;
     private static final int EDGE_INDENT = 10;
+    private static final Function<Integer, Double> BORDER_THICKNESS_COEFFICIENT = rectWidth -> rectWidth / 50.0 + 2;
+    private static final Function<Integer, Double> BB_TOP_PANE_HEIGHT_COEFFICIENT = rectWidth -> rectWidth / 6.0 + 10;
 
-    public static void draw(BufferedImage image, Rect rect, Emotion emotion, int borderThickness, int topPaneHeight) {
+
+    public static void draw(BufferedImage image, Rect rect, Emotion emotion) {
         log.debug("Draw rectangle around the face...");
+
+        double scaledBorderThickness = BORDER_THICKNESS_COEFFICIENT.apply(rect.width());
+        double scaledTopPaneHeight = BB_TOP_PANE_HEIGHT_COEFFICIENT.apply(rect.width());
+
+        int borderThickness = scaledBorderThickness < BORDER_THICKNESS_MIN ? BORDER_THICKNESS_MIN : (int) scaledBorderThickness;
+        int topPaneHeight = scaledTopPaneHeight < BB_TOP_PANE_HEIGHT_MIN ? BB_TOP_PANE_HEIGHT_MIN : (int) scaledTopPaneHeight;
+
         Graphics2D g2 = (Graphics2D) image.getGraphics();
         g2.setColor(emotion.getColor());
         g2.setStroke(new BasicStroke(borderThickness));

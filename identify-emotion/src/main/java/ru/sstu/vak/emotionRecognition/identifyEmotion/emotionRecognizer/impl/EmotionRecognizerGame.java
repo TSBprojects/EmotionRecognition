@@ -66,7 +66,7 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
                     videoNetInputListener.onNextFace(preparedFace);
                 }
                 Emotion emotion = feedForwardCNN.predict(preparedFace);
-                BoundingBox.draw(buffFrame, rect, emotion, boundingBoxBorderThickness, boundingBoxTopPaneHeight);
+                BoundingBox.draw(buffFrame, rect, emotion);
 
                 if (rect.size().area() > maxSize.area()) {
                     maxSize = rect.size();

@@ -49,9 +49,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     protected static final String PROCESSED_IMAGE_POSTFIX = "-processed";
     protected static final String PROCESSED_IMAGE_FACE_POSTFIX = "-face";
 
-    protected int boundingBoxBorderThickness;
-    protected int boundingBoxTopPaneHeight;
-
     private ObjectMapper toJson;
     private FileOutputStream fileOutputStream;
 
@@ -69,8 +66,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
 
 
     public EmotionRecognizerBase(String modelPath) throws IOException {
-        this.boundingBoxBorderThickness = 5;
-        this.boundingBoxTopPaneHeight = 40;
         this.frameIterator = new FrameIteratorBase();
         this.haarFaceDetector = new HaarFaceDetector();
         this.feedForwardCNN = new FeedForwardCNN(modelPath);
@@ -115,7 +110,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
                     imageNetInputListener.onNextFace(preparedFace.clone());
                 }
                 Emotion emotion = feedForwardCNN.predict(preparedFace);
-                BoundingBox.draw(image, rect, emotion, boundingBoxBorderThickness, boundingBoxTopPaneHeight);
+                BoundingBox.draw(image, rect, emotion);
                 imageFaceList.add(new ImageFace(emotion, faceLocation, faceImage));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
@@ -195,17 +190,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
-    @Override
-    public void setBBoxThickness(int boundingBoxBorderThickness) {
-        this.boundingBoxBorderThickness = boundingBoxBorderThickness;
-    }
-
-    @Override
-    public void setBBoxTopPaneHeight(int boundingBoxTopPaneHeight) {
-        this.boundingBoxTopPaneHeight = boundingBoxTopPaneHeight;
-    }
-
-
     public void setOnExceptionListener(FrameIterator.ExceptionListener exceptionListener) {
         this.onExceptionListener = exceptionListener;
     }
@@ -249,7 +233,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
                     videoNetInputListener.onNextFace(preparedFace);
                 }
                 Emotion emotion = feedForwardCNN.predict(preparedFace);
-                BoundingBox.draw(image, rect, emotion, boundingBoxBorderThickness, boundingBoxTopPaneHeight);
+                BoundingBox.draw(image, rect, emotion);
                 videoFacesList.add(new VideoFace(emotion, faceLocation));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
