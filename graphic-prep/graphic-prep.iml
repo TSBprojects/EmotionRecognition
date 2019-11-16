@@ -49,6 +49,7 @@
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="library" name="Maven: net.ericaro:neoitertools:1.0.0" level="project" />
     <orderEntry type="module" module-name="shared-resources" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-nop:1.7.26" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.11.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-core:2.11.0" level="project" />
   </component>

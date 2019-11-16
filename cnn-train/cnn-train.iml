@@ -243,7 +243,8 @@
     <orderEntry type="module" module-name="cnn" />
     <orderEntry type="module" module-name="graphic-prep" />
     <orderEntry type="module" module-name="common" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.10.0.pr3" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.10.1" level="project" />
+    <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.18.10" level="project" />
     <orderEntry type="library" name="Maven: org.nd4j:nd4j-native-platform:1.0.0-beta4" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco:openblas-platform:0.3.5-1.5" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco:openblas:0.3.5-1.5" level="project" />
@@ -284,9 +285,9 @@
     <orderEntry type="library" name="Maven: org.nd4j:nd4j-native:windows-x86_64:1.0.0-beta4" level="project" />
     <orderEntry type="library" name="Maven: org.nd4j:nd4j-native:linux-ppc64le:1.0.0-beta4" level="project" />
     <orderEntry type="library" name="Maven: org.nd4j:nd4j-native:linux-armhf:1.0.0-beta4" level="project" />
-    <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.18.10" level="project" />
     <orderEntry type="module" module-name="face-detector" />
     <orderEntry type="module" module-name="shared-resources" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-nop:1.7.26" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.11.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-core:2.11.0" level="project" />
   </component>

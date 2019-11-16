@@ -14,16 +14,25 @@ public class BoundingBox {
 
     private static final Logger log = LogManager.getLogger(BoundingBox.class.getName());
 
+    private static double FONT_WIDTH_COEFFICIENT;
+
     private static final int FONT_STYLE = Font.BOLD;
     private static final String FONT_NAME = "Consolas";
     private static final double FONT_HEIGHT_COEFFICIENT = 0.33;
-    private static final double FONT_WIDTH_COEFFICIENT = 0.27;
     private static final int BORDER_THICKNESS_MIN = 2;
     private static final int BB_TOP_PANE_HEIGHT_MIN = 20;
     private static final int EDGE_INDENT = 10;
     private static final Function<Integer, Double> BORDER_THICKNESS_COEFFICIENT = rectWidth -> rectWidth / 50.0 + 2;
     private static final Function<Integer, Double> BB_TOP_PANE_HEIGHT_COEFFICIENT = rectWidth -> rectWidth / 6.0 + 10;
 
+
+    static {
+        if (System.getProperty("os.name").contains("Windows")) {
+            FONT_WIDTH_COEFFICIENT = 0.27;
+        } else {
+            FONT_WIDTH_COEFFICIENT = 0.39;
+        }
+    }
 
     public static void draw(BufferedImage image, Rect rect, Emotion emotion) {
         log.debug("Draw rectangle around the face...");
