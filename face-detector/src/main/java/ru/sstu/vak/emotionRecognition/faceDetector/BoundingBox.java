@@ -30,7 +30,7 @@ public class BoundingBox {
         if (System.getProperty("os.name").contains("Windows")) {
             FONT_WIDTH_COEFFICIENT = 0.27;
         } else {
-            FONT_WIDTH_COEFFICIENT = 0.39;
+            FONT_WIDTH_COEFFICIENT = 0.38;
         }
     }
 

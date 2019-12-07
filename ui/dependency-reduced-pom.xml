@@ -51,7 +51,7 @@
     <profile>
       <id>win-x86_64-cpu</id>
       <build>
-        <finalName>${artifactId}-win-x86_64-cpu</finalName>
+        <finalName>${project.artifactId}-win-x86_64-cpu</finalName>
         <plugins>
           <plugin>
             <artifactId>maven-shade-plugin</artifactId>
@@ -78,7 +78,7 @@
     <profile>
       <id>win-x86_64-cuda</id>
       <build>
-        <finalName>${artifactId}-win-x86_64-cuda</finalName>
+        <finalName>${project.artifactId}-win-x86_64-cuda</finalName>
         <plugins>
           <plugin>
             <artifactId>maven-shade-plugin</artifactId>
@@ -105,7 +105,7 @@
     <profile>
       <id>linux-x86_64-cpu</id>
       <build>
-        <finalName>${artifactId}-linux-x86_64-cpu</finalName>
+        <finalName>${project.artifactId}-linux-x86_64-cpu</finalName>
         <plugins>
           <plugin>
             <artifactId>maven-shade-plugin</artifactId>
@@ -132,7 +132,7 @@
     <profile>
       <id>linux-x86_64-cuda</id>
       <build>
-        <finalName>${artifactId}-linux-x86_64-cuda</finalName>
+        <finalName>${project.artifactId}-linux-x86_64-cuda</finalName>
         <plugins>
           <plugin>
             <artifactId>maven-shade-plugin</artifactId>
