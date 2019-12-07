@@ -140,4 +140,5 @@ public enum Emotion {
                 ", probability=" + probability +
                 '}';
     }
+
 }

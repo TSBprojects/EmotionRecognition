@@ -37,7 +37,7 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
     @Override
     public synchronized void processVideo(String readFrom, ProcessedFrameListener listener) throws FrameGrabber.Exception {
         log.info("Starting video with emotion recognition...");
-        frameIterator.start(readFrom, frame -> listener.onNextFrame(processedFrame(frame)));
+        frameIterator.start(readFrom, frame -> listener.onNextFrame(new FrameInfo(processedFrame(frame))));
     }
 
 
@@ -63,7 +63,7 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
                 VideoFace.Location videoLocation = new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
                 Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
-                    videoNetInputListener.onNextFace(preparedFace);
+                    videoNetInputListener.onNextFace(preparedFace.clone());
                 }
                 Emotion emotion = feedForwardCNN.predict(preparedFace);
                 BoundingBox.draw(buffFrame, rect, emotion);

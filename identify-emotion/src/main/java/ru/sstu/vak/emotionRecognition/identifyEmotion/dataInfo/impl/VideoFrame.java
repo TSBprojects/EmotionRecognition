@@ -5,6 +5,7 @@ import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.DataInfo;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VideoFrame extends DataInfo {
 
@@ -13,6 +14,13 @@ public class VideoFrame extends DataInfo {
 
     @JsonProperty("faces")
     protected List<VideoFace> videoFaces;
+
+    public VideoFrame(VideoFrame videoFrame) {
+        this.frameIndex = videoFrame.getFrameIndex();
+        this.videoFaces = videoFrame.getVideoFaces().stream()
+                .map(VideoFace::new)
+                .collect(Collectors.toList());
+    }
 
     public VideoFrame(int frameIndex, List<VideoFace> videoFaces) {
         this.frameIndex = frameIndex;
@@ -52,4 +60,5 @@ public class VideoFrame extends DataInfo {
                 ", videoFaces=" + videoFaces +
                 '}';
     }
+
 }

@@ -1,6 +1,7 @@
 package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageCorrector;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.VideoFace;
 
 import java.awt.image.BufferedImage;
@@ -12,9 +13,13 @@ public class FrameInfo extends VideoFrame {
     @JsonIgnore
     private BufferedImage processedImage;
 
+    public FrameInfo(FrameInfo frameInfo) {
+        super(frameInfo);
+        this.processedImage = ImageCorrector.copyBufferedImage(frameInfo.getProcessedImage());
+    }
 
     public FrameInfo(int frameIndex, BufferedImage processedImage, List<VideoFace> videoFaces) {
-        super(frameIndex,videoFaces);
+        super(frameIndex, videoFaces);
         this.processedImage = processedImage;
     }
 

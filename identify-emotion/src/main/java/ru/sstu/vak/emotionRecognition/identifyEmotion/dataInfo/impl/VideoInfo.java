@@ -4,12 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.DataInfo;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VideoInfo extends DataInfo {
 
     @JsonProperty("frames")
     private List<VideoFrame> frames;
 
+
+    public VideoInfo(VideoInfo videoInfo) {
+        this.frames = videoInfo.getFrames().stream()
+                .map(VideoFrame::new)
+                .collect(Collectors.toList());
+    }
 
     public VideoInfo(List<VideoFrame> frames) {
         this.frames = frames;

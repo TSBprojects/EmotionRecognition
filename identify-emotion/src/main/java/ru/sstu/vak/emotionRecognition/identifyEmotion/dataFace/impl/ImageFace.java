@@ -2,6 +2,7 @@ package ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import ru.sstu.vak.emotionRecognition.common.Emotion;
+import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageCorrector;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.DataFace;
 
 import java.awt.image.BufferedImage;
@@ -10,6 +11,11 @@ public class ImageFace extends DataFace {
 
     @JsonIgnore
     private BufferedImage faceImage;
+
+    public ImageFace(ImageFace imageFace) {
+        super(imageFace.getEmotion(), new Location(imageFace.getLocation()));
+        this.faceImage = ImageCorrector.copyBufferedImage(imageFace.getFaceImage());
+    }
 
     public ImageFace(Emotion emotion, Location location, BufferedImage faceImage) {
         super(emotion, location);
@@ -38,4 +44,5 @@ public class ImageFace extends DataFace {
         result = 31 * result + getFaceImage().hashCode();
         return result;
     }
+
 }

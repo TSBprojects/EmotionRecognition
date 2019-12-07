@@ -2,11 +2,13 @@ package ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import ru.sstu.vak.emotionRecognition.graphicPrep.imageProcessing.ImageCorrector;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace.impl.ImageFace;
 import ru.sstu.vak.emotionRecognition.identifyEmotion.dataInfo.DataInfo;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ImageInfo extends DataInfo {
 
@@ -16,6 +18,13 @@ public class ImageInfo extends DataInfo {
     @JsonProperty("faces")
     private List<ImageFace> imageFaces;
 
+
+    public ImageInfo(ImageInfo imageInfo) {
+        this.processedImage = ImageCorrector.copyBufferedImage(imageInfo.getProcessedImage());
+        this.imageFaces = imageInfo.getImageFaces().stream()
+                .map(ImageFace::new)
+                .collect(Collectors.toList());
+    }
 
     public ImageInfo(BufferedImage processedImage, List<ImageFace> imageFaces) {
         this.processedImage = processedImage;

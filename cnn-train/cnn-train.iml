@@ -11,6 +11,21 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-core:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-tsne:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:nearestneighbor-core:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-datasets:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-modelimport:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-ui-components:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.deeplearning4j:deeplearning4j-cuda-10.0:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-cuda-10.0:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.nd4j:nd4j-cuda-10.0:windows-x86_64:1.0.0-beta4" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:cuda:10.0-7.4-1.5" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:cuda:windows-x86_64:10.0-7.4-1.5" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:cuda-platform:10.0-7.4-1.5" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:cuda:linux-x86_64:10.0-7.4-1.5" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:cuda:linux-ppc64le:10.0-7.4-1.5" level="project" />
+    <orderEntry type="library" name="Maven: org.bytedeco:cuda:macosx-x86_64:10.0-7.4-1.5" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco:javacv-platform:1.4.4" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco:javacv:1.4.4" level="project" />
     <orderEntry type="library" name="Maven: org.bytedeco.javacpp-presets:opencv:4.0.1-1.4.4" level="project" />

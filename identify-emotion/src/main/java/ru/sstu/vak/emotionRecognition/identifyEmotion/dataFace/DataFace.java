@@ -3,6 +3,8 @@ package ru.sstu.vak.emotionRecognition.identifyEmotion.dataFace;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import ru.sstu.vak.emotionRecognition.common.Emotion;
 
+import java.util.Objects;
+
 public abstract class DataFace {
 
     @JsonProperty("emotion")
@@ -11,6 +13,10 @@ public abstract class DataFace {
     @JsonProperty("location")
     private Location location;
 
+    public DataFace(DataFace dataFace) {
+        this.emotion = dataFace.getEmotion();
+        this.location = new Location(dataFace.getLocation());
+    }
 
     public DataFace(Emotion emotion, Location location) {
         this.emotion = emotion;
@@ -26,6 +32,27 @@ public abstract class DataFace {
         return location;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DataFace)) return false;
+        DataFace dataFace = (DataFace) o;
+        return getEmotion() == dataFace.getEmotion() &&
+                getLocation().equals(dataFace.getLocation());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getEmotion(), getLocation());
+    }
+
+    @Override
+    public String toString() {
+        return "DataFace{" +
+                "emotion=" + emotion +
+                ", location=" + location +
+                '}';
+    }
 
     public static class Location {
 
@@ -33,6 +60,13 @@ public abstract class DataFace {
         public int y;
         public int width;
         public int height;
+
+        public Location(Location location) {
+            this.x = location.x;
+            this.y = location.y;
+            this.width = location.width;
+            this.height = location.height;
+        }
 
         public Location(int x, int y, int width, int height) {
             this.x = x;
@@ -74,4 +108,5 @@ public abstract class DataFace {
                     '}';
         }
     }
+
 }
