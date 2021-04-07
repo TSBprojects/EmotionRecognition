@@ -6,7 +6,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.bytedeco.javacv.FrameGrabber;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.FrameInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 
 public class GameCore {

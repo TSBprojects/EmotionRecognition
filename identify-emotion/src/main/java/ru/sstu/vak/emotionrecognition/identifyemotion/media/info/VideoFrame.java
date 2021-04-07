@@ -1,9 +1,9 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.datainfo;
+package ru.sstu.vak.emotionrecognition.identifyemotion.media.info;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.stream.Collectors;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.impl.VideoFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 
 public class VideoFrame implements MediaInfo {
 

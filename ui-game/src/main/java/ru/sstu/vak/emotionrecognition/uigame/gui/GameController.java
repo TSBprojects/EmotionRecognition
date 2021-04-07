@@ -35,9 +35,9 @@ import org.bytedeco.javacpp.opencv_core.Rect;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.DataFace;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.impl.VideoFace;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.FrameInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.MediaFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.impl.EmotionRecognizerGame;
 import ru.sstu.vak.emotionrecognition.uigame.GameCore;
@@ -456,7 +456,7 @@ public class GameController {
 
     private void faceImageFly(FrameInfo frameInfo) {
         VideoFace videoFace = frameInfo.getVideoFaces().get(0);
-        DataFace.Location faceLocation = videoFace.getLocation();
+        MediaFace.Location faceLocation = videoFace.getLocation();
         Emotion faceEmotion = videoFace.getEmotion();
         Image faceImage = ImageConverter.toJavaFXImage(
                 ImageConverter.toMat(frameInfo.getProcessedImage())

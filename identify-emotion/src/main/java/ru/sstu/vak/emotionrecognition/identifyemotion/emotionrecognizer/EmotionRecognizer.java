@@ -6,9 +6,9 @@ import java.nio.file.Path;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacv.FrameGrabber;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.FrameInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.ImageInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.VideoInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.ImageInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoInfo;
 
 public interface EmotionRecognizer {
 

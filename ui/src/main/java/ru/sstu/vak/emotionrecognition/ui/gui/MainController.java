@@ -35,7 +35,7 @@ import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageCorrector;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.impl.FrameIteratorBase;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.ImageInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.ImageInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.impl.EmotionRecognizerBase;
 

@@ -19,9 +19,9 @@ import ru.sstu.vak.emotionrecognition.common.Emotion;
 import ru.sstu.vak.emotionrecognition.facedetector.BoundingBox;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.FacePreProcessing;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.impl.VideoFace;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.FrameInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.VideoFrame;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 
 public class EmotionRecognizerGame extends EmotionRecognizerBase {
 

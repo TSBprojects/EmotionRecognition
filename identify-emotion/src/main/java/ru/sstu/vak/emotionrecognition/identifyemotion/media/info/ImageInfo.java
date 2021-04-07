@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.datainfo;
+package ru.sstu.vak.emotionrecognition.identifyemotion.media.info;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.stream.Collectors;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageCorrector;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.impl.ImageFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.ImageFace;
 
 public class ImageInfo implements MediaInfo {
 

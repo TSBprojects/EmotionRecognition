@@ -30,12 +30,12 @@ import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.FacePreProcess
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.impl.FrameIteratorBase;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.impl.ImageFace;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.impl.VideoFace;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.FrameInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.ImageInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.VideoFrame;
-import ru.sstu.vak.emotionrecognition.identifyemotion.datainfo.VideoInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.ImageFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.ImageInfo;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 
 public class EmotionRecognizerBase implements EmotionRecognizer {

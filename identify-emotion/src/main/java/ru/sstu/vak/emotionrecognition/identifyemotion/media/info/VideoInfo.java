@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.datainfo;
+package ru.sstu.vak.emotionrecognition.identifyemotion.media.info;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;

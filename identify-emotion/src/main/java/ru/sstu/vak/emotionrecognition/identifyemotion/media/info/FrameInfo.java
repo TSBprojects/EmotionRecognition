@@ -1,11 +1,11 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.datainfo;
+package ru.sstu.vak.emotionrecognition.identifyemotion.media.info;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Objects;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageCorrector;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.impl.VideoFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 
 public class FrameInfo extends VideoFrame {
 

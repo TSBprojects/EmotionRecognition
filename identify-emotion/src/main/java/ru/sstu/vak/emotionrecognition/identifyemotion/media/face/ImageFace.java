@@ -1,12 +1,11 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.dataface.impl;
+package ru.sstu.vak.emotionrecognition.identifyemotion.media.face;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.awt.image.BufferedImage;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageCorrector;
-import ru.sstu.vak.emotionrecognition.identifyemotion.dataface.DataFace;
 
-public class ImageFace extends DataFace {
+public class ImageFace extends MediaFace {
 
     @JsonIgnore
     private BufferedImage faceImage;

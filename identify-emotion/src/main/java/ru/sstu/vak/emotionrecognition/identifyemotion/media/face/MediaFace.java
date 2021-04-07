@@ -1,10 +1,10 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.dataface;
+package ru.sstu.vak.emotionrecognition.identifyemotion.media.face;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 
-public abstract class DataFace {
+public abstract class MediaFace {
 
     @JsonProperty("emotion")
     private Emotion emotion;
@@ -12,12 +12,12 @@ public abstract class DataFace {
     @JsonProperty("location")
     private Location location;
 
-    public DataFace(DataFace dataFace) {
-        this.emotion = dataFace.getEmotion();
-        this.location = new Location(dataFace.getLocation());
+    public MediaFace(MediaFace mediaFace) {
+        this.emotion = mediaFace.getEmotion();
+        this.location = new Location(mediaFace.getLocation());
     }
 
-    public DataFace(Emotion emotion, Location location) {
+    public MediaFace(Emotion emotion, Location location) {
         this.emotion = emotion;
         this.location = location;
     }
@@ -34,10 +34,10 @@ public abstract class DataFace {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DataFace)) return false;
-        DataFace dataFace = (DataFace) o;
-        return getEmotion() == dataFace.getEmotion() &&
-                getLocation().equals(dataFace.getLocation());
+        if (!(o instanceof MediaFace)) return false;
+        MediaFace mediaFace = (MediaFace) o;
+        return getEmotion() == mediaFace.getEmotion() &&
+                getLocation().equals(mediaFace.getLocation());
     }
 
     @Override
