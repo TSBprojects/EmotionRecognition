@@ -12,7 +12,7 @@
             <FileName>logs.log</FileName>
             <FilePattern>logs-%d{yyyy-MM-dd-hh}-%i.log.zip</FilePattern>
             <PatternLayout>
-                <Pattern>[%-5p] [%d{yyyy/MM/dd HH:mm:ss.SSS}] [%t] %C{1}.%M()(%F:%L) - %m%n</Pattern>
+                <Pattern>[%-5level] [%d{yyyy/MM/dd HH:mm:ss.SSS}] [%t] %logger{1.} - %m%n</Pattern>
             </PatternLayout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="20Mb"/>
@@ -26,11 +26,11 @@
 
     </Appenders>
     <Loggers>
-        <Logger name="ru.sstu.vak.emotionRecognition" level="info" additivity="false">
+        <Logger name="ru.sstu.vak.emotionrecognition" level="info" additivity="false">
             <AppenderRef ref="AsyncRollingFile"/>
             <!--<AppenderRef ref="Console" />-->
         </Logger>
-        <Logger name="ru.sstu.vak.emotionRecognition.cnnTrain" level="info" additivity="false">
+        <Logger name="ru.sstu.vak.emotionrecognition.cnntrain" level="info" additivity="false">
             <AppenderRef ref="AsyncRollingFile"/>
             <AppenderRef ref="Console" />
         </Logger>
