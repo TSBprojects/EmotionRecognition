@@ -2,29 +2,29 @@ package ru.sstu.vak.emotionrecognition.identifyemotion.media.face;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
-import ru.sstu.vak.emotionrecognition.common.Emotion;
+import ru.sstu.vak.emotionrecognition.common.Prediction;
 
 public abstract class MediaFace {
 
-    @JsonProperty("emotion")
-    private Emotion emotion;
+    @JsonProperty("prediction")
+    private final Prediction prediction;
 
     @JsonProperty("location")
-    private Location location;
+    private final Location location;
 
-    public MediaFace(MediaFace mediaFace) {
-        this.emotion = mediaFace.getEmotion();
+    protected MediaFace(MediaFace mediaFace) {
+        this.prediction = mediaFace.getPrediction();
         this.location = new Location(mediaFace.getLocation());
     }
 
-    public MediaFace(Emotion emotion, Location location) {
-        this.emotion = emotion;
+    protected MediaFace(Prediction prediction, Location location) {
+        this.prediction = prediction;
         this.location = location;
     }
 
 
-    public Emotion getEmotion() {
-        return emotion;
+    public Prediction getPrediction() {
+        return prediction;
     }
 
     public Location getLocation() {
@@ -36,29 +36,29 @@ public abstract class MediaFace {
         if (this == o) return true;
         if (!(o instanceof MediaFace)) return false;
         MediaFace mediaFace = (MediaFace) o;
-        return getEmotion() == mediaFace.getEmotion() &&
+        return getPrediction() == mediaFace.getPrediction() &&
                 getLocation().equals(mediaFace.getLocation());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getEmotion(), getLocation());
+        return Objects.hash(getPrediction(), getLocation());
     }
 
     @Override
     public String toString() {
         return "DataFace{" +
-                "emotion=" + emotion +
+                "prediction=" + prediction +
                 ", location=" + location +
                 '}';
     }
 
     public static class Location {
 
-        public int x;
-        public int y;
-        public int width;
-        public int height;
+        public final int x;
+        public final int y;
+        public final int width;
+        public final int height;
 
         public Location(Location location) {
             this.x = location.x;

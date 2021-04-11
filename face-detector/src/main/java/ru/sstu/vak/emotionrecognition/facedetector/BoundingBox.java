@@ -6,17 +6,18 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.function.Function;
+import java.util.function.IntToDoubleFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
+import ru.sstu.vak.emotionrecognition.common.Prediction;
 
 public class BoundingBox {
 
     private static final Logger log = LogManager.getLogger(BoundingBox.class.getName());
 
-    private static double FONT_WIDTH_COEFFICIENT;
+    private static final double FONT_WIDTH_COEFFICIENT;
 
     private static final int FONT_STYLE = Font.BOLD;
     private static final String FONT_NAME = "Consolas";
@@ -24,9 +25,12 @@ public class BoundingBox {
     private static final int BORDER_THICKNESS_MIN = 2;
     private static final int BB_TOP_PANE_HEIGHT_MIN = 20;
     private static final int EDGE_INDENT = 10;
-    private static final Function<Integer, Double> BORDER_THICKNESS_COEFFICIENT = rectWidth -> rectWidth / 50.0 + 2;
-    private static final Function<Integer, Double> BB_TOP_PANE_HEIGHT_COEFFICIENT = rectWidth -> rectWidth / 6.0 + 10;
+    private static final IntToDoubleFunction BORDER_THICKNESS_COEFFICIENT = rectWidth -> rectWidth / 50.0 + 2;
+    private static final IntToDoubleFunction BB_TOP_PANE_HEIGHT_COEFFICIENT = rectWidth -> rectWidth / 6.0 + 10;
 
+    private BoundingBox() {
+        throw new AssertionError();
+    }
 
     static {
         if (System.getProperty("os.name").contains("Windows")) {
@@ -36,11 +40,13 @@ public class BoundingBox {
         }
     }
 
-    public static void draw(BufferedImage image, Rect rect, Emotion emotion) {
+    public static void draw(BufferedImage image, Rect rect, Prediction prediction) {
         log.debug("Draw rectangle around the face...");
 
-        double scaledBorderThickness = BORDER_THICKNESS_COEFFICIENT.apply(rect.width());
-        double scaledTopPaneHeight = BB_TOP_PANE_HEIGHT_COEFFICIENT.apply(rect.width());
+        Emotion emotion = prediction.getEmotion();
+
+        double scaledBorderThickness = BORDER_THICKNESS_COEFFICIENT.applyAsDouble(rect.width());
+        double scaledTopPaneHeight = BB_TOP_PANE_HEIGHT_COEFFICIENT.applyAsDouble(rect.width());
 
         int borderThickness = scaledBorderThickness < BORDER_THICKNESS_MIN ? BORDER_THICKNESS_MIN : (int) scaledBorderThickness;
         int topPaneHeight = scaledTopPaneHeight < BB_TOP_PANE_HEIGHT_MIN ? BB_TOP_PANE_HEIGHT_MIN : (int) scaledTopPaneHeight;
@@ -62,7 +68,7 @@ public class BoundingBox {
     private static void drawText(Graphics2D g2, Emotion emotion, Rect rect, int emNameBackHeight) {
         log.debug("Prepare text with emotion to draw...");
 
-        String emotionName = emotion.getValue();
+        String emotionName = emotion.getName();
         final int emotionLength = emotionName.length();
         final int halfBackHeight = emNameBackHeight / 2;
         final int textCenterAlignment = (int) (halfBackHeight * emotionLength * FONT_WIDTH_COEFFICIENT);

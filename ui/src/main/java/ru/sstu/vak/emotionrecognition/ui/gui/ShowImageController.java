@@ -10,6 +10,7 @@ public class ShowImageController {
 
     @FXML
     public void initialize() {
+        // FXML initializer
     }
 
     public void setImage(Image image) {

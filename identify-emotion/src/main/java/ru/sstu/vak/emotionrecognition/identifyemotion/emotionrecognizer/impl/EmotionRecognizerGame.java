@@ -15,7 +15,7 @@ import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import static ru.sstu.vak.emotionrecognition.cnn.FeedForwardCNN.INPUT_HEIGHT;
 import static ru.sstu.vak.emotionrecognition.cnn.FeedForwardCNN.INPUT_WIDTH;
-import ru.sstu.vak.emotionrecognition.common.Emotion;
+import ru.sstu.vak.emotionrecognition.common.Prediction;
 import ru.sstu.vak.emotionrecognition.facedetector.BoundingBox;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.FacePreProcessing;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
@@ -47,7 +47,7 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
 
 
         Size maxSize = new Size(0, 0);
-        Emotion maxEmotion = null;
+        Prediction closestFacePrediction = null;
         VideoFace.Location maxLocation = null;
 
         Mat matImage = ImageConverter.toMat(frame);
@@ -63,12 +63,12 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace.clone());
                 }
-                Emotion emotion = feedForwardCNN.predict(preparedFace);
-                BoundingBox.draw(buffFrame, rect, emotion);
+                Prediction prediction = feedForwardCNN.predict(preparedFace);
+                BoundingBox.draw(buffFrame, rect, prediction);
 
                 if (rect.size().area() > maxSize.area()) {
                     maxSize = rect.size();
-                    maxEmotion = emotion;
+                    closestFacePrediction = prediction;
                     maxLocation = videoLocation;
                 }
 
@@ -78,10 +78,10 @@ public class EmotionRecognizerGame extends EmotionRecognizerBase {
                 throwException(e);
             }
         }
-        videoFacesList.add(new VideoFace(maxEmotion, maxLocation));
+        videoFacesList.add(new VideoFace(closestFacePrediction, maxLocation));
 
         FrameInfo frameInfo;
-        if (maxEmotion == null) {
+        if (closestFacePrediction == null) {
             frameInfo = new FrameInfo(frames.size(), buffFrame, null);
         } else {
             frameInfo = new FrameInfo(frames.size(), buffFrame, videoFacesList);

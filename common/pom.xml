@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>common</artifactId>
+    <version>1.1</version>
+
     <build>
         <plugins>
             <plugin>

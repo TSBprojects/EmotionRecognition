@@ -43,9 +43,9 @@ public class MainController {
 
     private static final Logger log = LogManager.getLogger(MainController.class.getName());
 
-    private final static Image VIDEO_PLACE_HOLDER = new Image("image/videoPlaceHolder.png");
+    private static final Image VIDEO_PLACE_HOLDER = new Image("image/videoPlaceHolder.png");
 
-    private final static Image VIDEO_PLACE_HOLDER_FOR_FACE = new Image("image/videoPlaceHolderForFace.png");
+    private static final Image VIDEO_PLACE_HOLDER_FOR_FACE = new Image("image/videoPlaceHolderForFace.png");
 
 
     @FXML
@@ -121,27 +121,15 @@ public class MainController {
         }
         tryIt(() -> {
             emotionRecognizer = new EmotionRecognizerBase(modelName);
-            emotionRecognizer.setOnStopListener(videoInfo -> {
-                onStopAction();
-            });
-            emotionRecognizer.setFrameListener(frame -> {
-                currentFrame = frame;
-            });
-            emotionRecognizer.setImageNetInputListener(face -> {
-                Platform.runLater(() -> {
-                    faceFromScreen.setImage(ImageConverter.toJavaFXImage(face));
-                });
-            });
-            emotionRecognizer.setVideoNetInputListener(face -> {
-                Platform.runLater(() -> {
-                    faceFromVideo.setImage(ImageConverter.toJavaFXImage(face));
-                });
-            });
-            emotionRecognizer.setOnExceptionListener(e -> {
-                Platform.runLater(() -> {
-                    showError(e.getMessage());
-                });
-            });
+            emotionRecognizer.setOnStopListener(videoInfo -> onStopAction());
+            emotionRecognizer.setFrameListener(frame -> currentFrame = frame);
+            emotionRecognizer.setImageNetInputListener(face -> Platform.runLater(() ->
+                    faceFromScreen.setImage(ImageConverter.toJavaFXImage(face))
+            ));
+            emotionRecognizer.setVideoNetInputListener(face -> Platform.runLater(() ->
+                    faceFromVideo.setImage(ImageConverter.toJavaFXImage(face))
+            ));
+            emotionRecognizer.setOnExceptionListener(e -> Platform.runLater(() -> showError(e.getMessage())));
         });
     }
 
@@ -161,12 +149,7 @@ public class MainController {
 
             frameIterator = new FrameIteratorBase();
             frameIterator.setOnStopListener(this::onStopAction);
-            frameIterator.setOnExceptionListener(e -> {
-                Platform.runLater(() -> {
-                    showError(e.getMessage());
-                });
-            });
-
+            frameIterator.setOnExceptionListener(e -> Platform.runLater(() -> showError(e.getMessage())));
         });
     }
 

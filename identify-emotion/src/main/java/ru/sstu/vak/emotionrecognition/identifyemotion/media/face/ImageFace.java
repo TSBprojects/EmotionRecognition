@@ -2,21 +2,21 @@ package ru.sstu.vak.emotionrecognition.identifyemotion.media.face;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.awt.image.BufferedImage;
-import ru.sstu.vak.emotionrecognition.common.Emotion;
+import ru.sstu.vak.emotionrecognition.common.Prediction;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageCorrector;
 
 public class ImageFace extends MediaFace {
 
     @JsonIgnore
-    private BufferedImage faceImage;
+    private final BufferedImage faceImage;
 
     public ImageFace(ImageFace imageFace) {
-        super(imageFace.getEmotion(), new Location(imageFace.getLocation()));
+        super(imageFace.getPrediction(), new Location(imageFace.getLocation()));
         this.faceImage = ImageCorrector.copyBufferedImage(imageFace.getFaceImage());
     }
 
-    public ImageFace(Emotion emotion, Location location, BufferedImage faceImage) {
-        super(emotion, location);
+    public ImageFace(Prediction prediction, Location location, BufferedImage faceImage) {
+        super(prediction, location);
         this.faceImage = faceImage;
     }
 

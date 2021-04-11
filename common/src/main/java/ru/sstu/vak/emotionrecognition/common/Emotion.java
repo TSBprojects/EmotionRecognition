@@ -4,74 +4,45 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.awt.Color;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+import static java.util.Arrays.stream;
+import java.util.Map;
+import static java.util.stream.Collectors.toMap;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Emotion {
 
-    ANGER(0),
-    DISGUST(1),
-    FEAR(2),
-    HAPPY(3),
-    NEUTRAL(4),
-    SAD(5),
-    SURPRISE(6);
+    ANGER(0, "ЗЛОСТЬ", new Color(228, 48, 84), WHITE),
+    DISGUST(1, "ОТВРАЩЕНИЕ", new Color(53, 164, 80), WHITE),
+    FEAR(2, "СТРАХ", new Color(159, 120, 186), WHITE),
+    HAPPY(3, "СЧАСТЬЕ", new Color(255, 114, 0), WHITE),
+    NEUTRAL(4, "НЕЙТРАЛЬНЫЙ", new Color(0, 255, 255), BLACK),
+    SAD(5, "ПЕЧАЛЬ", new Color(114, 157, 201), WHITE),
+    SURPRISE(6, "УДИВЛЕНИЕ", new Color(255, 237, 43), BLACK);
 
-    private int emotionId;
-    private double probability;
+    private final int emotionId;
+    private final String name;
+    private final Color color;
+    private final Color textColor;
 
-    Emotion(int index) {
-        this.emotionId = index;
+    private static final Map<Integer, Emotion> map = stream(values()).collect(toMap(Emotion::getEmotionId, e -> e));
+
+    Emotion(int emotionId, String name, Color color, Color textColor) {
+        this.emotionId = emotionId;
+        this.name = name;
+        this.color = color;
+        this.textColor = textColor;
     }
 
     public static Emotion valueOf(int index) {
-        switch (index) {
-            case 0:
-                return ANGER;
-            case 1:
-                return DISGUST;
-            case 2:
-                return FEAR;
-            case 3:
-                return HAPPY;
-            case 4:
-                return NEUTRAL;
-            case 5:
-                return SAD;
-            case 6:
-                return SURPRISE;
+        Emotion emotion = map.get(index);
 
-            default:
-                throw new UnsupportedOperationException("Unknown or not supported emotion with index: " + index);
+        if (emotion == null) {
+            throw new UnsupportedOperationException("Unknown or not supported emotion with index: " + index);
         }
-    }
 
-
-    @JsonProperty("name")
-    public String getValue() {
-        switch (this) {
-            case ANGER:
-                return "ЗЛОСТЬ";
-            case DISGUST:
-                return "ОТВРАЩЕНИЕ";
-            case FEAR:
-                return "СТРАХ";
-            case HAPPY:
-                return "СЧАСТЬЕ";
-            case SAD:
-                return "ПЕЧАЛЬ";
-            case SURPRISE:
-                return "УДИВЛЕНИЕ";
-            case NEUTRAL:
-                return "НЕЙТРАЛЬНЫЙ";
-
-            default:
-                throw new UnsupportedOperationException("Unknown or not supported emotion: " + this);
-        }
-    }
-
-    @JsonProperty("probability")
-    public double getProbability() {
-        return probability;
+        return emotion;
     }
 
     @JsonIgnore
@@ -79,65 +50,26 @@ public enum Emotion {
         return emotionId;
     }
 
+    @JsonProperty("name")
+    public String getName() {
+        return name;
+    }
+
     @JsonIgnore
     public Color getColor() {
-        switch (this) {
-            case ANGER:
-                return new Color(228, 48, 84);
-            case DISGUST:
-                return new Color(53, 164, 80);
-            case FEAR:
-                return new Color(159, 120, 186);
-            case HAPPY:
-                return new Color(255, 114, 0);
-            case SAD:
-                return new Color(114, 157, 201);
-            case SURPRISE:
-                return new Color(255, 237, 43);
-            case NEUTRAL:
-                return new Color(0, 255, 255);
-
-            default:
-                throw new UnsupportedOperationException("Unknown or not supported emotion: " + this);
-        }
+        return color;
     }
 
     @JsonIgnore
     public Color getTextColor() {
-        switch (this) {
-            case ANGER:
-                return new Color(255, 255, 255);
-            case DISGUST:
-                return new Color(255, 255, 255);
-            case FEAR:
-                return new Color(255, 255, 255);
-            case HAPPY:
-                return new Color(255, 255, 255);
-            case SAD:
-                return new Color(255, 255, 255);
-            case SURPRISE:
-                return new Color(0, 0, 0);
-            case NEUTRAL:
-                return new Color(0, 0, 0);
-
-            default:
-                throw new UnsupportedOperationException("Unknown or not supported emotion: " + this);
-        }
+        return textColor;
     }
-
-
-    public void setProbability(double probability) {
-        this.probability = probability;
-    }
-
 
     @Override
     public String toString() {
         return "Emotion{" +
                 "emotionId=" + emotionId +
-                ", emotionName=" + getValue() +
-                ", probability=" + probability +
+                ", emotionName=" + name +
                 '}';
     }
-
 }

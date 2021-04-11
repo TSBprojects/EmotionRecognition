@@ -253,7 +253,7 @@ public class GameController {
                 runLater(() -> {
                     stopTransition(-1);
 
-                    int emId = frameInfo.getVideoFaces().get(0).getEmotion().getEmotionId();
+                    int emId = frameInfo.getVideoFaces().get(0).getPrediction().getEmotion().getEmotionId();
 
                     getEmotionCell(emId).emotionBackgr
                             .setStyle("-fx-background-color: #00FF26;");
@@ -457,7 +457,7 @@ public class GameController {
     private void faceImageFly(FrameInfo frameInfo) {
         VideoFace videoFace = frameInfo.getVideoFaces().get(0);
         MediaFace.Location faceLocation = videoFace.getLocation();
-        Emotion faceEmotion = videoFace.getEmotion();
+        Emotion faceEmotion = videoFace.getPrediction().getEmotion();
         Image faceImage = ImageConverter.toJavaFXImage(
                 ImageConverter.toMat(frameInfo.getProcessedImage())
                         .apply(new Rect(faceLocation.x, faceLocation.y, faceLocation.width, faceLocation.height))

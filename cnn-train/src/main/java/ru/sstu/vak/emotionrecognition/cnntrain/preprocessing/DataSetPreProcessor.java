@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -37,13 +38,14 @@ public class DataSetPreProcessor {
 
 
     public static void transformRawDataSet(Path readFrom, Path writeTo, boolean detectFaces) throws IOException {
-        log.info("Transform raw dataset by folder path '" + readFrom + "' and write to '" + writeTo + "'");
+        log.info("Transform raw dataset by folder path '{}' and write to '{}'", readFrom, writeTo);
 
         Path preparedData = createDir(Paths.get(writeTo.getParent() + "\\" + writeTo.getFileName() + "_processed"));
 
-        List<Path> imagesPath = Files.walk(readFrom)
-                .filter(Files::isRegularFile)
-                .collect(Collectors.toList());
+        List<Path> imagesPath;
+        try (Stream<Path> walk = Files.walk(readFrom)) {
+            imagesPath = walk.filter(Files::isRegularFile).collect(Collectors.toList());
+        }
 
         if (detectFaces) {
             HaarFaceDetector haarFaceDetector = new HaarFaceDetector();
@@ -55,8 +57,8 @@ public class DataSetPreProcessor {
                 Mat matImage = ImageConverter.toMat(image);
                 Map<Rect, Mat> faces = haarFaceDetector.detect(matImage,false);
 
-                Path classPathOriginal = createDir(Paths.get(writeTo + "\\" + imageParentName));
-                Path classPathProcessed = createDir(Paths.get(preparedData + "\\" + imageParentName));
+                Path classPathOriginal = createDir(Paths.get(writeTo.toString(), imageParentName));
+                Path classPathProcessed = createDir(Paths.get(preparedData.toString(), imageParentName));
 
                 for (Map.Entry<Rect, Mat> entry : faces.entrySet()) {
                     Rect rect = entry.getKey();
@@ -76,8 +78,8 @@ public class DataSetPreProcessor {
 
                 Mat matFaceImage = imread(imagePath.toString());
 
-                Path classPathOriginal = createDir(Paths.get(writeTo + "\\" + imageParentName));
-                Path classPathProcessed = createDir(Paths.get(preparedData + "\\" + imageParentName));
+                Path classPathOriginal = createDir(Paths.get(writeTo.toString(), imageParentName));
+                Path classPathProcessed = createDir(Paths.get(preparedData.toString(), imageParentName));
 
                 Mat resizedFaceImage = ImageCorrector.resize(matFaceImage, INPUT_WIDTH, INPUT_HEIGHT);
                 imwrite(classPathOriginal + "\\" + imagePath.getFileName(), resizedFaceImage);
@@ -90,16 +92,17 @@ public class DataSetPreProcessor {
     }
 
     public static void dataSetAugmentation(Path readFrom, Path writeTo) throws IOException {
-        log.info("Start augmentation of dataset by folder path '" + readFrom + "' and write to '" + writeTo + "'");
+        log.info("Start augmentation of dataset by folder path '{}' and write to '{}'", readFrom, writeTo);
 
-        List<Path> imagesPath = Files.walk(readFrom)
-                .filter(Files::isRegularFile)
-                .collect(Collectors.toList());
+        List<Path> imagesPath;
+        try (Stream<Path> walk = Files.walk(readFrom)) {
+            imagesPath = walk.filter(Files::isRegularFile).collect(Collectors.toList());
+        }
 
         int count = 0;
         for (Path imagePath : imagesPath) {
             final String imageParentName = imagePath.getParent().getFileName().toString();
-            final Path classPathOriginal = createDir(Paths.get(writeTo + "\\" + imageParentName));
+            final Path classPathOriginal = createDir(Paths.get(writeTo.toString(), imageParentName));
 
             Mat matFaceImage = imread(imagePath.toString());
 
@@ -111,7 +114,7 @@ public class DataSetPreProcessor {
             imwrite(classPathOriginal + "\\" + count + "_eqHist.png", matFaceImageEqHist);
             ImageIO.write(
                     flipHorizontally(ImageConverter.toBufferedImage(matFaceImageEqHist)),
-                    "png", new File(classPathOriginal + "\\" + count + "_eqHist_hor_flip.png")
+                    "png", Paths.get(classPathOriginal.toString(), count + "_eqHist_hor_flip.png").toFile()
             );
 
             BufferedImage bfFaceImageEqHistLowGamma = ImageCorrector.gammaCorrection(ImageConverter.toBufferedImage(matFaceImageEqHist), 0.5);
@@ -126,31 +129,36 @@ public class DataSetPreProcessor {
         }
     }
 
+    /**
+     * @deprecated -
+     */
     @Deprecated
     public static void rotateDataSet(Path dataSet) throws IOException {
         processDataSet(dataSet, "_cr_rot", DataSetPreProcessor::transformImage);
     }
 
     public static void horFlipDataSet(Path dataSet) throws IOException {
-        log.info("Horizontal flipping dataset by folder path '" + dataSet + "' and write to the same folder");
+        log.info("Horizontal flipping dataset by folder path '{}' and write to the same folder", dataSet);
         processDataSet(dataSet, "_flipped", DataSetPreProcessor::flipHorizontally);
     }
 
 
     private static void processDataSet(Path dataSet, String postfix, ImageProcessor imageProcessor) throws IOException {
-        Files.walk(dataSet).filter(Files::isRegularFile).forEach(imagePath -> {
-            try {
-                final String imageParentName = imagePath.getParent().getFileName().toString();
-                final String fileName = FilenameUtils.removeExtension(imagePath.getFileName().toString());
-                ImageIO.write(
-                        imageProcessor.process(ImageIO.read(imagePath.toFile())),
-                        "png",
-                        new File(dataSet + "\\" + imageParentName + "\\" + fileName + postfix + ".png")
-                );
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        try (Stream<Path> walk = Files.walk(dataSet)) {
+            walk.filter(Files::isRegularFile).forEach(imagePath -> {
+                try {
+                    final String imageParentName = imagePath.getParent().getFileName().toString();
+                    final String fileName = FilenameUtils.removeExtension(imagePath.getFileName().toString());
+                    ImageIO.write(
+                            imageProcessor.process(ImageIO.read(imagePath.toFile())),
+                            "png",
+                            new File(dataSet + "\\" + imageParentName + "\\" + fileName + postfix + ".png")
+                    );
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     private static BufferedImage transformImage(BufferedImage image) {
@@ -159,8 +167,11 @@ public class DataSetPreProcessor {
         int y = ThreadLocalRandom.current().nextInt(3, 11);
         double theta = ThreadLocalRandom.current().nextDouble(-0.25, 0.25);
 
+        int width = image.getWidth() / 2;
+        int height = image.getHeight() / 2;
+
         AffineTransform transform = new AffineTransform();
-        transform.rotate(theta, image.getWidth() / 2, image.getHeight() / 2);
+        transform.rotate(theta, width, height);
         AffineTransformOp transformOp = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
         image = transformOp.filter(image, null);
 

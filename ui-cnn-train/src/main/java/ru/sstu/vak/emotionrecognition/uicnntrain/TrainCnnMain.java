@@ -15,9 +15,7 @@ public class TrainCnnMain extends Application {
         primaryStage.setTitle("Emotion recognizer");
         primaryStage.getIcons().add(new Image("image/face-ico.png"));
         primaryStage.setScene(new Scene(root, 931, 460));
-        primaryStage.setOnCloseRequest(event -> {
-            System.exit(0);
-        });
+        primaryStage.setOnCloseRequest(event -> System.exit(0));
         primaryStage.show();
     }
 

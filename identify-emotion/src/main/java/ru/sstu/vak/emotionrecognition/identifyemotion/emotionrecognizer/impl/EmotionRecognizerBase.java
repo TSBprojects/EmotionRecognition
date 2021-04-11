@@ -23,20 +23,21 @@ import org.bytedeco.javacv.FrameGrabber;
 import ru.sstu.vak.emotionrecognition.cnn.FeedForwardCNN;
 import static ru.sstu.vak.emotionrecognition.cnn.FeedForwardCNN.INPUT_HEIGHT;
 import static ru.sstu.vak.emotionrecognition.cnn.FeedForwardCNN.INPUT_WIDTH;
-import ru.sstu.vak.emotionrecognition.common.Emotion;
+import ru.sstu.vak.emotionrecognition.common.Prediction;
 import ru.sstu.vak.emotionrecognition.facedetector.BoundingBox;
 import ru.sstu.vak.emotionrecognition.facedetector.HaarFaceDetector;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.FacePreProcessing;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.impl.FrameIteratorBase;
+import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.ImageFace;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.MediaFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.ImageInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 
 public class EmotionRecognizerBase implements EmotionRecognizer {
 
@@ -47,7 +48,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     protected static final String PROCESSED_IMAGE_POSTFIX = "-processed";
     protected static final String PROCESSED_IMAGE_FACE_POSTFIX = "-face";
 
-    private ObjectMapper toJson;
+    private final ObjectMapper toJson;
     private FileOutputStream fileOutputStream;
 
     protected FrameIterator frameIterator;
@@ -102,14 +103,14 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
         faces.forEach((rect, face) -> {
             try {
                 BufferedImage faceImage = ImageConverter.toBufferedImage(matImage.apply(rect));
-                ImageFace.Location faceLocation = new ImageFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
+                MediaFace.Location faceLocation = new MediaFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
                 Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                 if (imageNetInputListener != null) {
                     imageNetInputListener.onNextFace(preparedFace.clone());
                 }
-                Emotion emotion = feedForwardCNN.predict(preparedFace);
-                BoundingBox.draw(image, rect, emotion);
-                imageFaceList.add(new ImageFace(emotion, faceLocation, faceImage));
+                Prediction predict = feedForwardCNN.predict(preparedFace);
+                BoundingBox.draw(image, rect, predict);
+                imageFaceList.add(new ImageFace(predict, faceLocation, faceImage));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();
@@ -158,11 +159,12 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             List<ImageFace> imageFaces = imageInfo.getImageFaces();
             for (int i = 0; i < imageFaces.size(); i++) {
                 ImageFace imageFace = imageFaces.get(i);
+                String emotionMame = imageFace.getPrediction().getEmotion().getName();
                 ImageIO.write(
                         imageFace.getFaceImage(),
                         "png",
                         new File(writeTo.getParent() + "\\" + fileName
-                                + PROCESSED_IMAGE_FACE_POSTFIX + i + "-" + imageFace.getEmotion().getValue() + ".png")
+                                + PROCESSED_IMAGE_FACE_POSTFIX + i + "-" + emotionMame + ".png")
                 );
             }
         }
@@ -225,14 +227,14 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
 
         faces.forEach((rect, face) -> {
             try {
-                VideoFace.Location faceLocation = new VideoFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
+                MediaFace.Location faceLocation = new MediaFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
                 Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace.clone());
                 }
-                Emotion emotion = feedForwardCNN.predict(preparedFace);
-                BoundingBox.draw(image, rect, emotion);
-                videoFacesList.add(new VideoFace(emotion, faceLocation));
+                Prediction prediction = feedForwardCNN.predict(preparedFace);
+                BoundingBox.draw(image, rect, prediction);
+                videoFacesList.add(new VideoFace(prediction, faceLocation));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 e.printStackTrace();

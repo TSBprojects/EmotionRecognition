@@ -67,7 +67,7 @@ public class TrainController {
     }
 
     @FXML
-    void startTrain(ActionEvent event) throws Exception {
+    void startTrain(ActionEvent event) {
         trainRunning = true;
         emotionRec.train(CHECK_EVERY_EPOCH);
     }

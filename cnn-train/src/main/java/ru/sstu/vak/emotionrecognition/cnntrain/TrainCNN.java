@@ -5,6 +5,7 @@ import java.io.IOException;
 import static java.lang.Math.toIntExact;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -99,19 +100,19 @@ public class TrainCNN {
     }
 
 
-    public void train() throws Exception {
+    public void train() {
         train(Paths.get(""), -1);
     }
 
-    public void train(int checkAfterEveryIter) throws Exception {
+    public void train(int checkAfterEveryIter) {
         train(Paths.get(""), checkAfterEveryIter);
     }
 
-    public void train(Path saveModelTo) throws Exception {
+    public void train(Path saveModelTo) {
         train(saveModelTo, -1);
     }
 
-    public void train(Path saveModelTo, int checkAfterEveryIter) throws Exception {
+    public void train(Path saveModelTo, int checkAfterEveryIter) {
         this.executorService = Executors.newFixedThreadPool(EXEC_SERVICE_THREADS);
         Random rand = new Random(SEED);
 
@@ -120,8 +121,18 @@ public class TrainCNN {
         File mainPath = new File(dataSetPath);
         FileSplit fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, rand);
         int numExamples = toIntExact(fileSplit.length());
-        numLabels = fileSplit.getRootDir().listFiles(File::isDirectory).length; //This only works if your root is clean: only label subdirs.
-        BalancedPathFilter pathFilter = new BalancedPathFilter(rand, labelMaker, numExamples, numLabels, MAX_PATHS_PER_LABEL);
+        File[] files = Objects.requireNonNull(
+                fileSplit.getRootDir().listFiles(File::isDirectory),
+                "Pathname does not denote a directory, or I/O error occurs"
+        );
+        numLabels = files.length; //This only works if your root is clean: only label subdirs.
+        BalancedPathFilter pathFilter = new BalancedPathFilter(
+                rand,
+                labelMaker,
+                numExamples,
+                numLabels,
+                MAX_PATHS_PER_LABEL
+        );
 
         model = new ConvNetwork(modifiedAlexNetArchitecture());
         model.init();
@@ -130,36 +141,41 @@ public class TrainCNN {
         InputSplit trainData = inputSplit[0];
         InputSplit testData = inputSplit[1];
 
-        ImageRecordReader recordReader = initImageRecordReader(trainData, labelMaker);
-        DataSetIterator dataIter = initDataSetIterator(recordReader);
-
-        ImageRecordReader testRecordReader = initImageRecordReader(testData, labelMaker);
-        DataSetIterator testDataIter = initDataSetIterator(testRecordReader);
-
-
         executorService.submit(() -> {
-            int counter = checkAfterEveryIter;
-            log.info("Train model....");
-            for (int i = 0; i < epoch; i++) {
-                model.fit(dataIter);
+            try (ImageRecordReader recordReader = initImageRecordReader(trainData, labelMaker);
+                 ImageRecordReader testRecordReader = initImageRecordReader(testData, labelMaker)) {
 
-                final String epochInfo = "*** Completed epoch " + i + " ***";
-                log.info(epochInfo);
+                recordReader.initialize(trainData, null);
+                recordReader.initialize(testData, null);
+                DataSetIterator dataIter = initDataSetIterator(recordReader);
+                DataSetIterator testDataIter = initDataSetIterator(testRecordReader);
 
-                if (epochListener != null && !epochListener.onNextEpoch(epochInfo)) {
-                    break;
-                }
-                if (i == counter) {
-                    counter += checkAfterEveryIter;
-                    if (scoreListener != null) {
-                        scoreListener.onTotalScore(i, validateModel(saveModelTo, testDataIter));
+                int counter = checkAfterEveryIter;
+                log.info("Train model....");
+                for (int i = 0; i < epoch; i++) {
+                    model.fit(dataIter);
+
+                    final String epochInfo = "*** Completed epoch " + i + " ***";
+                    log.info(epochInfo);
+
+                    if (epochListener != null && !epochListener.onNextEpoch(epochInfo)) {
+                        break;
+                    }
+                    if (i == counter) {
+                        counter += checkAfterEveryIter;
+                        if (scoreListener != null) {
+                            scoreListener.onTotalScore(i, validateModel(saveModelTo, testDataIter));
+                        }
                     }
                 }
+                log.info("****************Train finished********************");
+                executorService.shutdown();
+            } catch (IOException e) {
+                log.error("****************Train failed********************", e);
+            } finally {
+                executorService.shutdown();
             }
-            log.info("****************Train finished********************");
-            executorService.shutdown();
         });
-
     }
 
 

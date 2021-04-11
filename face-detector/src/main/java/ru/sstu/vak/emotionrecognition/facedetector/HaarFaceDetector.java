@@ -27,11 +27,11 @@ public class HaarFaceDetector {
 
     private static final Logger log = LogManager.getLogger(HaarFaceDetector.class.getName());
 
-    private final static String CLASSIFIER_PATH = "/haarcascadeModel/model_alt.xml";
+    private static final String CLASSIFIER_PATH = "/haarcascadeModel/model_alt.xml";
 
-    private CascadeClassifier cascadeClassifier;
+    private final CascadeClassifier cascadeClassifier;
 
-    private OpenCVFrameConverter.ToMat converterToMat;
+    private final OpenCVFrameConverter.ToMat converterToMat;
 
 
     public HaarFaceDetector() throws IOException {

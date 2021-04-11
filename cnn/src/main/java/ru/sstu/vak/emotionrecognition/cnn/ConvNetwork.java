@@ -7,7 +7,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class ConvNetwork extends MultiLayerNetwork {
 
-    public final static int PARSE_FACTOR = 10000;
+    public static final int PARSE_FACTOR = 10000;
 
     public ConvNetwork(MultiLayerConfiguration conf) {
         super(conf);
@@ -28,5 +28,4 @@ public class ConvNetwork extends MultiLayerNetwork {
                 .mapToInt(operand -> (int) (operand * PARSE_FACTOR))
                 .toArray();
     }
-
 }

@@ -1,11 +1,13 @@
 package ru.sstu.vak.emotionrecognition.uigame;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.bytedeco.javacv.FrameGrabber;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
+import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 
@@ -124,10 +126,12 @@ public class GameCore {
 
                         callback.onFrameProcessed(frameInfo.getProcessedImage());
 
-                        if (frameInfo.getVideoFaces() != null && emotionTimer == null &&
-                                frameInfo.getVideoFaces().get(0).getEmotion().getEmotionId() == emotionOrder[awaitEmotion]) {
+                        List<VideoFace> faces = frameInfo.getVideoFaces();
 
-                            callback.onCorrectEmotion(frameInfo.getVideoFaces().get(0).getEmotion());
+                        if (faces != null && emotionTimer == null &&
+                                faces.get(0).getPrediction().getEmotion().getEmotionId() == emotionOrder[awaitEmotion]) {
+
+                            callback.onCorrectEmotion(faces.get(0).getPrediction().getEmotion());
                             emotionTimer = new Timer();
                             emotionTimer.schedule(new TimerTask() {
                                 @Override
@@ -145,8 +149,8 @@ public class GameCore {
                             }, emotionAchievedTime);
                         }
 
-                        if (emotionTimer != null && (frameInfo.getVideoFaces() == null ||
-                                frameInfo.getVideoFaces().get(0).getEmotion().getEmotionId() != emotionOrder[awaitEmotion])) {
+                        if (emotionTimer != null && (faces == null ||
+                                faces.get(0).getPrediction().getEmotion().getEmotionId() != emotionOrder[awaitEmotion])) {
                             callback.onEmotionFailed();
                             emotionTimer.cancel();
                             emotionTimer = null;

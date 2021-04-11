@@ -6,14 +6,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import static ru.sstu.vak.emotionrecognition.cnn.ConvNetwork.PARSE_FACTOR;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
+import ru.sstu.vak.emotionrecognition.common.Prediction;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 
 public class FeedForwardCNN {
 
     private static final Logger log = LogManager.getLogger(FeedForwardCNN.class.getName());
 
-    private ConvNetwork model;
+    private final ConvNetwork model;
 
     public static final int INPUT_HEIGHT = 48;
     public static final int INPUT_WIDTH = 48;
@@ -25,16 +27,12 @@ public class FeedForwardCNN {
         this.model.init();
     }
 
-    public synchronized Emotion predict(Mat face) throws IOException {
+    public synchronized Prediction predict(Mat face) throws IOException {
         INDArray array = ImageConverter.toNDArray(face);
 
         log.debug("Predict emotion...");
         int[] predictedClasses = model.predict(array);
 
-        return getEmotion(predictedClasses);
-    }
-
-    private Emotion getEmotion(int[] predictedClasses) {
         int maxClass = -1;
         double maxProbability = -1;
         for (int i = 0; i < predictedClasses.length; i++) {
@@ -43,10 +41,7 @@ public class FeedForwardCNN {
                 maxClass = i;
             }
         }
-        Emotion emotion = Emotion.valueOf(maxClass);
-        emotion.setProbability(maxProbability / ConvNetwork.PARSE_FACTOR);
 
-        return emotion;
+        return new Prediction(Emotion.valueOf(maxClass), maxProbability / PARSE_FACTOR);
     }
-
 }

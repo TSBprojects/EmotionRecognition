@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ui-cnn-train</artifactId>
+    <version>1.0.1</version>
 
     <build>
         <plugins>
@@ -60,7 +61,7 @@
         <dependency>
             <groupId>ru.sstu.vak.emotionrecognition</groupId>
             <artifactId>cnn-train</artifactId>
-            <version>1.0</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 
