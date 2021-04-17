@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 public class VideoInfo implements MediaInfo {
 
     @JsonProperty("frames")
-    private List<VideoFrame> frames;
+    private final List<VideoFrame> frames;
 
 
     public VideoInfo(VideoInfo videoInfo) {

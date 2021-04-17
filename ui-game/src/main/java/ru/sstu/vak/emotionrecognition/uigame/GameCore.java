@@ -5,13 +5,17 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacv.FrameGrabber;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
+import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 
 public class GameCore {
+
+    private static final Logger log = LogManager.getLogger(GameCore.class.getName());
 
     private int gameTime = 60; // sec
 
@@ -21,6 +25,8 @@ public class GameCore {
 
 
     private int[] emotionOrder = new int[]{3, 5, 4, 6, 1, 0, 2};
+
+    private int achievedEmotions = 0;
 
     private int awaitEmotion = 0;
 
@@ -86,17 +92,20 @@ public class GameCore {
     }
 
     public int getLastAwaitEmotion() {
-        return emotionOrder[emotionOrder.length-1];
+        return emotionOrder[emotionOrder.length - 1];
     }
 
     public int getNextAwaitEmotion() {
-        return emotionOrder[awaitEmotion+1];
+        return emotionOrder[awaitEmotion + 1];
     }
 
     public int getAwaitEmotionId() {
         return emotionOrder[awaitEmotion];
     }
 
+    public boolean allEmotionsAchieved() {
+        return achievedEmotions == emotionOrder.length;
+    }
 
     public void start(Callback callback) {
         this.callback = callback;
@@ -128,8 +137,8 @@ public class GameCore {
 
                         List<VideoFace> faces = frameInfo.getVideoFaces();
 
-                        if (faces != null && emotionTimer == null &&
-                                faces.get(0).getPrediction().getEmotion().getEmotionId() == emotionOrder[awaitEmotion]) {
+                        if (!faces.isEmpty() && emotionTimer == null &&
+                            faces.get(0).getPrediction().getEmotion().getEmotionId() == emotionOrder[awaitEmotion]) {
 
                             callback.onCorrectEmotion(faces.get(0).getPrediction().getEmotion());
                             emotionTimer = new Timer();
@@ -140,17 +149,19 @@ public class GameCore {
                                     emotionTimer.cancel();
                                     emotionTimer = null;
 
+                                    achievedEmotions++;
+
                                     if (awaitEmotion == 6) {
                                         stop();
-                                    }else{
+                                    } else {
                                         awaitEmotion++;
                                     }
                                 }
                             }, emotionAchievedTime);
                         }
 
-                        if (emotionTimer != null && (faces == null ||
-                                faces.get(0).getPrediction().getEmotion().getEmotionId() != emotionOrder[awaitEmotion])) {
+                        if (emotionTimer != null && (faces.isEmpty() ||
+                            faces.get(0).getPrediction().getEmotion().getEmotionId() != emotionOrder[awaitEmotion])) {
                             callback.onEmotionFailed();
                             emotionTimer.cancel();
                             emotionTimer = null;
@@ -158,7 +169,7 @@ public class GameCore {
 
                     });
                 } catch (FrameGrabber.Exception e) {
-                    e.printStackTrace();
+                    log.error("Some error occurred", e);
                 }
             }
         }, beforeStartTime);
@@ -181,6 +192,7 @@ public class GameCore {
             callback.onGameOver();
             gameTickCounter.set(0);
             awaitEmotion = 0;
+            achievedEmotions = 0;
             isStart = false;
         });
         emotionRecognizerGame.stop();

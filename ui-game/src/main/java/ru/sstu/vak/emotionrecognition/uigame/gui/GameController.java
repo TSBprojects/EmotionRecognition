@@ -35,11 +35,11 @@ import org.bytedeco.javacpp.opencv_core.Rect;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
+import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.ClosestFaceEmotionRecognizer;
+import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.MediaFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
-import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.impl.EmotionRecognizerGame;
 import ru.sstu.vak.emotionrecognition.uigame.GameCore;
 
 public class GameController {
@@ -69,7 +69,7 @@ public class GameController {
             this.modelName = parameters.get(1);
         }
         tryIt(() -> {
-            emotionRecognizer = new EmotionRecognizerGame(modelName);
+            emotionRecognizer = new ClosestFaceEmotionRecognizer(modelName);
             emotionRecognizer.setOnExceptionListener(e -> Platform.runLater(() -> showError(e.getMessage())));
             gameCore = new GameCore(pathToVid, emotionRecognizer);
         });
@@ -291,13 +291,12 @@ public class GameController {
 
             @Override
             public void onGameOver() {
-                final int emId = gameCore.getAwaitEmotionId();
                 runLater(() -> {
                     if (!clickStop) {
                         resetVideoView();
                         String message;
                         String style;
-                        if (emId == gameCore.getLastAwaitEmotion()) {
+                        if (gameCore.allEmotionsAchieved()) {
                             message = "Вы выиграли!";
                             style = "-fx-text-fill: #2DD81E; -fx-alignment: center;";
                             fireworkImage1.setVisible(true);

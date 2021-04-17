@@ -203,7 +203,6 @@ public class TrainCNN {
             MyModelSerializer.writeModel(model, saveModelTo + "trainedModel.bin", true);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            e.printStackTrace();
         }
     }
 

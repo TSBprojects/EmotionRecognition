@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.impl;
+package ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.image.BufferedImage;
@@ -30,7 +30,6 @@ import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.FacePreProcess
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.impl.FrameIteratorBase;
-import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.ImageFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.MediaFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
@@ -39,9 +38,9 @@ import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.ImageInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoInfo;
 
-public class EmotionRecognizerBase implements EmotionRecognizer {
+public class SimpleEmotionRecognizer implements EmotionRecognizer {
 
-    private static final Logger log = LogManager.getLogger(EmotionRecognizerBase.class.getName());
+    private static final Logger log = LogManager.getLogger(SimpleEmotionRecognizer.class.getName());
 
     protected static final String VIDEO_INFO_POSTFIX = "-videoInfo";
     protected static final String IMAGE_INFO_POSTFIX = "-imageInfo";
@@ -64,7 +63,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     protected List<VideoFrame> frames;
 
 
-    public EmotionRecognizerBase(String modelPath) throws IOException {
+    public SimpleEmotionRecognizer(String modelPath) throws IOException {
         this.frameIterator = new FrameIteratorBase();
         this.haarFaceDetector = new HaarFaceDetector();
         this.feedForwardCNN = new FeedForwardCNN(modelPath);
@@ -73,7 +72,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
 
         this.frameIterator.setDeviceFrameRate(null);
         this.frameIterator.setFileFrameRate(30);
-        this.frameIterator.setOnExceptionListener(onExceptionListener);
         this.frameIterator.setOnStopListener(() -> {
             if (stopListener != null) {
                 stopListener.onVideoStopped(new VideoInfo(frames));
@@ -87,7 +85,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
                 }
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
-                e.printStackTrace();
                 throwException(e);
             }
         });
@@ -113,7 +110,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
                 imageFaceList.add(new ImageFace(predict, faceLocation, faceImage));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
-                e.printStackTrace();
                 throwException(e);
             }
         });
@@ -192,6 +188,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
 
     public void setOnExceptionListener(FrameIterator.ExceptionListener exceptionListener) {
         this.onExceptionListener = exceptionListener;
+        this.frameIterator.setOnExceptionListener(onExceptionListener);
     }
 
     @Override
@@ -215,7 +212,7 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
     }
 
 
-    private FrameInfo processedFrame(Frame frame) {
+    protected FrameInfo processedFrame(Frame frame) {
         if (frameListener != null) {
             frameListener.onNextFrame(frame);
         }
@@ -237,7 +234,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
                 videoFacesList.add(new VideoFace(prediction, faceLocation));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
-                e.printStackTrace();
                 throwException(e);
             }
         });
@@ -258,7 +254,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             fileOutputStream.write("{\"frames\":[".getBytes());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            e.printStackTrace();
             throwException(e);
         }
     }
@@ -273,7 +268,6 @@ public class EmotionRecognizerBase implements EmotionRecognizer {
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            e.printStackTrace();
             throwException(e);
         }
     }

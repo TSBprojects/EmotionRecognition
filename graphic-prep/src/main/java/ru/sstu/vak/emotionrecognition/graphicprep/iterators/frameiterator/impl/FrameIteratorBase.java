@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameRecorder;
 import ru.sstu.vak.emotionrecognition.graphicprep.exception.IteratorAlreadyRunningException;
@@ -23,11 +22,11 @@ public class FrameIteratorBase implements FrameIterator {
     private static final Logger log = LogManager.getLogger(FrameIteratorBase.class.getName());
 
 
-    private ExecutorService executorService;
-
     private FrameGrabber frameGrabber;
 
     private OpenCVFrameRecorder frameRecorder;
+
+    private final ExecutorService executorService;
 
 
     private volatile boolean run = false;
@@ -44,11 +43,11 @@ public class FrameIteratorBase implements FrameIterator {
 
     private Stopwatch stopwatch;
 
-    private final int SAMPLING_COUNT_FOR_FPS_MEASURE = 50;
-
     private int sampleFrameCount = 0;
 
-    private List<Frame> framesToRec = new ArrayList<>(SAMPLING_COUNT_FOR_FPS_MEASURE);
+    private static final int SAMPLING_COUNT_FOR_FPS_MEASURE = 50;
+
+    private final List<Frame> framesToRec = new ArrayList<>(SAMPLING_COUNT_FOR_FPS_MEASURE);
 
 
     public FrameIteratorBase() {
@@ -133,7 +132,6 @@ public class FrameIteratorBase implements FrameIterator {
         } else {
             IteratorAlreadyRunningException e = new IteratorAlreadyRunningException();
             log.error(e.getMessage(), e);
-            e.printStackTrace();
         }
 
         log.debug("Submit executor service task with frame grabber...");
@@ -153,7 +151,6 @@ public class FrameIteratorBase implements FrameIterator {
                         videoFrame = frameGrabber.grab();
                     } catch (FrameGrabber.Exception e) {
                         log.error(e.getMessage(), e);
-                        e.printStackTrace();
                         stopGrabber();
                         throwException(e);
                     }
@@ -171,9 +168,8 @@ public class FrameIteratorBase implements FrameIterator {
                 }
                 stopGrabber();
 
-            } catch (FrameGrabber.Exception | InterruptedException e) {
+            } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                e.printStackTrace();
                 stopGrabber();
                 throwException(e);
             }
@@ -212,32 +208,11 @@ public class FrameIteratorBase implements FrameIterator {
                 framesToRec.add(videoFrame);
             }
 
-        } catch (FrameRecorder.Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            e.printStackTrace();
             stopGrabber();
             throwException(e);
         }
-
-//        try {
-//            if (frameRecorder == null) {
-//                frameRecorder = new OpenCVFrameRecorder(
-//                        videoFile.toString(),
-//                        frameGrabber.getImageWidth(),
-//                        frameGrabber.getImageHeight()
-//                );
-//                frameRecorder.setFormat("mp4");
-//                frameRecorder.setPixelFormat(1);
-//                frameRecorder.setFrameRate(15);
-//                frameRecorder.start();
-//            }
-//            frameRecorder.record(videoFrame);
-//        } catch (FrameRecorder.Exception e) {
-//            log.error(e.getMessage(), e);
-//            e.printStackTrace();
-//            stopGrabber();
-//            throwException(e);
-//        }
     }
 
     private void stopGrabber() {
@@ -260,9 +235,8 @@ public class FrameIteratorBase implements FrameIterator {
             }
             sampleFrameCount = 0;
             log.info("FrameIterator stopped");
-        } catch (FrameGrabber.Exception | FrameRecorder.Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            e.printStackTrace();
             throwException(e);
         }
     }

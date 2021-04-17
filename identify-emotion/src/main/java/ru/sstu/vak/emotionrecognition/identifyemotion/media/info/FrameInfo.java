@@ -10,7 +10,7 @@ import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 public class FrameInfo extends VideoFrame {
 
     @JsonIgnore
-    private BufferedImage processedImage;
+    private final BufferedImage processedImage;
 
     public FrameInfo(FrameInfo frameInfo) {
         super(frameInfo);
