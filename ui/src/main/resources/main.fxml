@@ -1,22 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="488.0" prefWidth="931.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionrecognition.ui.gui.MainController">
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="942.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionrecognition.ui.gui.MainController">
    <children>
       <TabPane layoutX="14.0" layoutY="14.0" prefHeight="513.0" prefWidth="931.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <tabs>
-          <Tab text="Демонстрация">
+          <Tab text="Видео">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="474.0" prefWidth="931.0">
+              <AnchorPane fx:id="videoPane" minHeight="0.0" minWidth="0.0" prefHeight="501.0" prefWidth="942.0">
                      <children>
-                        <AnchorPane layoutX="22.0" layoutY="55.0" prefHeight="300.0" prefWidth="400.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;">
+                        <AnchorPane layoutX="490.0" layoutY="53.0" prefHeight="300.0" prefWidth="400.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;" AnchorPane.rightAnchor="21.0">
                            <children>
                               <ImageView fx:id="videoImageView" fitHeight="300.0" fitWidth="400.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <image>
@@ -25,21 +32,11 @@
                               </ImageView>
                            </children>
                         </AnchorPane>
-                        <Button fx:id="startVideoBtn" layoutX="22.0" layoutY="384.0" mnemonicParsing="false" onAction="#startVideo" prefHeight="25.0" prefWidth="95.0" text="Только видео" />
-                        <Button fx:id="startRcognVideoBtn" layoutX="127.0" layoutY="384.0" mnemonicParsing="false" onAction="#startRecognVideo" prefHeight="25.0" prefWidth="163.0" text="Видео с распознаванием" />
-                        <Button fx:id="screenshotBtn" layoutX="23.0" layoutY="417.0" mnemonicParsing="false" onAction="#takeScreenshot" prefHeight="25.0" prefWidth="343.0" text="Скриншот" />
-                        <AnchorPane layoutX="490.0" layoutY="55.0" maxHeight="320.0" maxWidth="420.0" minHeight="320.0" minWidth="420.0" prefHeight="320.0" prefWidth="420.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;" AnchorPane.rightAnchor="21.0">
-                           <children>
-                              <ImageView fx:id="screenImageView" fitHeight="300.0" fitWidth="400.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <image>
-                                    <Image url="@image/videoPlaceHolder.png" />
-                                 </image>
-                              </ImageView>
-                           </children>
-                        </AnchorPane>
-                        <Button fx:id="recognScreenBtn" layoutX="490.0" layoutY="384.0" mnemonicParsing="false" onAction="#recognizeScreenshot" prefHeight="58.0" prefWidth="181.0" text="Распознать" AnchorPane.rightAnchor="260.0" />
-                        <Button fx:id="stopVideoBtn" layoutX="300.0" layoutY="384.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="66.0" text="Стоп" />
-                        <AnchorPane layoutX="384.0" layoutY="384.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;">
+                        <Button fx:id="startVideoBtn" layoutX="490.0" layoutY="382.0" mnemonicParsing="false" onAction="#startVideo" prefHeight="25.0" prefWidth="95.0" text="Только видео" AnchorPane.rightAnchor="346.0" />
+                        <Button fx:id="startRcognVideoBtn" layoutX="595.0" layoutY="382.0" mnemonicParsing="false" onAction="#startRecognVideo" prefHeight="25.0" prefWidth="163.0" text="Видео с распознаванием" AnchorPane.rightAnchor="173.0" />
+                        <Button fx:id="screenshotBtn" layoutX="491.0" layoutY="415.0" mnemonicParsing="false" onAction="#takeScreenshot" prefHeight="25.0" prefWidth="343.0" text="Скриншот" AnchorPane.rightAnchor="97.0" />
+                        <Button fx:id="stopVideoBtn" layoutX="768.0" layoutY="382.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="66.0" text="Стоп" AnchorPane.rightAnchor="97.0" />
+                        <AnchorPane layoutX="852.0" layoutY="382.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;" AnchorPane.rightAnchor="21.0">
                            <children>
                               <ImageView fx:id="faceFromVideo" fitHeight="48.0" fitWidth="48.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <image>
@@ -48,7 +45,61 @@
                               </ImageView>
                            </children>
                         </AnchorPane>
-                        <AnchorPane layoutX="852.0" layoutY="384.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;" AnchorPane.rightAnchor="21.0">
+                        <ProgressBar fx:id="startVideoProgressBar" layoutX="501.0" layoutY="382.0" prefHeight="25.0" prefWidth="344.0" visible="false" />
+                        <TextField fx:id="videoPath" layoutX="490.0" layoutY="19.0" prefHeight="25.0" prefWidth="421.0" promptText="ID камеры | Путь к камере | Путь к файлу" AnchorPane.rightAnchor="21.0" />
+                        <LineChart fx:id="emotionChart" layoutX="14.0" layoutY="19.0" legendVisible="false" prefHeight="337.0" prefWidth="459.0" title="Эмоции в течении отрезка времени">
+                          <xAxis>
+                              <CategoryAxis fx:id="emotionChartX" side="BOTTOM" />
+                          </xAxis>
+                          <yAxis>
+                              <CategoryAxis fx:id="emotionChartY" side="LEFT" />
+                          </yAxis>
+                        </LineChart>
+                        <Pane fx:id="chartRangeHolder" layoutX="12.0" layoutY="357.0" prefHeight="54.0" prefWidth="464.0">
+                           <children>
+                              <Slider fx:id="rangeSliderOld" layoutX="115.0" layoutY="9.0" max="6.0" min="3.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="38.0" prefWidth="239.0" value="6.0" visible="false" />
+                              <Text fx:id="chartHighSliderLabel" layoutX="364.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06/00:00:00" />
+                              <Text fx:id="chartLowSliderLabel" layoutX="11.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:00/00:00:00" />
+                              <Text fx:id="chartRangeTotalLabel" layoutX="217.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06" />
+                              <Label layoutX="310.0" layoutY="35.0" text="график" textFill="#f3622d">
+                                 <font>
+                                    <Font name="System Bold Italic" size="11.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </Pane>
+                        <Pane fx:id="analyzeRangeHolder" layoutX="12.0" layoutY="399.0" prefHeight="54.0" prefWidth="464.0">
+                           <children>
+                              <Slider fx:id="rangeSliderOld1" layoutX="115.0" layoutY="9.0" max="6.0" min="3.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="38.0" prefWidth="239.0" value="6.0" visible="false" />
+                              <Text fx:id="analyzeHighSliderLabel" layoutX="364.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06/00:00:00" />
+                              <Text fx:id="analyzeLowSliderLabel" layoutX="11.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:00/00:00:00" />
+                              <Text fx:id="analyzeRangeTotalLabel" layoutX="217.0" layoutY="18.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06" />
+                              <Label layoutX="311.0" layoutY="34.0" prefHeight="16.0" prefWidth="39.0" text="анализ" textFill="#30b90e">
+                                 <font>
+                                    <Font name="System Bold Italic" size="11.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </Pane>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+            <Tab text="Изображение">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="474.0" prefWidth="931.0">
+                     <children>
+                        <AnchorPane layoutX="256.0" layoutY="53.0" maxHeight="320.0" maxWidth="420.0" minHeight="320.0" minWidth="420.0" prefHeight="320.0" prefWidth="420.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;">
+                           <children>
+                              <ImageView fx:id="screenImageView" fitHeight="300.0" fitWidth="400.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <image>
+                                    <Image url="@image/videoPlaceHolder.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                        <Button fx:id="recognScreenBtn" layoutX="256.0" layoutY="382.0" mnemonicParsing="false" onAction="#recognizeScreenshot" prefHeight="58.0" prefWidth="181.0" text="Распознать" />
+                        <AnchorPane layoutX="618.0" layoutY="382.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;">
                            <children>
                               <ImageView fx:id="faceFromScreen" fitHeight="48.0" fitWidth="48.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <image>
@@ -57,17 +108,20 @@
                               </ImageView>
                            </children>
                         </AnchorPane>
-                        <TextField fx:id="imagePath" disable="true" layoutX="490.0" layoutY="21.0" prefHeight="25.0" prefWidth="337.0" promptText="Путь к изображению" AnchorPane.rightAnchor="104.0" />
-                        <Button fx:id="browseImageBtn" layoutX="835.0" layoutY="21.0" mnemonicParsing="false" onAction="#browseImage" prefHeight="25.0" prefWidth="75.0" text="Обзор" AnchorPane.rightAnchor="21.0" />
-                        <Button fx:id="saveImageBtn" layoutX="768.0" layoutY="384.0" mnemonicParsing="false" onAction="#saveScreen" prefHeight="58.0" prefWidth="75.0" text="Сохранить" AnchorPane.rightAnchor="88.0" />
-                        <ProgressBar fx:id="recognImageProgressBar" layoutX="490.0" layoutY="384.0" prefHeight="59.0" prefWidth="181.0" visible="false" AnchorPane.rightAnchor="260.0" />
-                        <ProgressBar fx:id="startVideoProgressBar" layoutX="22.0" layoutY="384.0" prefHeight="25.0" prefWidth="344.0" visible="false" />
-                        <TextField fx:id="videoPath" layoutX="22.0" layoutY="21.0" prefHeight="25.0" prefWidth="421.0" promptText="ID камеры | Путь к камере | Путь к файлу" />
-                        <Button fx:id="openImageBtn" layoutX="682.0" layoutY="384.0" mnemonicParsing="false" onAction="#openScreen" prefHeight="58.0" prefWidth="75.0" text="Открыть" AnchorPane.rightAnchor="174.0" />
+                        <TextField fx:id="imagePath" disable="true" layoutX="256.0" layoutY="19.0" prefHeight="25.0" prefWidth="337.0" promptText="Путь к изображению" />
+                        <Button fx:id="browseImageBtn" layoutX="601.0" layoutY="19.0" mnemonicParsing="false" onAction="#browseImage" prefHeight="25.0" prefWidth="75.0" text="Обзор" />
+                        <Button fx:id="saveImageBtn" layoutX="534.0" layoutY="382.0" mnemonicParsing="false" onAction="#saveScreen" prefHeight="58.0" prefWidth="75.0" text="Сохранить" />
+                        <ProgressBar fx:id="recognImageProgressBar" layoutX="256.0" layoutY="382.0" prefHeight="59.0" prefWidth="181.0" visible="false" AnchorPane.rightAnchor="494.0" />
+                        <Button fx:id="openImageBtn" layoutX="448.0" layoutY="382.0" mnemonicParsing="false" onAction="#openScreen" prefHeight="58.0" prefWidth="75.0" text="Открыть" />
                      </children>
                   </AnchorPane>
-            </content>
-          </Tab>
+               </content>
+            </Tab>
+            <Tab text="Конструктор">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="474.0" prefWidth="931.0" />
+               </content>
+            </Tab>
         </tabs>
       </TabPane>
    </children>

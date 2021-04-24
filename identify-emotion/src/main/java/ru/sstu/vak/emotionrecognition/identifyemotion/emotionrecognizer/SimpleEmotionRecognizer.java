@@ -59,11 +59,13 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
     protected NetInputListener imageNetInputListener;
     protected FrameIterator.FrameListener frameListener;
     protected FrameIterator.ExceptionListener onExceptionListener;
+    protected List<VideoFrameListener> onProcessedFrameListenerListeners;
 
     protected List<VideoFrame> frames;
 
 
     public SimpleEmotionRecognizer(String modelPath) throws IOException {
+        this.onProcessedFrameListenerListeners = new ArrayList<>();
         this.frameIterator = new FrameIteratorBase();
         this.haarFaceDetector = new HaarFaceDetector();
         this.feedForwardCNN = new FeedForwardCNN(modelPath);
@@ -119,7 +121,11 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
     @Override
     public synchronized void processVideo(String readFrom, ProcessedFrameListener listener) throws FrameGrabber.Exception {
         log.info("Starting video with emotion recognition...");
-        frameIterator.start(readFrom, frame -> listener.onNextFrame(new FrameInfo(processedFrame(frame))));
+        frameIterator.start(readFrom, frame -> {
+            FrameInfo frameInfo = new FrameInfo(processedFrame(frame));
+            notifyVideoFrameListeners(frames.get(frames.size() - 1));
+            listener.onNextFrame(frameInfo);
+        });
     }
 
     @Override
@@ -129,6 +135,7 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         frameIterator.start(readFrom, writeTo, frame -> {
             FrameInfo frameInfo = processedFrame(frame);
             Frame procFrame = ImageConverter.toFrame(frameInfo.getProcessedImage());
+            notifyVideoFrameListeners(frames.get(frames.size() - 1));
             listener.onNextFrame(new FrameInfo(frameInfo));
             return procFrame;
         });
@@ -211,6 +218,16 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         this.videoNetInputListener = videoNetInputListener;
     }
 
+    @Override
+    public void addVideoFrameListener(VideoFrameListener videoFrameListener) {
+        onProcessedFrameListenerListeners.add(videoFrameListener);
+    }
+
+    @Override
+    public void removeVideoFrameListener(VideoFrameListener videoFrameListener) {
+        onProcessedFrameListenerListeners.remove(videoFrameListener);
+    }
+
 
     protected FrameInfo processedFrame(Frame frame) {
         if (frameListener != null) {
@@ -270,6 +287,10 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
             log.error(e.getMessage(), e);
             throwException(e);
         }
+    }
+
+    private void notifyVideoFrameListeners(VideoFrame videoFrame){
+        onProcessedFrameListenerListeners.forEach(l -> l.onNextFrame(videoFrame));
     }
 
 

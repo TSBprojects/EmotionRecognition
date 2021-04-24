@@ -71,18 +71,14 @@ public class ClosestFaceEmotionRecognizer extends SimpleEmotionRecognizer {
 
         maxSize.close();
 
-        if(closestFacePrediction != null){
+        if (closestFacePrediction != null) {
             videoFacesList.add(new VideoFace(closestFacePrediction, maxLocation));
         }
 
         FrameInfo frameInfo = new FrameInfo(frames.size(), buffFrame, videoFacesList);
 
-        frames.add(createVideoFrame(frames.size(), videoFacesList));
+        frames.add(new VideoFrame(frames.size(), videoFacesList));
 
         return frameInfo;
-    }
-
-    protected VideoFrame createVideoFrame(int frameIndex, List<VideoFace> videoFacesList) {
-        return new VideoFrame(frameIndex, videoFacesList);
     }
 }

@@ -10,23 +10,7 @@ import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.ImageInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoInfo;
 
-public interface EmotionRecognizer {
-
-    @FunctionalInterface
-    interface StopListener {
-        void onVideoStopped(VideoInfo videoInfo);
-    }
-
-    @FunctionalInterface
-    interface ProcessedFrameListener {
-        void onNextFrame(FrameInfo frameInfo);
-    }
-
-    @FunctionalInterface
-    interface NetInputListener {
-        void onNextFace(Mat frame);
-    }
-
+public interface EmotionRecognizer extends Listenable {
 
     ImageInfo processImage(BufferedImage image);
 
@@ -53,4 +37,19 @@ public interface EmotionRecognizer {
 
     void setVideoNetInputListener(NetInputListener videoNetInputListener);
 
+
+    @FunctionalInterface
+    interface StopListener {
+        void onVideoStopped(VideoInfo videoInfo);
+    }
+
+    @FunctionalInterface
+    interface ProcessedFrameListener {
+        void onNextFrame(FrameInfo frameInfo);
+    }
+
+    @FunctionalInterface
+    interface NetInputListener {
+        void onNextFace(Mat frame);
+    }
 }

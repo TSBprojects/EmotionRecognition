@@ -29,7 +29,7 @@ public class Main extends Application {
 
         primaryStage.getIcons().add(new Image("image/face-ico.png"));
         primaryStage.setTitle("Emotion recognizer");
-        primaryStage.setScene(new Scene(root, 931, 490));
+        primaryStage.setScene(new Scene(root, 942, 485));
         primaryStage.show();
     }
 
