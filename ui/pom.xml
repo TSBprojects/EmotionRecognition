@@ -60,8 +60,8 @@
     <dependencies>
         <dependency>
             <groupId>ru.sstu.vak.emotionrecognition</groupId>
-            <artifactId>identify-emotion</artifactId>
-            <version>2.1</version>
+            <artifactId>time-series</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>

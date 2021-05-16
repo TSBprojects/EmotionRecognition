@@ -16,6 +16,7 @@
         <module>ui</module>
         <module>ui-game</module>
         <module>ui-cnn-train</module>
+        <module>time-series</module>
         <module>identify-emotion</module>
         <module>cnn</module>
         <module>cnn-train</module>

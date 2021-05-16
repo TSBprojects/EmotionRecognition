@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>face-detector</artifactId>
-    <version>1.0.1</version>
+    <artifactId>time-series</artifactId>
+    <version>1.0</version>
 
     <build>
         <plugins>
@@ -28,7 +28,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>ru.sstu.vak.emotionrecognition.facedetector.Main</mainClass>
+                                    <mainClass>ru.sstu.vak.emotionrecognition.timeseries.Main</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>
@@ -58,14 +58,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv-platform</artifactId>
-            <version>1.4.4</version>
-        </dependency>
-        <dependency>
             <groupId>ru.sstu.vak.emotionrecognition</groupId>
-            <artifactId>common</artifactId>
-            <version>1.1</version>
+            <artifactId>identify-emotion</artifactId>
+            <version>2.1</version>
         </dependency>
     </dependencies>
 
@@ -92,7 +87,7 @@
                                             <exclude>*:*:jar:macosx-*</exclude>
                                             <exclude>*:*:jar:ios-*</exclude>
                                             <exclude>*:*:jar:windows-x86</exclude>
-                                            <!--                                            <exclude>*:*:windows-x86_64</exclude>-->
+                                            <!--<exclude>*:*:windows-x86_64</exclude>-->
                                         </excludes>
                                     </artifactSet>
                                 </configuration>
@@ -192,77 +187,3 @@
     </profiles>
 
 </project>
-
-
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>opencv</artifactId>-->
-        <!--<version>4.0.1-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>artoolkitplus</artifactId>-->
-        <!--<version>2.3.1-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>ffmpeg</artifactId>-->
-        <!--<version>4.1-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>flandmark</artifactId>-->
-        <!--<version>1.07-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>flycapture</artifactId>-->
-        <!--<version>2.13.3.31-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>leptonica</artifactId>-->
-        <!--<version>1.77.0-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>libdc1394</artifactId>-->
-        <!--<version>2.2.5-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>libfreenect2</artifactId>-->
-        <!--<version>0.2.0-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>libfreenect</artifactId>-->
-        <!--<version>0.5.3-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>librealsense</artifactId>-->
-        <!--<version>1.12.1-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>tesseract</artifactId>-->
-        <!--<version>4.0.0-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-        <!--<artifactId>videoinput</artifactId>-->
-        <!--<version>0.200-1.4.4</version>-->
-        <!--<classifier>windows-x86_64</classifier>-->
-        <!--</dependency>-->

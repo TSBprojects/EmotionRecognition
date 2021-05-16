@@ -16,6 +16,8 @@ public class Main extends Application {
 
     private static final Logger log = LogManager.getLogger(Main.class.getName());
 
+    public static final String TITLE_IMAGE_PATH = "image/face-ico.png";
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         URL gameControllerUrl = getClass().getResource("/main.fxml");
@@ -27,9 +29,9 @@ public class Main extends Application {
         List<String> parameters = getParameters().getRaw();
         mainController.setParameters(parameters);
 
-        primaryStage.getIcons().add(new Image("image/face-ico.png"));
+        primaryStage.getIcons().add(new Image(TITLE_IMAGE_PATH));
         primaryStage.setTitle("Emotion recognizer");
-        primaryStage.setScene(new Scene(root, 942, 485));
+        primaryStage.setScene(new Scene(root, 1066, 485));
         primaryStage.show();
     }
 

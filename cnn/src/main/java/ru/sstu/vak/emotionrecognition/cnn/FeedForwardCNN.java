@@ -42,6 +42,6 @@ public class FeedForwardCNN {
             }
         }
 
-        return new Prediction(Emotion.valueOf(maxClass), maxProbability / PARSE_FACTOR);
+        return new Prediction(Emotion.of(maxClass), maxProbability / PARSE_FACTOR);
     }
 }

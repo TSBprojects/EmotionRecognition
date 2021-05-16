@@ -69,11 +69,6 @@
             <artifactId>common</artifactId>
             <version>1.1</version>
         </dependency>
-        <dependency>
-            <groupId>ru.sstu.vak.emotionrecognition</groupId>
-            <artifactId>shared-resources</artifactId>
-            <version>1.0</version>
-        </dependency>
 
         <dependency>
             <groupId>org.deeplearning4j</groupId>
@@ -89,11 +84,6 @@
             <groupId>org.datavec</groupId>
             <artifactId>datavec-data-image</artifactId>
             <version>1.0.0-beta4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>RELEASE</version>
         </dependency>
     </dependencies>
 

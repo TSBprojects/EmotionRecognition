@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.timeseries;
+package ru.sstu.vak.emotionrecognition.timeseries;
 
 import java.util.SortedMap;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;

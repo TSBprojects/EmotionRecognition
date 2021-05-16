@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.ui.utils;
+package ru.sstu.vak.emotionrecognition.ui.util.converters;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.timeseries;
+package ru.sstu.vak.emotionrecognition.timeseries;
 
 public enum TimelineState {
     FULL_COVERAGE,

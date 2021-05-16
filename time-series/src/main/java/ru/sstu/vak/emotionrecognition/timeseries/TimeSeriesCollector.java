@@ -1,19 +1,19 @@
-package ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.timeseries;
+package ru.sstu.vak.emotionrecognition.timeseries;
 
 import java.time.Instant;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.Listenable;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 
 public class TimeSeriesCollector {
 
-    private final SortedMap<Long, VideoFrame> timeline = new TreeMap<>();
+    private final SortedMap<Long, VideoFrame> timeline = new ConcurrentSkipListMap<>();
 
-    private final Map<String, TimeSeries> targetTimeSequences = new HashMap<>();
+    private final Map<String, TimeSeries> targetTimeSequences = new ConcurrentHashMap<>();
 
     public TimeSeriesCollector(Listenable listenable) {
         listenable.addVideoFrameListener(this::onNextFrame);
@@ -51,12 +51,6 @@ public class TimeSeriesCollector {
             }
         }
 
-        synchronized (timeline) {
-            timeline.put(timestamp, videoFrame);
-        }
-
-//        if (!targetTimelines.isEmpty()) {
-//            targetTimelines.forEach((s, timeSeries) -> System.out.println("!!!!!!!!!! "+s +" - "+timeSeries.getRaw().size()));
-//        }
+        timeline.put(timestamp, videoFrame);
     }
 }

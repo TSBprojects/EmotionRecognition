@@ -1,5 +1,6 @@
 package ru.sstu.vak.emotionrecognition.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,7 +12,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.toMap;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public enum Emotion {
+public enum Emotion implements Nameable {
 
     ANGER(0, "ЗЛОСТЬ", new Color(228, 48, 84), WHITE),
     DISGUST(1, "ОТВРАЩЕНИЕ", new Color(53, 164, 80), WHITE),
@@ -26,7 +27,9 @@ public enum Emotion {
     private final Color color;
     private final Color textColor;
 
-    private static final Map<Integer, Emotion> map = stream(values()).collect(toMap(Emotion::getEmotionId, e -> e));
+    private static final Map<Integer, Emotion> ID_MAP = stream(values()).collect(toMap(Emotion::getEmotionId, e -> e));
+
+    private static final Map<String, Emotion> NAME_MAP = stream(values()).collect(toMap(Emotion::getName, e -> e));
 
     Emotion(int emotionId, String name, Color color, Color textColor) {
         this.emotionId = emotionId;
@@ -35,11 +38,20 @@ public enum Emotion {
         this.textColor = textColor;
     }
 
-    public static Emotion valueOf(int index) {
-        Emotion emotion = map.get(index);
+    public static Emotion of(int index) {
+        return of(ID_MAP, index);
+    }
+
+    @JsonCreator
+    public static Emotion of(String name) {
+        return of(NAME_MAP, name);
+    }
+
+    private static <T> Emotion of(Map<T, Emotion> map, T value) {
+        Emotion emotion = map.get(value);
 
         if (emotion == null) {
-            throw new UnsupportedOperationException("Unknown or not supported emotion with index: " + index);
+            throw new UnsupportedOperationException("Unknown or not supported emotion with value: " + value);
         }
 
         return emotion;

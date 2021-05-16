@@ -1,5 +1,6 @@
 package ru.sstu.vak.emotionrecognition.ui.gui;
 
+import com.google.common.collect.Lists;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -8,10 +9,16 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static javafx.application.Platform.runLater;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -21,6 +28,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -29,13 +37,25 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
+import static javafx.scene.input.TransferMode.ANY;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import static javafx.scene.paint.Color.GRAY;
+import static javafx.scene.paint.Color.GREEN;
+import static javafx.scene.paint.Color.ORANGE;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -43,6 +63,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import lombok.var;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacv.Frame;
@@ -55,18 +76,49 @@ import static ru.sstu.vak.emotionrecognition.common.Emotion.HAPPY;
 import static ru.sstu.vak.emotionrecognition.common.Emotion.NEUTRAL;
 import static ru.sstu.vak.emotionrecognition.common.Emotion.SAD;
 import static ru.sstu.vak.emotionrecognition.common.Emotion.SURPRISE;
+import ru.sstu.vak.emotionrecognition.common.Invalidable;
+import ru.sstu.vak.emotionrecognition.common.Satisfiable;
+import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementHashMap;
+import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageCorrector;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.impl.FrameIteratorBase;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.ClosestFaceEmotionRecognizer;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
-import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.timeseries.TimeSeries;
-import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.timeseries.TimeSeriesCollector;
-import static ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.timeseries.TimelineState.PARTIAL_FROM_END;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.ImageInfo;
+import ru.sstu.vak.emotionrecognition.timeseries.TimeSeries;
+import ru.sstu.vak.emotionrecognition.timeseries.TimeSeriesCollector;
+import static ru.sstu.vak.emotionrecognition.timeseries.TimelineState.PARTIAL_FROM_END;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.AnalyzeEngine;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.EmotionFeature;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.Feature;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.SimpleAnalyzableModel;
+import static ru.sstu.vak.emotionrecognition.ui.Main.TITLE_IMAGE_PATH;
+import ru.sstu.vak.emotionrecognition.ui.gui.adapter.AnchorPaneAdapter;
+import ru.sstu.vak.emotionrecognition.ui.gui.adapter.HasChildren;
+import ru.sstu.vak.emotionrecognition.ui.gui.adapter.SplitPaneAdapter;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureSettingsButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureAnchorPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureSerialNumberLabel;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureWarnLabel;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFlowPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyPlaceHolderInner;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyPlaceHolderLabel;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyPlaceHolderOuter;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelHeaderAnchorPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelScrollPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelSplitPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildRemoveModelButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildSelectFeatureAnchorPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStateNameTextField;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStringencyRadioButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.NodeDecorator.shadow;
 
 public class MainController {
 
@@ -82,15 +134,13 @@ public class MainController {
 
     private static final String ANALYZE_RANGE_NAME = "analyze";
 
-    private static final int COMFORT_CHART_FACTOR = 34;
+    private static final int COMFORT_CHART_FACTOR = 40;
 
     private static final float FIXED_RANGE_TRIGGER_FACTOR = 0.02f;
 
     private static final float FREE_RANGE_TRIGGER_FACTOR = 0.04f;
 
     private static final Duration TARGET_FIXED_RANGE = Duration.ofSeconds(6);
-
-    private static final long MIN_RANGE_SIZE_MS = 6000;
 
     @FXML
     private ImageView videoImageView;
@@ -130,12 +180,11 @@ public class MainController {
 
     private XYChart.Series<String, String> chartLine;
 
+    @FXML
+    private final RangeSlider chartRangeSlider = initChartRangeSlider();
 
     @FXML
-    private final RangeSlider chartRangeSlider = new RangeSlider(0, 6000, 0, 6000);
-
-    @FXML
-    private final RangeSlider analyzeRangeSlider = new RangeSlider(0, 6000, 0, 6000);
+    private final RangeSlider analyzeRangeSlider = initAnalyzeRangeSlider();
 
     @FXML
     private Pane chartRangeHolder;
@@ -161,6 +210,8 @@ public class MainController {
     @FXML
     private Text analyzeRangeTotalLabel;
 
+    @FXML
+    private ListView<String> stateListView;
 
     @FXML
     private ImageView screenImageView;
@@ -186,11 +237,14 @@ public class MainController {
     @FXML
     private Button openImageBtn;
 
+    @FXML
+    private VBox constructorVbox;
+
 
     private final EventHandler<? super MouseEvent> mouseConsumeEvent = MouseEvent::consume;
 
     private final ChangeListener<? super Number> chartRangeHighValueChange = (ChangeListener<Number>) (o, oldV, newV) -> {
-        if (getChartSliderRange() < MIN_RANGE_SIZE_MS) {
+        if (getChartSliderRange() < TARGET_FIXED_RANGE.toMillis()) {
             chartRangeSlider.highValueProperty().removeListener(this.chartRangeHighValueChange);
             chartRangeSlider.setHighValue(oldV.doubleValue());
             chartRangeSlider.highValueProperty().addListener(this.chartRangeHighValueChange);
@@ -200,7 +254,7 @@ public class MainController {
     };
 
     private final ChangeListener<? super Number> chartRangeLowValueChange = (ChangeListener<Number>) (o, oldV, newV) -> {
-        if (getChartSliderRange() < MIN_RANGE_SIZE_MS) {
+        if (getChartSliderRange() < TARGET_FIXED_RANGE.toMillis()) {
             chartRangeSlider.lowValueProperty().removeListener(this.chartRangeLowValueChange);
             chartRangeSlider.setLowValue(oldV.doubleValue());
             chartRangeSlider.lowValueProperty().addListener(this.chartRangeLowValueChange);
@@ -210,7 +264,7 @@ public class MainController {
     };
 
     private final ChangeListener<? super Number> analyzeRangeHighValueChange = (ChangeListener<Number>) (o, oldV, newV) -> {
-        if (getAnalyzeSliderRange() < MIN_RANGE_SIZE_MS) {
+        if (getAnalyzeSliderRange() < TARGET_FIXED_RANGE.toMillis()) {
             chartRangeSlider.highValueProperty().removeListener(this.analyzeRangeHighValueChange);
             analyzeRangeSlider.setHighValue(oldV.doubleValue());
             chartRangeSlider.highValueProperty().addListener(this.analyzeRangeHighValueChange);
@@ -220,7 +274,7 @@ public class MainController {
     };
 
     private final ChangeListener<? super Number> analyzeRangeLowValueChange = (ChangeListener<Number>) (o, oldV, newV) -> {
-        if (getAnalyzeSliderRange() < MIN_RANGE_SIZE_MS) {
+        if (getAnalyzeSliderRange() < TARGET_FIXED_RANGE.toMillis()) {
             chartRangeSlider.lowValueProperty().removeListener(this.analyzeRangeLowValueChange);
             analyzeRangeSlider.setLowValue(oldV.doubleValue());
             chartRangeSlider.lowValueProperty().addListener(this.analyzeRangeLowValueChange);
@@ -230,7 +284,6 @@ public class MainController {
     };
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
-
 
     private Stage currentStage;
 
@@ -292,7 +345,9 @@ public class MainController {
         tryIt(() -> {
             initExit();
             initEmotionChart();
-            initRangeSlider();
+            initStateListView();
+            addConstructorFeatures();
+            initAddModelDragAndDropHandlers(addModelPlaceHolder);
 
             frameIterator = new FrameIteratorBase();
             frameIterator.setOnStopListener(this::onStopAction);
@@ -358,11 +413,15 @@ public class MainController {
 
         Duration currentRange = Duration.ofMillis(getChartSliderRange());
         if (chartTimeSeries.getState().isReachedToEnd() && currentRange.compareTo(TARGET_FIXED_RANGE) > 0) {
-            long untiedValue = chartCurrentMax - (long) (chartCurrentMax * FREE_RANGE_TRIGGER_FACTOR);
-            chartRangeSlider.highValueProperty().removeListener(this.chartRangeHighValueChange);
-            chartRangeSlider.setHighValue(untiedValue);
-            chartRangeSlider.highValueProperty().addListener(this.chartRangeHighValueChange);
-            highValueMs = untiedValue;
+            long diffToSub = (long) (chartCurrentMax * FREE_RANGE_TRIGGER_FACTOR);
+            long untiedLowValue = lowValueMs - diffToSub;
+            long untiedHighValue = highValueMs - diffToSub;
+            removeChartChangeListeners();
+            chartRangeSlider.setLowValue(untiedLowValue);
+            chartRangeSlider.setHighValue(untiedHighValue);
+            addChartChangeListeners();
+            lowValueMs = untiedLowValue;
+            highValueMs = untiedHighValue;
         }
 
         chartTimeSeries.mutateToRelativeRange(lowValueMs, highValueMs);
@@ -406,9 +465,9 @@ public class MainController {
                 Stage stage = new Stage();
                 stage.initModality(Modality.APPLICATION_MODAL);
                 stage.setTitle("Изображение");
-                stage.setScene(new Scene(root, winSize.width - 150, winSize.height - 150));
+                stage.setScene(new Scene(root, winSize.width - 150.0, winSize.height - 150.0));
                 stage.setResizable(true);
-                stage.getIcons().add(new Image("image/face-ico.png"));
+                stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
                 stage.showAndWait();
             });
         }
@@ -461,7 +520,99 @@ public class MainController {
             Duration fullRange = Duration.ofMillis(now.toEpochMilli() - firstFrameTimestamp);
             refreshSliderLabels(fullRange, chartRangeSlider, chartHighSliderLabel, chartLowSliderLabel, chartRangeTotalLabel);
             refreshSliderLabels(fullRange, analyzeRangeSlider, analyzeHighSliderLabel, analyzeLowSliderLabel, analyzeRangeTotalLabel);
+
+
+            var modelsList = stateListView.getItems();
+
+            if (allModels.isEmpty()) {
+                if (modelsList.get(0).equals(STATE_MODEL_NOT_SET)) return;
+                shadow(stateListView, ORANGE);
+                modelsList.clear();
+                modelsList.add(STATE_MODEL_NOT_SET);
+                return;
+            }
+
+            var r = AnalyzeEngine.analyze(analyzeTimeSeries, allModels);
+
+            applyHighlighting(allModels);
+
+            if (r.isEmpty()) {
+                if (modelsList.get(0).equals(STATE_NO_MATCH)) return;
+                shadow(stateListView, GRAY);
+                stateListView.getItems().clear();
+                stateListView.getItems().add(STATE_NO_MATCH);
+                return;
+            }
+
+            if (modelsList.equals(new ArrayList<>(r))) return;
+            shadow(stateListView, GREEN);
+            stateListView.getItems().clear();
+            stateListView.getItems().addAll(r);
         });
+    }
+
+    private void applyHighlighting(AutoIncrementMap<AnalyzableModel> models) {
+        if (models.isEmpty()) return;
+
+        var scene = mainAnchorPane.getScene();
+
+        for (var modelEntry : models.entrySet()) {
+            int modelId = modelEntry.getKey();
+            var model = modelEntry.getValue();
+            var splitPane = (SplitPane) scene.lookup("#" + modelId + MODEL_ID_SUFFIX);
+            highlightNode(model, new SplitPaneAdapter(splitPane));
+
+            for (var entry : model.getFeatures().entrySet()) {
+                int featureId = entry.getKey();
+                var feature = entry.getValue();
+                var selector = "#" + modelId + "_" + featureId + FEATURE_ID_SUFFIX;
+                var anchorPane = (AnchorPane) scene.lookup(selector);
+                highlightNode(feature, new AnchorPaneAdapter(anchorPane));
+            }
+            for (var entry : model.getMetaFeatures().entrySet()) {
+                int featureId = entry.getKey();
+                var feature = entry.getValue();
+                var selector = "#" + modelId + "_" + featureId + META_FEATURE_ID_SUFFIX + FEATURE_ID_SUFFIX;
+                var anchorPane = (AnchorPane) scene.lookup(selector);
+                highlightNode(feature, new AnchorPaneAdapter(anchorPane));
+            }
+        }
+    }
+
+    private void highlightNode(Satisfiable object, HasChildren<?> hasChildren) {
+        var node = hasChildren.getNode();
+
+        if (node == null) return;
+
+        var nodeChildren = hasChildren.getChildren();
+
+        final String styleDelimiter = ";";
+        var styles = new ArrayList<>(Arrays.asList(node.getStyle().split(styleDelimiter)));
+        var lastStyle = styles.get(styles.size() - 1);
+        if (lastStyle.contains("-fx-effect: dropshadow")) {
+            styles.remove(lastStyle);
+            lastStyle = "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);";
+        } else {
+            lastStyle = "";
+        }
+
+        var warnLabelOpt = nodeChildren.stream()
+            .filter(n -> "warn".equals(n.getId()))
+            .findFirst();
+
+        warnLabelOpt.ifPresent(value -> value.setVisible(false));
+
+        var nodeStyle = String.join(styleDelimiter, styles) + styleDelimiter;
+        if (Invalidable.class.isAssignableFrom(object.getClass()) && ((Invalidable) object).isInvalid()) {
+            var style = "-fx-effect: dropshadow(three-pass-box, red, 10, 0, 0, 0);";
+            node.setStyle(nodeStyle + style);
+            warnLabelOpt.ifPresent(value -> value.setVisible(true));
+        } else if (object.isSatisfied()) {
+            var style = "-fx-effect: dropshadow(three-pass-box, green, 10, 0, 0, 0);";
+            node.setStyle(nodeStyle + style);
+        } else {
+            node.setStyle(nodeStyle + lastStyle);
+        }
     }
 
     private void drawFixedRange(Instant now, FrameInfo frameInfo) {
@@ -642,23 +793,38 @@ public class MainController {
         emotionChart.setLegendVisible(false);
     }
 
-    private void initRangeSlider() {
-        runLater(() -> {
-            chartRangeSlider.setLayoutX(115);
-            chartRangeSlider.setLayoutY(9);
-            chartRangeSlider.setMinWidth(239);
-            chartRangeSlider.setMinHeight(38);
-            chartRangeHolder.getChildren().add(chartRangeSlider);
-            chartRangeHolder.addEventFilter(MouseEvent.MOUSE_RELEASED, event ->
-                chartRangeSlider.removeEventFilter(MouseEvent.ANY, mouseConsumeEvent)
-            );
+    private void initStateListView() {
+        stateListView.getItems().add(STATE_MODEL_NOT_SET);
+        stateListView.setFixedCellSize(23);
+    }
 
-            analyzeRangeSlider.setLayoutX(115);
-            analyzeRangeSlider.setLayoutY(9);
-            analyzeRangeSlider.setMinWidth(239);
-            analyzeRangeSlider.setMinHeight(38);
+    private RangeSlider initAnalyzeRangeSlider() {
+        long rangeMs = TARGET_FIXED_RANGE.toMillis();
+        RangeSlider rangeSlider = new RangeSlider(0, rangeMs, 0, rangeMs);
+        runLater(() -> {
+            rangeSlider.setLayoutX(115);
+            rangeSlider.setLayoutY(9);
+            rangeSlider.setMinWidth(239);
+            rangeSlider.setMinHeight(38);
             analyzeRangeHolder.getChildren().add(analyzeRangeSlider);
         });
+        return rangeSlider;
+    }
+
+    private RangeSlider initChartRangeSlider() {
+        long rangeMs = TARGET_FIXED_RANGE.toMillis();
+        RangeSlider rangeSlider = new RangeSlider(0, rangeMs, 0, rangeMs);
+        runLater(() -> {
+            rangeSlider.setLayoutX(115);
+            rangeSlider.setLayoutY(9);
+            rangeSlider.setMinWidth(239);
+            rangeSlider.setMinHeight(38);
+            chartRangeHolder.getChildren().add(rangeSlider);
+            chartRangeHolder.addEventFilter(MouseEvent.MOUSE_RELEASED, event ->
+                rangeSlider.removeEventFilter(MouseEvent.ANY, mouseConsumeEvent)
+            );
+        });
+        return rangeSlider;
     }
 
     private void addPointToChart(long value, String emotion) {
@@ -813,5 +979,503 @@ public class MainController {
 
     private interface TryItCallback {
         void executableCode() throws Exception;
+    }
+
+    ///////////////////////////////////////////////
+    //////////////// CONSTRUCTOR 2.0 //////////////
+    ///////////////////////////////////////////////
+
+    public static final String STATE_NO_MATCH = "НЕТ СОВПАДЕНИЙ";
+
+    public static final String STATE_MODEL_NOT_SET = "НЕ ЗАДАНО";
+
+    public static final String MODEL_ID_SUFFIX = "_model";
+
+    public static final String FEATURE_ID_SUFFIX = "_feature";
+
+    public static final String META_FEATURE_ID_SUFFIX = "_meta";
+
+    @FXML
+    private AnchorPane mainAnchorPane;
+
+    @FXML
+    private AnchorPane addModelPlaceHolder;
+
+    @FXML
+    private FlowPane selectFeaturePane;
+
+    @FXML
+    private VBox selectModelVBox;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    private final AutoIncrementMap<AnalyzableModel> allModels = new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
+
+    private final List<AbstractFeatureInfo<? extends Feature>> allFeatures = initFeatures();
+
+    private List<AbstractFeatureInfo<? extends Feature>> initFeatures() {
+        List<AbstractFeatureInfo<? extends Feature>> features = new ArrayList<>();
+
+        for (var feature : Lists.newArrayList(ServiceLoader.load(MetaFeature.class))) {
+            features.add(new MetaFeatureInfo(feature, allModels));
+        }
+
+        for (var feature : Lists.newArrayList(ServiceLoader.load(EmotionFeature.class))) {
+            features.add(new EmotionFeatureInfo(feature, allModels));
+        }
+
+        return Collections.unmodifiableList(features);
+    }
+
+    private void initAddModelDragAndDropHandlers(Node node) {
+        node.setOnDragOver(event -> {
+            /* accept it only if it is  not dragged from the same node
+             * and if it has a string data */
+            if (event.getGestureSource() != node && event.getDragboard().hasString()) {
+                /* allow for both copying and moving, whatever user chooses */
+                event.acceptTransferModes(ANY);
+            }
+
+            event.consume();
+        });
+
+//        addModelPlaceHolder.setOnDragEntered(new EventHandler <DragEvent>() {
+//            public void handle(DragEvent event) {
+//                /* the drag-and-drop gesture entered the target */
+//                System.out.println("onDragEntered");
+//                /* show to the user that it is an actual gesture target */
+//                if (event.getGestureSource() != target &&
+//                    event.getDragboard().hasString()) {
+//                    target.setFill(Color.GREEN);
+//                }
+//
+//                event.consume();
+//            }
+//        });
+
+//        addModelPlaceHolder.setOnDragExited(new EventHandler <DragEvent>() {
+//            public void handle(DragEvent event) {
+//                /* mouse moved away, remove the graphical cues */
+//                target.setFill(Color.BLACK);
+//
+//                event.consume();
+//            }
+//        });
+
+        node.setOnDragDropped(event -> {
+            boolean success = false;
+
+            Dragboard db = event.getDragboard();
+            if (db.hasString()) {
+                int featureNumberInModel = 0;
+                int modelId = allModels.getNextId();
+                String stateName = "Модель " + modelId;
+                int featureId = Integer.parseInt(db.getString());
+                var featureInfo = allFeatures.get(featureId);
+                featureInfo.createAndPutModel(stateName);
+
+                AnchorPane addFeaturePlaceHolder = buildModelBodyPlaceHolderOuter(
+                    buildModelBodyPlaceHolderInner(buildModelBodyPlaceHolderLabel())
+                );
+
+                Label labelName = buildFeatureNameLabel(featureInfo.getFeature().getName());
+
+                Button configureFeatureButton = buildFeatureSettingsButton();
+
+                Button removeModelFeatureButton = buildRemoveModelButton();
+
+                String serialNumber = featureInfo.createSerialNumber(featureNumberInModel);
+
+                AnchorPane firstFeature = buildModelBodyFeatureAnchorPane(
+                    buildModelBodyFeatureSerialNumberLabel(serialNumber),
+                    buildModelBodyFeatureWarnLabel(),
+                    labelName,
+                    configureFeatureButton,
+                    removeModelFeatureButton
+                );
+
+                firstFeature.setId(modelId + "_" + serialNumber + FEATURE_ID_SUFFIX);
+
+                FlowPane featuresHolder = buildModelBodyFlowPane(firstFeature, addFeaturePlaceHolder);
+
+                TextField state = buildStateNameTextField(stateName);
+
+                RadioButton stringency = buildStringencyRadioButton();
+
+                Button removeModelButton = buildRemoveModelButton();
+
+                SplitPane modelPane = buildModelSplitPane(
+                    buildModelHeaderAnchorPane(
+                        state,
+                        stringency,
+                        removeModelButton
+                    ),
+                    buildModelScrollPane(featuresHolder)
+                );
+
+                modelPane.setId(modelId + MODEL_ID_SUFFIX);
+
+                featureInfo.initModelFeatureSettingHandler(
+                    modelId,
+                    featureNumberInModel,
+                    configureFeatureButton,
+                    labelName
+                );
+
+                featureInfo.initRemoveHandler(
+                    modelId,
+                    featureNumberInModel,
+                    featuresHolder,
+                    firstFeature,
+                    removeModelFeatureButton
+                );
+
+                initStateNameChangeHandler(modelId, state);
+
+                initStringencyChangeHandler(modelId, stringency);
+
+                initAddFeatureToModelHandlers(modelId, featuresHolder, featuresHolder);
+
+                initRemoveModelHandler(modelId, selectModelVBox, modelPane, removeModelButton);
+
+                var paneModels = selectModelVBox.getChildren();
+                paneModels.add(paneModels.size() - 1, modelPane);
+
+                success = true;
+            }
+
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
+    private void initStateNameChangeHandler(int modelId, TextField stateTextField) {
+        stateTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            var model = allModels.get(modelId);
+            String newName = stateTextField.getText();
+            if (isBlank(newName)) {
+                String oldName = model.getName();
+                model.setName(oldName);
+                stateTextField.setText(oldName);
+                stateTextField.setStyle("-fx-border-color:red");
+                scheduler.schedule(() -> runLater(() -> stateTextField.setStyle("-fx-border-color:none")), 1, SECONDS);
+            } else {
+                model.setName(newName);
+                stateTextField.setStyle("-fx-border-color:none");
+            }
+        });
+    }
+
+    private void initStringencyChangeHandler(int modelId, RadioButton stringency) {
+        stringency.setOnAction(event -> allModels.get(modelId).setStrictly(stringency.isSelected()));
+    }
+
+    private void initRemoveModelHandler(int modelId, Pane holder, Node target, Button removeBtn) {
+        removeBtn.setOnAction(event -> {
+            holder.getChildren().remove(target);
+            allModels.remove(modelId);
+        });
+    }
+
+    private void initAddFeatureToModelHandlers(int modelId, Pane target, Pane addTo) {
+
+        target.setOnDragOver(event -> {
+            /* accept it only if it is  not dragged from the same node
+             * and if it has a string data */
+            if (event.getGestureSource() != target && event.getDragboard().hasString()) {
+                /* allow for both copying and moving, whatever user chooses */
+                event.acceptTransferModes(ANY);
+            }
+
+            event.consume();
+        });
+
+//        addModelPlaceHolder.setOnDragEntered(new EventHandler <DragEvent>() {
+//            public void handle(DragEvent event) {
+//                /* the drag-and-drop gesture entered the target */
+//                System.out.println("onDragEntered");
+//                /* show to the user that it is an actual gesture target */
+//                if (event.getGestureSource() != target &&
+//                    event.getDragboard().hasString()) {
+//                    target.setFill(Color.GREEN);
+//                }
+//
+//                event.consume();
+//            }
+//        });
+
+//        addModelPlaceHolder.setOnDragExited(new EventHandler <DragEvent>() {
+//            public void handle(DragEvent event) {
+//                /* mouse moved away, remove the graphical cues */
+//                target.setFill(Color.BLACK);
+//
+//                event.consume();
+//            }
+//        });
+
+        target.setOnDragDropped(event -> {
+
+            boolean success = false;
+
+            Dragboard db = event.getDragboard();
+            if (db.hasString()) {
+                int featureId = Integer.parseInt(db.getString());
+
+                var featureInfo = allFeatures.get(featureId);
+
+                int featureNumberInModel = featureInfo.putFeature(modelId);
+
+                Label labelName = buildFeatureNameLabel(featureInfo.getFeature().getName());
+
+                Button configureFeatureButton = buildFeatureSettingsButton();
+
+                Button removeFeatureButton = buildRemoveModelButton();
+
+                String serialNumber = featureInfo.createSerialNumber(featureNumberInModel);
+
+                AnchorPane featurePane = buildModelBodyFeatureAnchorPane(
+                    buildModelBodyFeatureSerialNumberLabel(serialNumber),
+                    buildModelBodyFeatureWarnLabel(),
+                    labelName,
+                    configureFeatureButton,
+                    removeFeatureButton
+                );
+
+                featurePane.setId(modelId + "_" + serialNumber + FEATURE_ID_SUFFIX);
+
+                featureInfo.initModelFeatureSettingHandler(
+                    modelId,
+                    featureNumberInModel,
+                    configureFeatureButton,
+                    labelName
+                );
+
+                featureInfo.initRemoveHandler(
+                    modelId,
+                    featureNumberInModel,
+                    addTo,
+                    featurePane,
+                    removeFeatureButton
+                );
+
+                var addToChildren = addTo.getChildren();
+                addToChildren.add(addToChildren.size() - 1, featurePane);
+
+                success = true;
+            }
+
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
+    private void addConstructorFeatures() {
+        for (int i = 0; i < allFeatures.size(); i++) {
+            var featureInfo = allFeatures.get(i);
+
+            Button settingsButton = buildFeatureSettingsButton();
+
+            Label labelName = buildFeatureNameLabel(featureInfo.getFeature().getName());
+
+            AnchorPane featurePane = buildSelectFeatureAnchorPane(labelName, settingsButton);
+
+            featureInfo.initConstructorFeatureSettingHandler(settingsButton, labelName);
+
+            final int id = i;
+            featurePane.setOnDragDetected(event -> {
+                //greenShadow(featurePane);
+
+                /* allow any transfer mode */
+                Dragboard db = featurePane.startDragAndDrop(ANY);
+
+                /* put a string on dragboard */
+                ClipboardContent content = new ClipboardContent();
+                content.putString(Integer.toString(id));
+                db.setContent(content);
+
+                event.consume();
+            });
+
+            featurePane.setOnDragDone(event -> {
+                //blackShadow(featurePane);
+                event.consume();
+            });
+
+            selectFeaturePane.getChildren().add(featurePane);
+        }
+    }
+
+    protected abstract static class AbstractFeatureInfo<T extends Feature> {
+
+        private final T feature;
+
+        private final AutoIncrementMap<AnalyzableModel> models;
+
+        protected AbstractFeatureInfo(T feature, AutoIncrementMap<AnalyzableModel> models) {
+            this.feature = feature;
+            this.models = models;
+        }
+
+        public T getFeature() {
+            return feature;
+        }
+
+        public AutoIncrementMap<AnalyzableModel> getModels() {
+            return models;
+        }
+
+        public abstract int putFeature(int modelId);
+
+        public abstract String createSerialNumber(int id);
+
+        public abstract void initRemoveHandler(int modelId, int featureId, Pane holder, Node target, Button removeBtn);
+
+        public abstract void initConstructorFeatureSettingHandler(Button settings, Label nameLabel);
+
+        public abstract void initModelFeatureSettingHandler(int modelId, int featureId, Button settings, Label nameLabel);
+
+        public abstract void createAndPutModel(String stateName);
+    }
+
+    protected static class MetaFeatureInfo extends AbstractFeatureInfo<MetaFeature> {
+
+        public MetaFeatureInfo(MetaFeature feature, AutoIncrementMap<AnalyzableModel> models) {
+            super(feature, models);
+        }
+
+        @Override
+        public int putFeature(int modelId) {
+            return getModels().get(modelId).getMetaFeatures().put(getFeature().copy());
+        }
+
+        @Override
+        public String createSerialNumber(int id) {
+            return id + META_FEATURE_ID_SUFFIX;
+        }
+
+        @Override
+        public void initRemoveHandler(int modelId, int featureId, Pane holder, Node target, Button removeBtn) {
+            removeBtn.setOnAction(event -> {
+                holder.getChildren().remove(target);
+                getModels().get(modelId).getMetaFeatures().remove(featureId);
+            });
+        }
+
+        @Override
+        public void initConstructorFeatureSettingHandler(Button settings, Label nameLabel) {
+            settings.setVisible(false);
+            settings.setDisable(true);
+        }
+
+        @Override
+        public void initModelFeatureSettingHandler(int modelId, int featureId, Button settings, Label nameLabel) {
+            settings.setOnAction(event -> {
+
+                var model = getModels().get(modelId);
+
+                MetaFeature feature = model.getMetaFeatures().get(featureId);
+
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(getClass().getResource("/metaFeatureSettings.fxml"));
+
+                Parent root = null;
+                try {
+                    root = loader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                MetaFeatureSettingsController progressController = loader.getController();
+                progressController.setData(feature, model.getFeatures());
+
+                Stage stage = new Stage();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setTitle(feature.getName() + " - конфигурация");
+                stage.setScene(new Scene(root, 629, 496));
+                stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
+                stage.showAndWait();
+            });
+        }
+
+        @Override
+        public void createAndPutModel(String stateName) {
+            getModels().put(new SimpleAnalyzableModel(
+                stateName,
+                true,
+                Collections.emptyMap(),
+                Collections.singletonMap(0, getFeature().copy())
+            ));
+        }
+    }
+
+    protected static class EmotionFeatureInfo extends AbstractFeatureInfo<EmotionFeature> {
+
+        public EmotionFeatureInfo(EmotionFeature feature, AutoIncrementMap<AnalyzableModel> models) {
+            super(feature, models);
+        }
+
+        @Override
+        public int putFeature(int modelId) {
+            return getModels().get(modelId).getFeatures().put(getFeature().copy());
+        }
+
+        @Override
+        public String createSerialNumber(int id) {
+            return Integer.toString(id);
+        }
+
+        @Override
+        public void initRemoveHandler(int modelId, int featureId, Pane holder, Node target, Button removeBtn) {
+            removeBtn.setOnAction(event -> {
+                holder.getChildren().remove(target);
+                getModels().get(modelId).getFeatures().remove(featureId);
+            });
+        }
+
+        @Override
+        public void initConstructorFeatureSettingHandler(Button settings, Label nameLabel) {
+            initFeatureSettingHandler(getFeature(), settings, nameLabel);
+        }
+
+        @Override
+        public void initModelFeatureSettingHandler(int modelId, int featureId, Button settings, Label nameLabel) {
+            initFeatureSettingHandler(getModels().get(modelId).getFeatures().get(featureId), settings, nameLabel);
+        }
+
+        private void initFeatureSettingHandler(EmotionFeature feature, Button settings, Label nameLabel) {
+            settings.setOnAction(event -> {
+
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(getClass().getResource("/featureSettings.fxml"));
+
+                Parent root = null;
+                try {
+                    root = loader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                FeatureSettingsController progressController = loader.getController();
+                progressController.setFeature(feature);
+
+                Stage stage = new Stage();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setTitle(feature.getName() + " - конфигурация");
+                stage.setScene(new Scene(root, 423, 317));
+                stage.setOnCloseRequest(e -> nameLabel.setText(feature.getName()));
+                stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
+                stage.showAndWait();
+            });
+        }
+
+        @Override
+        public void createAndPutModel(String stateName) {
+            getModels().put(new SimpleAnalyzableModel(
+                stateName,
+                true,
+                Collections.singletonMap(0, getFeature().copy()),
+                Collections.emptyMap()
+            ));
+        }
     }
 }
