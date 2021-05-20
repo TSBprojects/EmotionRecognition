@@ -221,12 +221,7 @@
                                           <ImageView fx:id="disgustFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="482.0" pickOnBounds="true" preserveRatio="true" visible="false" />
                                           <ImageView fx:id="angryFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="578.0" pickOnBounds="true" preserveRatio="true" visible="false" />
                                           <ImageView fx:id="fearFaceImage" fitHeight="31.0" fitWidth="32.0" layoutX="1244.0" layoutY="665.0" pickOnBounds="true" preserveRatio="true" visible="false" />
-                                          <ImageView fitHeight="103.0" fitWidth="239.0" layoutX="439.0" layoutY="752.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@image/инпит.png" />
-                                             </image>
-                                          </ImageView>
-                                          <ImageView fitHeight="114.0" fitWidth="315.0" layoutX="69.0" layoutY="746.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fitHeight="114.0" fitWidth="315.0" layoutX="296.0" layoutY="746.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@image/неофлекс.png" />
                                              </image>
@@ -234,11 +229,6 @@
                                           <ImageView fx:id="fireworkImage2" fitHeight="264.0" fitWidth="263.0" layoutX="693.0" layoutY="-1.0" pickOnBounds="true" preserveRatio="true" visible="false">
                                              <image>
                                                 <Image url="@image/fireworks.gif" />
-                                             </image>
-                                          </ImageView>
-                                          <ImageView fitHeight="130.0" fitWidth="141.0" layoutX="708.0" layoutY="739.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@image/mayCareer.png" />
                                              </image>
                                           </ImageView>
                                        </children>
