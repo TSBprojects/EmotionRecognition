@@ -99,14 +99,14 @@ import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.SimpleAnalyzableModel;
 import static ru.sstu.vak.emotionrecognition.ui.Main.TITLE_IMAGE_PATH;
-import ru.sstu.vak.emotionrecognition.ui.gui.adapter.AnchorPaneAdapter;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.HasChildren;
+import ru.sstu.vak.emotionrecognition.ui.gui.adapter.PaneAdapter;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.SplitPaneAdapter;
+import ru.sstu.vak.emotionrecognition.ui.gui.feature.ActionHandler;
+import ru.sstu.vak.emotionrecognition.ui.gui.feature.FeatureConfiguration;
+import ru.sstu.vak.emotionrecognition.ui.gui.feature.FeatureFactory;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureSettingsButton;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureAnchorPane;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureSerialNumberLabel;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureWarnLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFlowPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyPlaceHolderInner;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyPlaceHolderLabel;
@@ -567,14 +567,14 @@ public class MainController {
                 var feature = entry.getValue();
                 var selector = "#" + modelId + "_" + featureId + FEATURE_ID_SUFFIX;
                 var anchorPane = (AnchorPane) scene.lookup(selector);
-                highlightNode(feature, new AnchorPaneAdapter(anchorPane));
+                highlightNode(feature, new PaneAdapter(anchorPane));
             }
             for (var entry : model.getMetaFeatures().entrySet()) {
                 int featureId = entry.getKey();
                 var feature = entry.getValue();
                 var selector = "#" + modelId + "_" + featureId + META_FEATURE_ID_SUFFIX + FEATURE_ID_SUFFIX;
                 var anchorPane = (AnchorPane) scene.lookup(selector);
-                highlightNode(feature, new AnchorPaneAdapter(anchorPane));
+                highlightNode(feature, new PaneAdapter(anchorPane));
             }
         }
     }
@@ -1009,19 +1009,19 @@ public class MainController {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    private final AutoIncrementMap<AnalyzableModel> allModels = new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
+    private static final AutoIncrementMap<AnalyzableModel> allModels = new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
 
-    private final List<AbstractFeatureInfo<? extends Feature>> allFeatures = initFeatures();
+    private static final List<AbstractFeatureInfo<? extends Feature>> ALL_FEATURES = initFeatures();
 
-    private List<AbstractFeatureInfo<? extends Feature>> initFeatures() {
+    private static List<AbstractFeatureInfo<? extends Feature>> initFeatures() {
         List<AbstractFeatureInfo<? extends Feature>> features = new ArrayList<>();
 
         for (var feature : Lists.newArrayList(ServiceLoader.load(MetaFeature.class))) {
-            features.add(new MetaFeatureInfo(feature, allModels));
+            features.add(new MetaFeatureInfo(feature, MainController.allModels));
         }
 
         for (var feature : Lists.newArrayList(ServiceLoader.load(EmotionFeature.class))) {
-            features.add(new EmotionFeatureInfo(feature, allModels));
+            features.add(new EmotionFeatureInfo(feature, MainController.allModels));
         }
 
         return Collections.unmodifiableList(features);
@@ -1071,32 +1071,29 @@ public class MainController {
                 int modelId = allModels.getNextId();
                 String stateName = "Модель " + modelId;
                 int featureId = Integer.parseInt(db.getString());
-                var featureInfo = allFeatures.get(featureId);
+                var featureInfo = ALL_FEATURES.get(featureId);
                 featureInfo.createAndPutModel(stateName);
 
                 AnchorPane addFeaturePlaceHolder = buildModelBodyPlaceHolderOuter(
                     buildModelBodyPlaceHolderInner(buildModelBodyPlaceHolderLabel())
                 );
 
-                Label labelName = buildFeatureNameLabel(featureInfo.getFeature().getName());
-
-                Button configureFeatureButton = buildFeatureSettingsButton();
-
-                Button removeModelFeatureButton = buildRemoveModelButton();
-
                 String serialNumber = featureInfo.createSerialNumber(featureNumberInModel);
 
-                AnchorPane firstFeature = buildModelBodyFeatureAnchorPane(
-                    buildModelBodyFeatureSerialNumberLabel(serialNumber),
-                    buildModelBodyFeatureWarnLabel(),
-                    labelName,
-                    configureFeatureButton,
-                    removeModelFeatureButton
-                );
+                FlowPane featuresHolder = buildModelBodyFlowPane();
 
-                firstFeature.setId(modelId + "_" + serialNumber + FEATURE_ID_SUFFIX);
+                FeatureConfiguration featureConfig = FeatureConfiguration.builder()
+                    .modelId(modelId)
+                    .label(featureInfo.getFeature().getName())
+                    .serialNumber(serialNumber)
+                    .removeHandler(featureInfo.getRemoveHandler(modelId, featureNumberInModel))
+                    .settingHandler(featureInfo.getModelFeatureSettingHandler(modelId, featureNumberInModel))
+                    .featureHolder(new PaneAdapter(featuresHolder))
+                    .build();
 
-                FlowPane featuresHolder = buildModelBodyFlowPane(firstFeature, addFeaturePlaceHolder);
+                AnchorPane firstFeature = FeatureFactory.createFeature(featureConfig);
+
+                featuresHolder.getChildren().addAll(firstFeature, addFeaturePlaceHolder);
 
                 TextField state = buildStateNameTextField(stateName);
 
@@ -1114,21 +1111,6 @@ public class MainController {
                 );
 
                 modelPane.setId(modelId + MODEL_ID_SUFFIX);
-
-                featureInfo.initModelFeatureSettingHandler(
-                    modelId,
-                    featureNumberInModel,
-                    configureFeatureButton,
-                    labelName
-                );
-
-                featureInfo.initRemoveHandler(
-                    modelId,
-                    featureNumberInModel,
-                    featuresHolder,
-                    firstFeature,
-                    removeModelFeatureButton
-                );
 
                 initStateNameChangeHandler(modelId, state);
 
@@ -1221,42 +1203,22 @@ public class MainController {
             if (db.hasString()) {
                 int featureId = Integer.parseInt(db.getString());
 
-                var featureInfo = allFeatures.get(featureId);
+                var featureInfo = ALL_FEATURES.get(featureId);
 
                 int featureNumberInModel = featureInfo.putFeature(modelId);
 
-                Label labelName = buildFeatureNameLabel(featureInfo.getFeature().getName());
-
-                Button configureFeatureButton = buildFeatureSettingsButton();
-
-                Button removeFeatureButton = buildRemoveModelButton();
-
                 String serialNumber = featureInfo.createSerialNumber(featureNumberInModel);
 
-                AnchorPane featurePane = buildModelBodyFeatureAnchorPane(
-                    buildModelBodyFeatureSerialNumberLabel(serialNumber),
-                    buildModelBodyFeatureWarnLabel(),
-                    labelName,
-                    configureFeatureButton,
-                    removeFeatureButton
-                );
+                FeatureConfiguration featureConfig = FeatureConfiguration.builder()
+                    .modelId(modelId)
+                    .label(featureInfo.getFeature().getName())
+                    .serialNumber(serialNumber)
+                    .removeHandler(featureInfo.getRemoveHandler(modelId, featureNumberInModel))
+                    .settingHandler(featureInfo.getModelFeatureSettingHandler(modelId, featureNumberInModel))
+                    .featureHolder(new PaneAdapter(addTo))
+                    .build();
 
-                featurePane.setId(modelId + "_" + serialNumber + FEATURE_ID_SUFFIX);
-
-                featureInfo.initModelFeatureSettingHandler(
-                    modelId,
-                    featureNumberInModel,
-                    configureFeatureButton,
-                    labelName
-                );
-
-                featureInfo.initRemoveHandler(
-                    modelId,
-                    featureNumberInModel,
-                    addTo,
-                    featurePane,
-                    removeFeatureButton
-                );
+                AnchorPane featurePane = FeatureFactory.createFeature(featureConfig);
 
                 var addToChildren = addTo.getChildren();
                 addToChildren.add(addToChildren.size() - 1, featurePane);
@@ -1270,8 +1232,8 @@ public class MainController {
     }
 
     private void addConstructorFeatures() {
-        for (int i = 0; i < allFeatures.size(); i++) {
-            var featureInfo = allFeatures.get(i);
+        for (int i = 0; i < ALL_FEATURES.size(); i++) {
+            var featureInfo = ALL_FEATURES.get(i);
 
             Button settingsButton = buildFeatureSettingsButton();
 
@@ -1279,7 +1241,9 @@ public class MainController {
 
             AnchorPane featurePane = buildSelectFeatureAnchorPane(labelName, settingsButton);
 
-            featureInfo.initConstructorFeatureSettingHandler(settingsButton, labelName);
+            settingsButton.setOnAction(featureInfo.getConstructorFeatureSettingHandler(labelName).apply(
+                settingsButton, null, null
+            ));
 
             final int id = i;
             featurePane.setOnDragDetected(event -> {
@@ -1328,11 +1292,11 @@ public class MainController {
 
         public abstract String createSerialNumber(int id);
 
-        public abstract void initRemoveHandler(int modelId, int featureId, Pane holder, Node target, Button removeBtn);
+        public abstract ActionHandler getRemoveHandler(int modelId, int featureId);
 
-        public abstract void initConstructorFeatureSettingHandler(Button settings, Label nameLabel);
+        public abstract ActionHandler getConstructorFeatureSettingHandler(Label nameLabel);
 
-        public abstract void initModelFeatureSettingHandler(int modelId, int featureId, Button settings, Label nameLabel);
+        public abstract ActionHandler getModelFeatureSettingHandler(int modelId, int featureId);
 
         public abstract void createAndPutModel(String stateName);
     }
@@ -1354,22 +1318,25 @@ public class MainController {
         }
 
         @Override
-        public void initRemoveHandler(int modelId, int featureId, Pane holder, Node target, Button removeBtn) {
-            removeBtn.setOnAction(event -> {
-                holder.getChildren().remove(target);
+        public ActionHandler getRemoveHandler(int modelId, int featureId) {
+            return (button, holder, feature) -> event -> {
+                holder.getChildren().remove(feature.value());
                 getModels().get(modelId).getMetaFeatures().remove(featureId);
-            });
+            };
         }
 
         @Override
-        public void initConstructorFeatureSettingHandler(Button settings, Label nameLabel) {
-            settings.setVisible(false);
-            settings.setDisable(true);
+        public ActionHandler getConstructorFeatureSettingHandler(Label nameLabel) {
+            return (button, ignore2, ignore3) -> {
+                button.setVisible(false);
+                button.setDisable(true);
+                return e -> { };
+            };
         }
 
         @Override
-        public void initModelFeatureSettingHandler(int modelId, int featureId, Button settings, Label nameLabel) {
-            settings.setOnAction(event -> {
+        public ActionHandler getModelFeatureSettingHandler(int modelId, int featureId) {
+            return (ignore1, ignore2, ignore3) -> event -> {
 
                 var model = getModels().get(modelId);
 
@@ -1394,7 +1361,7 @@ public class MainController {
                 stage.setScene(new Scene(root, 629, 496));
                 stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
                 stage.showAndWait();
-            });
+            };
         }
 
         @Override
@@ -1425,25 +1392,26 @@ public class MainController {
         }
 
         @Override
-        public void initRemoveHandler(int modelId, int featureId, Pane holder, Node target, Button removeBtn) {
-            removeBtn.setOnAction(event -> {
-                holder.getChildren().remove(target);
+        public ActionHandler getRemoveHandler(int modelId, int featureId) {
+            return (ignore1, holder, feature) -> event -> {
+                holder.getChildren().remove(feature.value());
                 getModels().get(modelId).getFeatures().remove(featureId);
-            });
+            };
         }
 
         @Override
-        public void initConstructorFeatureSettingHandler(Button settings, Label nameLabel) {
-            initFeatureSettingHandler(getFeature(), settings, nameLabel);
+        public ActionHandler getConstructorFeatureSettingHandler(Label nameLabel) {
+            return (ignore1, ignore2, ignore3) -> getFeatureSettingHandler(getFeature(), nameLabel);
         }
 
         @Override
-        public void initModelFeatureSettingHandler(int modelId, int featureId, Button settings, Label nameLabel) {
-            initFeatureSettingHandler(getModels().get(modelId).getFeatures().get(featureId), settings, nameLabel);
+        public ActionHandler getModelFeatureSettingHandler(int modelId, int featureId) {
+            return (ignore1, holder, feature) ->
+                getFeatureSettingHandler(getModels().get(modelId).getFeatures().get(featureId), feature.getNameLabel());
         }
 
-        private void initFeatureSettingHandler(EmotionFeature feature, Button settings, Label nameLabel) {
-            settings.setOnAction(event -> {
+        private EventHandler<ActionEvent> getFeatureSettingHandler(EmotionFeature feature, Label nameLabel) {
+            return event -> {
 
                 FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(getClass().getResource("/featureSettings.fxml"));
@@ -1465,7 +1433,7 @@ public class MainController {
                 stage.setOnCloseRequest(e -> nameLabel.setText(feature.getName()));
                 stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
                 stage.showAndWait();
-            });
+            };
         }
 
         @Override
