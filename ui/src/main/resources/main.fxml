@@ -157,28 +157,28 @@
                               </VBox>
                            </content>
                         </ScrollPane>
-                        <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="456.0" prefWidth="283.0">
-                           <content>
-                              <SplitPane dividerPositions="0.09251101321585903" orientation="VERTICAL" prefHeight="456.0" prefWidth="261.0">
-                                <items>
-                                    <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
-                                       <children>
-                                          <Label text="Библиотека факторов" textFill="#6b6b6b">
-                                             <font>
-                                                <Font name="Century" size="16.0" />
-                                             </font>
-                                          </Label>
-                                       </children>
-                                    </VBox>
-                                    <FlowPane fx:id="selectFeaturePane" prefHeight="456.0" prefWidth="136.0">
+                        <SplitPane dividerPositions="0.09251101321585903" orientation="VERTICAL" prefHeight="456.0" prefWidth="261.0">
+                          <items>
+                              <VBox alignment="CENTER" maxHeight="39.0" minHeight="39.0" prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <Label text="Библиотека факторов" textFill="#6b6b6b">
+                                       <font>
+                                          <Font name="Century" size="16.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                              <ScrollPane fitToHeight="true" fitToWidth="true">
+                                 <content>
+                                    <FlowPane fx:id="selectFeaturePane">
                                        <padding>
                                           <Insets right="15.0" top="15.0" />
                                        </padding>
                                     </FlowPane>
-                                </items>
-                              </SplitPane>
-                           </content>
-                        </ScrollPane>
+                                 </content>
+                              </ScrollPane>
+                          </items>
+                        </SplitPane>
                     </items>
                   </SplitPane>
                </content>
