@@ -1,9 +1,10 @@
-package ru.sstu.vak.emotionrecognition.ui.gui.feature;
+package ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import static ru.sstu.vak.emotionrecognition.ui.gui.MainController.FEATURE_ID_SUFFIX;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.FeatureContext;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureSettingsButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureAnchorPane;
@@ -17,11 +18,17 @@ public final class FeatureFactory {
         throw new AssertionError();
     }
 
-    public static AnchorPane createFeature(FeatureConfiguration config) {
+    public static FeaturePane createFeature(FeatureConfig config) {
 
-        String serialNumber = config.getSerialNumber();
+        int modelId = config.getModelId();
 
-        Label labelName = buildFeatureNameLabel(config.getLabel());
+        int featureNumberInModel = config.getFeatureNumberInModel();
+
+        FeatureContext<?> featureInfo = config.getFeatureContext();
+
+        String serialNumber = featureInfo.createSerialNumber(featureNumberInModel);
+
+        Label labelName = buildFeatureNameLabel(featureInfo.getFeature().getName());
 
         Button configureFeatureButton = buildFeatureSettingsButton();
 
@@ -47,21 +54,23 @@ public final class FeatureFactory {
             .warnMsg(warnLabel)
             .remove(removeModelFeatureButton)
             .settings(configureFeatureButton)
-            .pane(feature)
+            .value(feature)
             .build();
 
-        configureFeatureButton.setOnAction(config.getSettingHandler().apply(
+        FeatureAction settingsHandler = featureInfo.getModelFeatureSettingHandler(modelId, featureNumberInModel);
+        configureFeatureButton.setOnAction(settingsHandler.apply(
             configureFeatureButton,
             config.getFeatureHolder(),
             featureWrapper
         ));
 
-        removeModelFeatureButton.setOnAction(config.getRemoveHandler().apply(
+        FeatureAction removeHandler = featureInfo.getRemoveHandler(modelId, featureNumberInModel);
+        removeModelFeatureButton.setOnAction(removeHandler.apply(
             removeModelFeatureButton,
             config.getFeatureHolder(),
             featureWrapper
         ));
 
-        return feature;
+        return featureWrapper;
     }
 }

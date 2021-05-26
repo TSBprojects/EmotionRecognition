@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.ui.gui.feature;
+package ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -8,11 +8,11 @@ public interface FeaturePane {
 
     AnchorPane value();
 
-    Label getSerialNumberLabel();
+    Label getSerialNumber();
 
-    Label getWarnMsgLabel();
+    Label getWarnMsg();
 
-    Label getNameLabel();
+    Label getName();
 
     Button getSettingsBtn();
 

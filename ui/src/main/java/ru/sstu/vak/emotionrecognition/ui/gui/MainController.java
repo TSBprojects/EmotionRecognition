@@ -97,14 +97,17 @@ import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.EmotionFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.Feature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
-import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.SimpleAnalyzableModel;
 import static ru.sstu.vak.emotionrecognition.ui.Main.TITLE_IMAGE_PATH;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.HasChildren;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.PaneAdapter;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.SplitPaneAdapter;
-import ru.sstu.vak.emotionrecognition.ui.gui.feature.ActionHandler;
-import ru.sstu.vak.emotionrecognition.ui.gui.feature.FeatureConfiguration;
-import ru.sstu.vak.emotionrecognition.ui.gui.feature.FeatureFactory;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.FeatureConfig;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.FeatureFactory;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.EmotionFeatureContext;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.FeatureContext;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.MetaFeatureContext;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.ModelPane;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.SimpleModelPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureSettingsButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFlowPane;
@@ -524,7 +527,7 @@ public class MainController {
 
             var modelsList = stateListView.getItems();
 
-            if (allModels.isEmpty()) {
+            if (currentModels.isEmpty()) {
                 if (modelsList.get(0).equals(STATE_MODEL_NOT_SET)) return;
                 shadow(stateListView, ORANGE);
                 modelsList.clear();
@@ -532,9 +535,9 @@ public class MainController {
                 return;
             }
 
-            var r = AnalyzeEngine.analyze(analyzeTimeSeries, allModels);
+            var r = AnalyzeEngine.analyze(analyzeTimeSeries, currentModels);
 
-            applyHighlighting(allModels);
+            applyHighlighting(currentModels);
 
             if (r.isEmpty()) {
                 if (modelsList.get(0).equals(STATE_NO_MATCH)) return;
@@ -1007,21 +1010,23 @@ public class MainController {
     @FXML
     private VBox selectModelVBox;
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final AutoIncrementMap<AnalyzableModel> currentModels = new AutoIncrementHashMap<>(
+        new ConcurrentHashMap<>()
+    );
 
-    private static final AutoIncrementMap<AnalyzableModel> allModels = new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
+    private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
 
-    private static final List<AbstractFeatureInfo<? extends Feature>> ALL_FEATURES = initFeatures();
+    private static final List<FeatureContext<? extends Feature>> BASE_FEATURE_CONTEXTS = initFeatures();
 
-    private static List<AbstractFeatureInfo<? extends Feature>> initFeatures() {
-        List<AbstractFeatureInfo<? extends Feature>> features = new ArrayList<>();
+    private static List<FeatureContext<? extends Feature>> initFeatures() {
+        List<FeatureContext<? extends Feature>> features = new ArrayList<>();
 
         for (var feature : Lists.newArrayList(ServiceLoader.load(MetaFeature.class))) {
-            features.add(new MetaFeatureInfo(feature, MainController.allModels));
+            features.add(new MetaFeatureContext(feature, currentModels));
         }
 
         for (var feature : Lists.newArrayList(ServiceLoader.load(EmotionFeature.class))) {
-            features.add(new EmotionFeatureInfo(feature, MainController.allModels));
+            features.add(new EmotionFeatureContext(feature, currentModels));
         }
 
         return Collections.unmodifiableList(features);
@@ -1068,60 +1073,29 @@ public class MainController {
             Dragboard db = event.getDragboard();
             if (db.hasString()) {
                 int featureNumberInModel = 0;
-                int modelId = allModels.getNextId();
+                int modelId = currentModels.getNextId();
                 String stateName = "Модель " + modelId;
                 int featureId = Integer.parseInt(db.getString());
-                var featureInfo = ALL_FEATURES.get(featureId);
-                featureInfo.createAndPutModel(stateName);
+                var featureContext = BASE_FEATURE_CONTEXTS.get(featureId);
+                featureContext.createAndPutModel(stateName);
 
-                AnchorPane addFeaturePlaceHolder = buildModelBodyPlaceHolderOuter(
-                    buildModelBodyPlaceHolderInner(buildModelBodyPlaceHolderLabel())
-                );
+                ModelPane modelPane = createModelPane(modelId, stateName);
 
-                String serialNumber = featureInfo.createSerialNumber(featureNumberInModel);
+                FlowPane featuresHolder = modelPane.getFeatureHolder();
 
-                FlowPane featuresHolder = buildModelBodyFlowPane();
-
-                FeatureConfiguration featureConfig = FeatureConfiguration.builder()
+                FeatureConfig featureConfig = FeatureConfig.builder()
                     .modelId(modelId)
-                    .label(featureInfo.getFeature().getName())
-                    .serialNumber(serialNumber)
-                    .removeHandler(featureInfo.getRemoveHandler(modelId, featureNumberInModel))
-                    .settingHandler(featureInfo.getModelFeatureSettingHandler(modelId, featureNumberInModel))
+                    .featureNumberInModel(featureNumberInModel)
                     .featureHolder(new PaneAdapter(featuresHolder))
+                    .featureContext(featureContext)
                     .build();
 
-                AnchorPane firstFeature = FeatureFactory.createFeature(featureConfig);
+                AnchorPane firstFeature = FeatureFactory.createFeature(featureConfig).value();
 
-                featuresHolder.getChildren().addAll(firstFeature, addFeaturePlaceHolder);
-
-                TextField state = buildStateNameTextField(stateName);
-
-                RadioButton stringency = buildStringencyRadioButton();
-
-                Button removeModelButton = buildRemoveModelButton();
-
-                SplitPane modelPane = buildModelSplitPane(
-                    buildModelHeaderAnchorPane(
-                        state,
-                        stringency,
-                        removeModelButton
-                    ),
-                    buildModelScrollPane(featuresHolder)
-                );
-
-                modelPane.setId(modelId + MODEL_ID_SUFFIX);
-
-                initStateNameChangeHandler(modelId, state);
-
-                initStringencyChangeHandler(modelId, stringency);
-
-                initAddFeatureToModelHandlers(modelId, featuresHolder, featuresHolder);
-
-                initRemoveModelHandler(modelId, selectModelVBox, modelPane, removeModelButton);
+                featuresHolder.getChildren().add(0, firstFeature);
 
                 var paneModels = selectModelVBox.getChildren();
-                paneModels.add(paneModels.size() - 1, modelPane);
+                paneModels.add(paneModels.size() - 1, modelPane.value());
 
                 success = true;
             }
@@ -1131,16 +1105,59 @@ public class MainController {
         });
     }
 
+    private ModelPane createModelPane(int modelId, String stateName) {
+        FlowPane featuresHolder = buildModelBodyFlowPane();
+
+        AnchorPane addFeaturePlaceHolder = buildModelBodyPlaceHolderOuter(
+            buildModelBodyPlaceHolderInner(buildModelBodyPlaceHolderLabel())
+        );
+
+        featuresHolder.getChildren().add(addFeaturePlaceHolder);
+
+        TextField state = buildStateNameTextField(stateName);
+
+        RadioButton stringency = buildStringencyRadioButton();
+
+        Button removeModelButton = buildRemoveModelButton();
+
+        SplitPane modelPane = buildModelSplitPane(
+            buildModelHeaderAnchorPane(
+                state,
+                stringency,
+                removeModelButton
+            ),
+            buildModelScrollPane(featuresHolder)
+        );
+
+        modelPane.setId(modelId + MODEL_ID_SUFFIX);
+
+        initStateNameChangeHandler(modelId, state);
+
+        initStringencyChangeHandler(modelId, stringency);
+
+        initAddFeatureToModelHandlers(modelId, featuresHolder, featuresHolder);
+
+        initRemoveModelHandler(modelId, selectModelVBox, modelPane, removeModelButton);
+
+        return SimpleModelPane.builder()
+            .value(modelPane)
+            .state(state)
+            .stringency(stringency)
+            .remove(removeModelButton)
+            .featureHolder(featuresHolder)
+            .build();
+    }
+
     private void initStateNameChangeHandler(int modelId, TextField stateTextField) {
         stateTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            var model = allModels.get(modelId);
+            var model = currentModels.get(modelId);
             String newName = stateTextField.getText();
             if (isBlank(newName)) {
                 String oldName = model.getName();
                 model.setName(oldName);
                 stateTextField.setText(oldName);
                 stateTextField.setStyle("-fx-border-color:red");
-                scheduler.schedule(() -> runLater(() -> stateTextField.setStyle("-fx-border-color:none")), 1, SECONDS);
+                SCHEDULER.schedule(() -> runLater(() -> stateTextField.setStyle("-fx-border-color:none")), 1, SECONDS);
             } else {
                 model.setName(newName);
                 stateTextField.setStyle("-fx-border-color:none");
@@ -1149,13 +1166,13 @@ public class MainController {
     }
 
     private void initStringencyChangeHandler(int modelId, RadioButton stringency) {
-        stringency.setOnAction(event -> allModels.get(modelId).setStrictly(stringency.isSelected()));
+        stringency.setOnAction(event -> currentModels.get(modelId).setStrictly(stringency.isSelected()));
     }
 
     private void initRemoveModelHandler(int modelId, Pane holder, Node target, Button removeBtn) {
         removeBtn.setOnAction(event -> {
             holder.getChildren().remove(target);
-            allModels.remove(modelId);
+            currentModels.remove(modelId);
         });
     }
 
@@ -1203,22 +1220,18 @@ public class MainController {
             if (db.hasString()) {
                 int featureId = Integer.parseInt(db.getString());
 
-                var featureInfo = ALL_FEATURES.get(featureId);
+                var featureContext = BASE_FEATURE_CONTEXTS.get(featureId);
 
-                int featureNumberInModel = featureInfo.putFeature(modelId);
+                int featureNumberInModel = featureContext.putFeature(modelId);
 
-                String serialNumber = featureInfo.createSerialNumber(featureNumberInModel);
-
-                FeatureConfiguration featureConfig = FeatureConfiguration.builder()
+                FeatureConfig featureConfig = FeatureConfig.builder()
                     .modelId(modelId)
-                    .label(featureInfo.getFeature().getName())
-                    .serialNumber(serialNumber)
-                    .removeHandler(featureInfo.getRemoveHandler(modelId, featureNumberInModel))
-                    .settingHandler(featureInfo.getModelFeatureSettingHandler(modelId, featureNumberInModel))
+                    .featureNumberInModel(featureNumberInModel)
                     .featureHolder(new PaneAdapter(addTo))
+                    .featureContext(featureContext)
                     .build();
 
-                AnchorPane featurePane = FeatureFactory.createFeature(featureConfig);
+                AnchorPane featurePane = FeatureFactory.createFeature(featureConfig).value();
 
                 var addToChildren = addTo.getChildren();
                 addToChildren.add(addToChildren.size() - 1, featurePane);
@@ -1232,16 +1245,16 @@ public class MainController {
     }
 
     private void addConstructorFeatures() {
-        for (int i = 0; i < ALL_FEATURES.size(); i++) {
-            var featureInfo = ALL_FEATURES.get(i);
+        for (int i = 0; i < BASE_FEATURE_CONTEXTS.size(); i++) {
+            var featureContext = BASE_FEATURE_CONTEXTS.get(i);
 
             Button settingsButton = buildFeatureSettingsButton();
 
-            Label labelName = buildFeatureNameLabel(featureInfo.getFeature().getName());
+            Label labelName = buildFeatureNameLabel(featureContext.getFeature().getName());
 
             AnchorPane featurePane = buildSelectFeatureAnchorPane(labelName, settingsButton);
 
-            settingsButton.setOnAction(featureInfo.getConstructorFeatureSettingHandler(labelName).apply(
+            settingsButton.setOnAction(featureContext.getLibraryFeatureSettingHandler(labelName).apply(
                 settingsButton, null, null
             ));
 
@@ -1269,181 +1282,4 @@ public class MainController {
         }
     }
 
-    protected abstract static class AbstractFeatureInfo<T extends Feature> {
-
-        private final T feature;
-
-        private final AutoIncrementMap<AnalyzableModel> models;
-
-        protected AbstractFeatureInfo(T feature, AutoIncrementMap<AnalyzableModel> models) {
-            this.feature = feature;
-            this.models = models;
-        }
-
-        public T getFeature() {
-            return feature;
-        }
-
-        public AutoIncrementMap<AnalyzableModel> getModels() {
-            return models;
-        }
-
-        public abstract int putFeature(int modelId);
-
-        public abstract String createSerialNumber(int id);
-
-        public abstract ActionHandler getRemoveHandler(int modelId, int featureId);
-
-        public abstract ActionHandler getConstructorFeatureSettingHandler(Label nameLabel);
-
-        public abstract ActionHandler getModelFeatureSettingHandler(int modelId, int featureId);
-
-        public abstract void createAndPutModel(String stateName);
-    }
-
-    protected static class MetaFeatureInfo extends AbstractFeatureInfo<MetaFeature> {
-
-        public MetaFeatureInfo(MetaFeature feature, AutoIncrementMap<AnalyzableModel> models) {
-            super(feature, models);
-        }
-
-        @Override
-        public int putFeature(int modelId) {
-            return getModels().get(modelId).getMetaFeatures().put(getFeature().copy());
-        }
-
-        @Override
-        public String createSerialNumber(int id) {
-            return id + META_FEATURE_ID_SUFFIX;
-        }
-
-        @Override
-        public ActionHandler getRemoveHandler(int modelId, int featureId) {
-            return (button, holder, feature) -> event -> {
-                holder.getChildren().remove(feature.value());
-                getModels().get(modelId).getMetaFeatures().remove(featureId);
-            };
-        }
-
-        @Override
-        public ActionHandler getConstructorFeatureSettingHandler(Label nameLabel) {
-            return (button, ignore2, ignore3) -> {
-                button.setVisible(false);
-                button.setDisable(true);
-                return e -> { };
-            };
-        }
-
-        @Override
-        public ActionHandler getModelFeatureSettingHandler(int modelId, int featureId) {
-            return (ignore1, ignore2, ignore3) -> event -> {
-
-                var model = getModels().get(modelId);
-
-                MetaFeature feature = model.getMetaFeatures().get(featureId);
-
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("/metaFeatureSettings.fxml"));
-
-                Parent root = null;
-                try {
-                    root = loader.load();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                MetaFeatureSettingsController progressController = loader.getController();
-                progressController.setData(feature, model.getFeatures());
-
-                Stage stage = new Stage();
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.setTitle(feature.getName() + " - конфигурация");
-                stage.setScene(new Scene(root, 629, 496));
-                stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
-                stage.showAndWait();
-            };
-        }
-
-        @Override
-        public void createAndPutModel(String stateName) {
-            getModels().put(new SimpleAnalyzableModel(
-                stateName,
-                true,
-                Collections.emptyMap(),
-                Collections.singletonMap(0, getFeature().copy())
-            ));
-        }
-    }
-
-    protected static class EmotionFeatureInfo extends AbstractFeatureInfo<EmotionFeature> {
-
-        public EmotionFeatureInfo(EmotionFeature feature, AutoIncrementMap<AnalyzableModel> models) {
-            super(feature, models);
-        }
-
-        @Override
-        public int putFeature(int modelId) {
-            return getModels().get(modelId).getFeatures().put(getFeature().copy());
-        }
-
-        @Override
-        public String createSerialNumber(int id) {
-            return Integer.toString(id);
-        }
-
-        @Override
-        public ActionHandler getRemoveHandler(int modelId, int featureId) {
-            return (ignore1, holder, feature) -> event -> {
-                holder.getChildren().remove(feature.value());
-                getModels().get(modelId).getFeatures().remove(featureId);
-            };
-        }
-
-        @Override
-        public ActionHandler getConstructorFeatureSettingHandler(Label nameLabel) {
-            return (ignore1, ignore2, ignore3) -> getFeatureSettingHandler(getFeature(), nameLabel);
-        }
-
-        @Override
-        public ActionHandler getModelFeatureSettingHandler(int modelId, int featureId) {
-            return (ignore1, holder, feature) ->
-                getFeatureSettingHandler(getModels().get(modelId).getFeatures().get(featureId), feature.getNameLabel());
-        }
-
-        private EventHandler<ActionEvent> getFeatureSettingHandler(EmotionFeature feature, Label nameLabel) {
-            return event -> {
-
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("/featureSettings.fxml"));
-
-                Parent root = null;
-                try {
-                    root = loader.load();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                FeatureSettingsController progressController = loader.getController();
-                progressController.setFeature(feature);
-
-                Stage stage = new Stage();
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.setTitle(feature.getName() + " - конфигурация");
-                stage.setScene(new Scene(root, 423, 317));
-                stage.setOnCloseRequest(e -> nameLabel.setText(feature.getName()));
-                stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
-                stage.showAndWait();
-            };
-        }
-
-        @Override
-        public void createAndPutModel(String stateName) {
-            getModels().put(new SimpleAnalyzableModel(
-                stateName,
-                true,
-                Collections.singletonMap(0, getFeature().copy()),
-                Collections.emptyMap()
-            ));
-        }
-    }
 }

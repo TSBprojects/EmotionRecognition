@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.ui.gui.feature;
+package ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -7,7 +7,7 @@ import lombok.Builder;
 
 @Builder
 public class SimpleFeaturePane implements FeaturePane {
-    private final AnchorPane pane;
+    private final AnchorPane value;
     private final Label serialNumber;
     private final Label warnMsg;
     private final Label name;
@@ -16,21 +16,21 @@ public class SimpleFeaturePane implements FeaturePane {
 
     @Override
     public AnchorPane value() {
-        return pane;
+        return value;
     }
 
     @Override
-    public Label getSerialNumberLabel() {
+    public Label getSerialNumber() {
         return serialNumber;
     }
 
     @Override
-    public Label getWarnMsgLabel() {
+    public Label getWarnMsg() {
         return warnMsg;
     }
 
     @Override
-    public Label getNameLabel() {
+    public Label getName() {
         return name;
     }
 
