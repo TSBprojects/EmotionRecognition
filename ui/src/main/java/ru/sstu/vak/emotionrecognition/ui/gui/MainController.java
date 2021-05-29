@@ -1131,6 +1131,10 @@ public class MainController {
     }
 
     private ModelPane createModelPane(int modelId, String stateName) {
+        return createModelPane(modelId, stateName, true);
+    }
+
+    private ModelPane createModelPane(int modelId, String stateName, boolean stringency) {
         FlowPane featuresHolder = buildModelBodyFlowPane();
 
         AnchorPane addFeaturePlaceHolder = buildModelBodyPlaceHolderOuter(
@@ -1141,14 +1145,14 @@ public class MainController {
 
         TextField state = buildStateNameTextField(stateName);
 
-        RadioButton stringency = buildStringencyRadioButton();
+        RadioButton stringencyBtn = buildStringencyRadioButton(stringency);
 
         Button removeModelButton = buildRemoveModelButton();
 
         SplitPane modelPane = buildModelSplitPane(
             buildModelHeaderAnchorPane(
                 state,
-                stringency,
+                stringencyBtn,
                 removeModelButton
             ),
             buildModelScrollPane(featuresHolder)
@@ -1158,7 +1162,7 @@ public class MainController {
 
         initStateNameChangeHandler(modelId, state);
 
-        initStringencyChangeHandler(modelId, stringency);
+        initStringencyChangeHandler(modelId, stringencyBtn);
 
         initAddFeatureToModelHandlers(modelId, featuresHolder, featuresHolder);
 
@@ -1167,7 +1171,7 @@ public class MainController {
         return SimpleModelPane.builder()
             .value(modelPane)
             .state(state)
-            .stringency(stringency)
+            .stringency(stringencyBtn)
             .remove(removeModelButton)
             .featureHolder(featuresHolder)
             .build();
@@ -1341,10 +1345,9 @@ public class MainController {
     private void addLoadedModels(List<AnalyzableModel> models) {
         for (var model : models) {
             int modelId = currentModels.getNextId();
-            String stateName = model.getName();
             currentModels.put(model);
 
-            ModelPane modelPane = createModelPane(modelId, stateName);
+            ModelPane modelPane = createModelPane(modelId, model.getName(), model.isStrictly());
             FlowPane featuresHolder = modelPane.getFeatureHolder();
 
             addLoadedFeatures(modelId, model.getFeatures(), featuresHolder);

@@ -165,10 +165,10 @@ public final class ConstructorV2 {
         return remove;
     }
 
-    public static RadioButton buildStringencyRadioButton() {
+    public static RadioButton buildStringencyRadioButton(boolean value) {
         RadioButton stringency = new RadioButton();
         stringency.setText("строго");
-        stringency.setSelected(true);
+        stringency.setSelected(value);
         stringency.setTooltip(new Tooltip("Строго - все факторы должны быть истины, иначе достаточно одного"));
         return stringency;
     }
