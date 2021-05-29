@@ -2,6 +2,7 @@ package ru.sstu.vak.emotionrecognition.timeseries.analyze.feature;
 
 import com.google.auto.service.AutoService;
 import java.util.List;
+import lombok.ToString;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 import static ru.sstu.vak.emotionrecognition.common.Emotion.HAPPY;
 import static ru.sstu.vak.emotionrecognition.common.Emotion.SAD;
@@ -10,8 +11,11 @@ import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 import ru.sstu.vak.emotionrecognition.timeseries.TimeSeries;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.configuration.ConfigurableProperty;
 
+@ToString(callSuper = true)
 @AutoService(EmotionFeature.class)
 public class JumpFrequencyEmotionFeature extends AbstractEmotionFeature {
+
+    private static final int ID = 2;
 
     private static final String DESCRIPTION =
         "Частота перехода с одной эмоции на другую - переход с исходной эмоции"
@@ -44,6 +48,11 @@ public class JumpFrequencyEmotionFeature extends AbstractEmotionFeature {
     @Override
     public int getValue() {
         return frequency;
+    }
+
+    @Override
+    public int getId() {
+        return ID;
     }
 
     @Override

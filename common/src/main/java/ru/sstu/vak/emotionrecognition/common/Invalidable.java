@@ -1,6 +1,8 @@
 package ru.sstu.vak.emotionrecognition.common;
 
-public interface Invalidable {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+public interface Invalidable {
+    @JsonIgnore
     boolean isInvalid();
 }

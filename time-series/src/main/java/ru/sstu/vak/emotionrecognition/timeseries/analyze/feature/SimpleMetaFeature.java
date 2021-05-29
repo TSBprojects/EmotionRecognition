@@ -6,13 +6,17 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import lombok.ToString;
 import lombok.var;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.signs.EquivalenceSign;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.signs.LogicalSign;
 
+@ToString
 @AutoService(MetaFeature.class)
 public class SimpleMetaFeature implements MetaFeature {
+
+    private static final int ID = 6;
 
     private static final String DESCRIPTION =
         "Мета фактор. выражение, описывающее отношение (>,<,=) между факторами, указанными в текущей модели";
@@ -21,6 +25,7 @@ public class SimpleMetaFeature implements MetaFeature {
 
     private final SortedMap<Integer, String> rule;
 
+    @ToString.Exclude
     private final ScriptEngine evalEngine = new ScriptEngineManager().getEngineByName("JavaScript");
 
     private boolean invalid = false;
@@ -45,6 +50,11 @@ public class SimpleMetaFeature implements MetaFeature {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public int getId() {
+        return ID;
     }
 
     @Override

@@ -1,9 +1,8 @@
 package ru.sstu.vak.emotionrecognition.common;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.awt.Color;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -11,7 +10,6 @@ import static java.util.Arrays.stream;
 import java.util.Map;
 import static java.util.stream.Collectors.toMap;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Emotion implements Nameable {
 
     ANGER(0, "ЗЛОСТЬ", new Color(228, 48, 84), WHITE),
@@ -62,7 +60,7 @@ public enum Emotion implements Nameable {
         return emotionId;
     }
 
-    @JsonProperty("name")
+    @JsonValue
     public String getName() {
         return name;
     }

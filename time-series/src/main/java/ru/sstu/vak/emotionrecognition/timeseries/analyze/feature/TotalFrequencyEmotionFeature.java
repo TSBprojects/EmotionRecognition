@@ -2,13 +2,17 @@ package ru.sstu.vak.emotionrecognition.timeseries.analyze.feature;
 
 import com.google.auto.service.AutoService;
 import java.util.List;
+import lombok.ToString;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 import ru.sstu.vak.emotionrecognition.timeseries.TimeSeries;
 
+@ToString(callSuper = true)
 @AutoService(EmotionFeature.class)
 public class TotalFrequencyEmotionFeature extends FrequencyEmotionFeature {
+
+    private static final int ID = 4;
 
     private static final String DESCRIPTION =
         "Общая частота смены всех эмоций за отрезок времени - переход с"
@@ -19,7 +23,7 @@ public class TotalFrequencyEmotionFeature extends FrequencyEmotionFeature {
     private Emotion prevEm = null;
 
     public TotalFrequencyEmotionFeature() {
-        super("Общая частота");
+        this("Общая частота");
     }
 
     public TotalFrequencyEmotionFeature(String name) {
@@ -33,6 +37,11 @@ public class TotalFrequencyEmotionFeature extends FrequencyEmotionFeature {
     @Override
     public int getValue() {
         return frequency;
+    }
+
+    @Override
+    public int getId() {
+        return ID;
     }
 
     @Override

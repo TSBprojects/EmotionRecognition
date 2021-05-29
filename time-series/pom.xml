@@ -58,14 +58,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service</artifactId>
-            <version>1.0-rc5</version>
-        </dependency>
-        <dependency>
             <groupId>ru.sstu.vak.emotionrecognition</groupId>
             <artifactId>identify-emotion</artifactId>
             <version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0-rc5</version>
         </dependency>
     </dependencies>
 

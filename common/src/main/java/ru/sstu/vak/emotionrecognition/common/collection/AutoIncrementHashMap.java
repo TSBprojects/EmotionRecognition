@@ -1,5 +1,6 @@
 package ru.sstu.vak.emotionrecognition.common.collection;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,9 @@ public class AutoIncrementHashMap<E> extends ForwardingMap<Integer, E> implement
 
     public AutoIncrementHashMap(Map<Integer, E> map) {
         super(map);
-        nextId = map.size();
+        if (!map.isEmpty()) {
+            nextId = Collections.max(map.keySet()) + 1;
+        }
     }
 
     @Override

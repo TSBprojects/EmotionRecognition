@@ -1,6 +1,7 @@
 package ru.sstu.vak.emotionrecognition.timeseries.analyze.signs;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import static java.util.Arrays.stream;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -14,6 +15,7 @@ public enum EquivalenceSign implements Nameable {
 
     private static final Map<String, EquivalenceSign> MAP = stream(values()).collect(toMap(EquivalenceSign::getName, e -> e));
 
+    @JsonValue
     private final String humanReadable;
 
     private final String programReadable;

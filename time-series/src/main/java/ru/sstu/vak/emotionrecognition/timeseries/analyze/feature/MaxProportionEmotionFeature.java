@@ -2,6 +2,7 @@ package ru.sstu.vak.emotionrecognition.timeseries.analyze.feature;
 
 import com.google.auto.service.AutoService;
 import java.util.List;
+import lombok.ToString;
 import lombok.var;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 import static ru.sstu.vak.emotionrecognition.common.Emotion.HAPPY;
@@ -10,8 +11,11 @@ import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 import ru.sstu.vak.emotionrecognition.timeseries.TimeSeries;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.configuration.ConfigurableProperty;
 
+@ToString(callSuper = true)
 @AutoService(EmotionFeature.class)
 public class MaxProportionEmotionFeature extends AbstractEmotionFeature {
+
+    private static final int ID = 3;
 
     private static final String DESCRIPTION =
         "Максимальная доля непрерывной эмоции за отрезок времени – максимальный из всех отрезков времени " +
@@ -37,6 +41,11 @@ public class MaxProportionEmotionFeature extends AbstractEmotionFeature {
     public MaxProportionEmotionFeature(MaxProportionEmotionFeature feature) {
         super(feature);
         this.emotion = feature.emotion;
+    }
+
+    @Override
+    public int getId() {
+        return ID;
     }
 
     @Override

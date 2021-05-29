@@ -1,6 +1,7 @@
 package ru.sstu.vak.emotionrecognition.timeseries.analyze.signs;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import static java.util.Arrays.stream;
 import java.util.Map;
 import static java.util.stream.Collectors.toMap;
@@ -12,6 +13,7 @@ public enum LogicalSign implements Nameable {
 
     private static final Map<String, LogicalSign> MAP = stream(values()).collect(toMap(LogicalSign::getName, e -> e));
 
+    @JsonValue
     private final String humanReadable;
 
     private final String programReadable;

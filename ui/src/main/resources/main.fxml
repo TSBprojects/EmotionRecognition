@@ -13,6 +13,7 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -21,7 +22,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
-<AnchorPane fx:id="mainAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="1066.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionrecognition.ui.gui.MainController">
+<AnchorPane fx:id="mainAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="1066.0" stylesheets="@main.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionrecognition.ui.gui.MainController">
    <children>
       <TabPane layoutX="-21.0" layoutY="14.0" prefHeight="485.0" prefWidth="1064.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <tabs>
@@ -131,32 +132,42 @@
             </Tab>
             <Tab text="Конструктор">
                <content>
-                  <SplitPane dividerPositions="0.7509" prefHeight="160.0" prefWidth="200.0">
+                  <SplitPane dividerPositions="0.7504690431519699" prefHeight="160.0" prefWidth="200.0">
                     <items>
-                        <ScrollPane fitToWidth="true">
-                           <content>
-                              <VBox fx:id="selectModelVBox">
-                                 <children>
-                                    <AnchorPane fx:id="addModelPlaceHolder" prefHeight="86.0" prefWidth="607.0" style="-fx-border-style: dashed;">
-                                       <VBox.margin>
-                                          <Insets bottom="35.0" left="50.0" right="50.0" top="30.0" />
-                                       </VBox.margin>
+                        <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                          <items>
+                              <ToolBar maxHeight="39.0" minHeight="39.0" prefHeight="40.0" prefWidth="200.0">
+                                 <items>
+                                    <Button mnemonicParsing="false" onAction="#onModelsLoad" text="Импорт" />
+                                    <Button mnemonicParsing="false" onAction="#onModelsSave" text="Экспорт" />
+                                 </items>
+                              </ToolBar>
+                              <ScrollPane fitToWidth="true">
+                                 <content>
+                                    <VBox fx:id="selectModelVBox">
                                        <children>
-                                          <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" style="-fx-border-style: dashed;" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+                                          <AnchorPane fx:id="addModelPlaceHolder" prefHeight="86.0" prefWidth="607.0" style="-fx-border-style: dashed;">
+                                             <VBox.margin>
+                                                <Insets bottom="35.0" left="50.0" right="50.0" top="30.0" />
+                                             </VBox.margin>
                                              <children>
-                                                <Label opacity="0.34" prefWidth="461.0" text="Перетащите фактор чтобы добавить модель">
-                                                   <font>
-                                                      <Font name="Arial" size="22.0" />
-                                                   </font>
-                                                </Label>
+                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" style="-fx-border-style: dashed;" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+                                                   <children>
+                                                      <Label opacity="0.34" prefWidth="461.0" text="Перетащите фактор чтобы добавить модель">
+                                                         <font>
+                                                            <Font name="Arial" size="22.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </VBox>
                                              </children>
-                                          </VBox>
+                                          </AnchorPane>
                                        </children>
-                                    </AnchorPane>
-                                 </children>
-                              </VBox>
-                           </content>
-                        </ScrollPane>
+                                    </VBox>
+                                 </content>
+                              </ScrollPane>
+                          </items>
+                        </SplitPane>
                         <SplitPane dividerPositions="0.09251101321585903" orientation="VERTICAL" prefHeight="456.0" prefWidth="261.0">
                           <items>
                               <VBox alignment="CENTER" maxHeight="39.0" minHeight="39.0" prefHeight="200.0" prefWidth="100.0">

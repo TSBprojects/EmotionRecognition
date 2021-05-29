@@ -6,6 +6,8 @@ import ru.sstu.vak.emotionrecognition.common.Satisfiable;
 
 public interface Feature extends Descriptable, Satisfiable, Invalidable {
 
+    int getId();
+
     void clear();
 
     Feature copy();

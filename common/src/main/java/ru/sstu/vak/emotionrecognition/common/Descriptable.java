@@ -1,6 +1,8 @@
 package ru.sstu.vak.emotionrecognition.common;
 
-public interface Descriptable extends Nameable {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+public interface Descriptable extends Nameable {
+    @JsonIgnore
     String getDescription();
 }

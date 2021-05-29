@@ -1,10 +1,12 @@
 package ru.sstu.vak.emotionrecognition.timeseries.analyze.models;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ru.sstu.vak.emotionrecognition.common.Satisfiable;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.EmotionFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, property = "type")
 public interface AnalyzableModel extends Satisfiable {
 
     String getName();

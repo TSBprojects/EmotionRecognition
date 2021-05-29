@@ -1,17 +1,24 @@
 package ru.sstu.vak.emotionrecognition.ui.gui;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 import com.google.common.collect.Lists;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
@@ -108,6 +115,7 @@ import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.Feature
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.MetaFeatureContext;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.ModelPane;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.SimpleModelPane;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.io.ModelsHolder;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureSettingsButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFlowPane;
@@ -316,7 +324,7 @@ public class MainController {
         if (parameters.size() == 1) {
             this.modelName = parameters.get(0);
         }
-        tryIt(() -> {
+        tryGracefully(() -> {
             emotionRecognizer = new ClosestFaceEmotionRecognizer(modelName);
             emotionRecognizer.setOnStopListener(videoInfo -> onStopAction());
             emotionRecognizer.setFrameListener(frame -> currentFrame = frame);
@@ -345,7 +353,7 @@ public class MainController {
     @FXML
     public void initialize() {
         log.info("Initialize main components...");
-        tryIt(() -> {
+        tryGracefully(() -> {
             initExit();
             initEmotionChart();
             initStateListView();
@@ -449,7 +457,7 @@ public class MainController {
     @FXML
     void openScreen(ActionEvent event) {
         if (screenshotFrame != null) {
-            tryIt(() -> {
+            tryGracefully(() -> {
                 Dimension winSize = Toolkit.getDefaultToolkit().getScreenSize();
 
                 FXMLLoader loader = new FXMLLoader();
@@ -480,7 +488,7 @@ public class MainController {
     void startRecognVideo(ActionEvent event) {
         if (emotionRecognizer.isRun() || frameIterator.isRun()) return;
 
-        tryIt(() -> {
+        tryGracefully(() -> {
             boolean ok = showConfirm(
                 "Что делать с данными?",
                 "Сохранить обработанные данные и информацию о них?",
@@ -685,7 +693,7 @@ public class MainController {
     void startVideo(ActionEvent event) {
         if (emotionRecognizer.isRun() || frameIterator.isRun()) return;
 
-        tryIt(() -> {
+        tryGracefully(() -> {
             startVidProgressBarOn();
             frameIterator.start(videoPath.getText(), frame -> {
                 startVidProgressBarOff();
@@ -697,7 +705,7 @@ public class MainController {
 
     @FXML
     void stopVideo(ActionEvent event) {
-        tryIt(() -> {
+        tryGracefully(() -> {
             if (emotionRecognizer.isRun()) {
                 startVidProgressBarOn();
                 emotionRecognizer.stop();
@@ -712,7 +720,7 @@ public class MainController {
     void takeScreenshot(ActionEvent event) {
         if (currentFrame != null) {
             log.info("Take a screenshot...");
-            tryIt(() -> {
+            tryGracefully(() -> {
                 screenshotFrame = ImageConverter.toBufferedImage(currentFrame.clone());
                 originalScreenShot = ImageCorrector.copyBufferedImage(screenshotFrame);
                 screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
@@ -725,7 +733,7 @@ public class MainController {
         if (screenshotFrame != null) {
             recognScreenProgressBarToggle();
             executorService.submit(() ->
-                tryIt(() -> {
+                tryGracefully(() -> {
                     imageInfo = emotionRecognizer.processImage(ImageCorrector.copyBufferedImage(originalScreenShot));
                     screenshotFrame = imageInfo.getProcessedImage();
                     screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
@@ -739,7 +747,7 @@ public class MainController {
     void browseImage(ActionEvent event) {
         log.info("Browse for image...");
 
-        tryIt(() -> {
+        tryGracefully(() -> {
             File image = selectFile("Select image for recognize emotions!",
                 "Image", "*.png", "*.jpeg", "*.jpg", "*.bmp"
             );
@@ -757,7 +765,7 @@ public class MainController {
         log.info("Save image...");
 
         if (screenshotFrame != null) {
-            tryIt(() -> {
+            tryGracefully(() -> {
                 File image = saveFile("Saving image",
                     "Image", "*.png", "*.jpg", "*.jpeg", "*.bmp"
                 );
@@ -882,7 +890,7 @@ public class MainController {
 
     private void initExit() {
         runLater(() ->
-            tryIt(() -> {
+            tryGracefully(() -> {
                 currentStage = (Stage) videoImageView.getScene().getWindow();
                 currentStage.setOnCloseRequest(event -> {
                     if (emotionRecognizer != null && emotionRecognizer.isRun()) {
@@ -965,7 +973,7 @@ public class MainController {
         addChangeListeners();
     }
 
-    private void tryIt(TryItCallback tryCode) {
+    private void tryGracefully(TryItCallback tryCode) {
         try {
             tryCode.executableCode();
         } catch (Exception e) {
@@ -977,6 +985,15 @@ public class MainController {
             if (frameIterator != null) {
                 frameIterator.stop();
             }
+        }
+    }
+
+    private void tryIt(TryItCallback tryCode) {
+        try {
+            tryCode.executableCode();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            runLater(() -> showError(e.getMessage()));
         }
     }
 
@@ -1010,26 +1027,34 @@ public class MainController {
     @FXML
     private VBox selectModelVBox;
 
-    private static final AutoIncrementMap<AnalyzableModel> currentModels = new AutoIncrementHashMap<>(
-        new ConcurrentHashMap<>()
-    );
+    private static final ObjectMapper mapper = initMapperForModels();
+
+    private static final AutoIncrementMap<AnalyzableModel> currentModels =
+        new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
 
     private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
 
-    private static final List<FeatureContext<? extends Feature>> BASE_FEATURE_CONTEXTS = initFeatures();
+    private static final Map<Integer, FeatureContext<?>> BASE_FEATURE_CONTEXTS = initFeatures();
 
-    private static List<FeatureContext<? extends Feature>> initFeatures() {
-        List<FeatureContext<? extends Feature>> features = new ArrayList<>();
+    private static Map<Integer, FeatureContext<?>> initFeatures() {
+        Map<Integer, FeatureContext<?>> features = new HashMap<>();
 
         for (var feature : Lists.newArrayList(ServiceLoader.load(MetaFeature.class))) {
-            features.add(new MetaFeatureContext(feature, currentModels));
+            features.put(feature.getId(), new MetaFeatureContext(feature, currentModels));
         }
 
         for (var feature : Lists.newArrayList(ServiceLoader.load(EmotionFeature.class))) {
-            features.add(new EmotionFeatureContext(feature, currentModels));
+            features.put(feature.getId(), new EmotionFeatureContext(feature, currentModels));
         }
 
-        return Collections.unmodifiableList(features);
+        return Collections.unmodifiableMap(features);
+    }
+
+    private static ObjectMapper initMapperForModels() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(INDENT_OUTPUT);
+        mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper;
     }
 
     private void initAddModelDragAndDropHandlers(Node node) {
@@ -1245,8 +1270,9 @@ public class MainController {
     }
 
     private void addConstructorFeatures() {
-        for (int i = 0; i < BASE_FEATURE_CONTEXTS.size(); i++) {
-            var featureContext = BASE_FEATURE_CONTEXTS.get(i);
+        for (var entry : BASE_FEATURE_CONTEXTS.entrySet()) {
+            final int id = entry.getKey();
+            final var featureContext = entry.getValue();
 
             Button settingsButton = buildFeatureSettingsButton();
 
@@ -1258,7 +1284,6 @@ public class MainController {
                 settingsButton, null, null
             ));
 
-            final int id = i;
             featurePane.setOnDragDetected(event -> {
                 //greenShadow(featurePane);
 
@@ -1282,4 +1307,71 @@ public class MainController {
         }
     }
 
+    @FXML
+    void onModelsSave(ActionEvent event) {
+        tryIt(() -> {
+            File configFile = saveFile(
+                "Сохранить конфигурацию",
+                "Emotion recognition constructor configuration",
+                "*.ercc"
+            );
+            if (configFile != null) {
+                byte[] json = mapper.writeValueAsBytes(ModelsHolder.from(currentModels));
+                Files.write(configFile.toPath(), Base64.getEncoder().encode(json));
+            }
+        });
+    }
+
+    @FXML
+    void onModelsLoad(ActionEvent event) {
+        tryIt(() -> {
+            File configFile = selectFile(
+                "Загрузить конфигурацию",
+                "Emotion recognition constructor configuration",
+                "*.ercc"
+            );
+            if (configFile != null) {
+                byte[] encodedJson = Files.readAllBytes(configFile.toPath());
+                ModelsHolder holder = mapper.readValue(Base64.getDecoder().decode(encodedJson), ModelsHolder.class);
+                addLoadedModels(holder.getModels());
+            }
+        });
+    }
+
+    private void addLoadedModels(List<AnalyzableModel> models) {
+        for (var model : models) {
+            int modelId = currentModels.getNextId();
+            String stateName = model.getName();
+            currentModels.put(model);
+
+            ModelPane modelPane = createModelPane(modelId, stateName);
+            FlowPane featuresHolder = modelPane.getFeatureHolder();
+
+            addLoadedFeatures(modelId, model.getFeatures(), featuresHolder);
+            addLoadedFeatures(modelId, model.getMetaFeatures(), featuresHolder);
+
+            var paneModels = selectModelVBox.getChildren();
+            paneModels.add(paneModels.size() - 1, modelPane.value());
+        }
+    }
+
+    private void addLoadedFeatures(int modelId, AutoIncrementMap<? extends Feature> features, FlowPane featuresHolder) {
+        for (var entry : features.entrySet()) {
+            var featureNumberInModel = entry.getKey();
+            var feature = entry.getValue();
+            var featureContext = BASE_FEATURE_CONTEXTS.get(feature.getId());
+
+            FeatureConfig featureConfig = FeatureConfig.builder()
+                .modelId(modelId)
+                .featureNumberInModel(featureNumberInModel)
+                .featureHolder(new PaneAdapter(featuresHolder))
+                .featureContext(featureContext)
+                .build();
+
+            AnchorPane featurePane = FeatureFactory.createFeature(featureConfig).value();
+
+            var addToChildren = featuresHolder.getChildren();
+            addToChildren.add(addToChildren.size() - 1, featurePane);
+        }
+    }
 }

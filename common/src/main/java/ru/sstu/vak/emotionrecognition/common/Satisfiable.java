@@ -1,6 +1,8 @@
 package ru.sstu.vak.emotionrecognition.common;
 
-public interface Satisfiable {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+public interface Satisfiable {
+    @JsonIgnore
     boolean isSatisfied();
 }

@@ -2,6 +2,7 @@ package ru.sstu.vak.emotionrecognition.timeseries.analyze.feature;
 
 import com.google.auto.service.AutoService;
 import java.util.List;
+import lombok.ToString;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 import static ru.sstu.vak.emotionrecognition.common.Emotion.HAPPY;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
@@ -9,8 +10,11 @@ import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 import ru.sstu.vak.emotionrecognition.timeseries.TimeSeries;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.configuration.ConfigurableProperty;
 
+@ToString(callSuper = true)
 @AutoService(EmotionFeature.class)
 public class FrequencyEmotionFeature extends AbstractEmotionFeature {
+
+    private static final int ID = 1;
 
     private static final String DESCRIPTION =
         "Частота проявления эмоции – количество отрезков времени на которых эмоция была непрерывна. "
@@ -39,6 +43,11 @@ public class FrequencyEmotionFeature extends AbstractEmotionFeature {
     @Override
     public int getValue() {
         return frequency;
+    }
+
+    @Override
+    public int getId() {
+        return ID;
     }
 
     @Override
