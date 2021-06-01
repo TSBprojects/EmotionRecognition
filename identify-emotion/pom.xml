@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>identify-emotion</artifactId>
-    <version>2.1</version>
+    <version>2.2</version>
 
     <build>
         <plugins>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>ru.sstu.vak.emotionrecognition</groupId>
             <artifactId>common</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 

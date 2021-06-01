@@ -61,7 +61,7 @@
         <dependency>
             <groupId>ru.sstu.vak.emotionrecognition</groupId>
             <artifactId>identify-emotion</artifactId>
-            <version>2.1</version>
+            <version>2.2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

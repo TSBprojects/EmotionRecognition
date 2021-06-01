@@ -10,17 +10,13 @@ import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.Rect;
 import org.bytedeco.javacpp.opencv_core.Size;
-import org.bytedeco.javacv.Frame;
 import static ru.sstu.vak.emotionrecognition.cnn.FeedForwardCNN.INPUT_HEIGHT;
 import static ru.sstu.vak.emotionrecognition.cnn.FeedForwardCNN.INPUT_WIDTH;
 import ru.sstu.vak.emotionrecognition.common.Prediction;
 import ru.sstu.vak.emotionrecognition.facedetector.BoundingBox;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.FacePreProcessing;
-import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.MediaFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
-import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.VideoFrame;
 
 public class ClosestFaceEmotionRecognizer extends SimpleEmotionRecognizer {
 
@@ -31,26 +27,19 @@ public class ClosestFaceEmotionRecognizer extends SimpleEmotionRecognizer {
     }
 
     @Override
-    protected FrameInfo processedFrame(Frame frame) {
-        if (frameListener != null) {
-            frameListener.onNextFrame(frame);
-        }
+    protected List<VideoFace> processFaces(BufferedImage buffFrame, Map<Rect, Mat> faces) {
         List<VideoFace> videoFacesList = new ArrayList<>();
 
         Size maxSize = new Size(0, 0);
         Prediction closestFacePrediction = null;
         MediaFace.Location maxLocation = null;
 
-        Mat matImage = ImageConverter.toMat(frame);
-        BufferedImage buffFrame = ImageConverter.toBufferedImage(frame);
-        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage, false);
-
         for (Map.Entry<Rect, Mat> entry : faces.entrySet()) {
-            Rect rect = entry.getKey();
-
             try {
+                Rect rect = entry.getKey();
+                Mat face = entry.getValue();
                 MediaFace.Location videoLocation = new MediaFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace.clone());
                 }
@@ -75,10 +64,6 @@ public class ClosestFaceEmotionRecognizer extends SimpleEmotionRecognizer {
             videoFacesList.add(new VideoFace(closestFacePrediction, maxLocation));
         }
 
-        FrameInfo frameInfo = new FrameInfo(frames.size(), buffFrame, videoFacesList);
-
-        frames.add(new VideoFrame(frames.size(), videoFacesList));
-
-        return frameInfo;
+        return videoFacesList;
     }
 }

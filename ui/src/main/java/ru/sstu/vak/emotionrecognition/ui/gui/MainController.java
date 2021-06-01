@@ -502,10 +502,7 @@ public class MainController {
                 String videoPath = this.videoPath.getText();
                 File videoFile = saveFile("Сохранить медиаданные", "Video", "*.mp4");
                 if (videoFile != null) {
-                    emotionRecognizer.processVideo(videoPath, videoFile.toPath(), frameInfo -> {
-                        startVidProgressBarOff();
-                        videoImageView.setImage(ImageConverter.toJavaFXImage(frameInfo.getProcessedImage()));
-                    });
+                    emotionRecognizer.processVideo(videoPath, videoFile.toPath(), this::processedFrameHandler);
                 } else {
                     startVidProgressBarOff();
                 }

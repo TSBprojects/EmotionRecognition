@@ -2,15 +2,18 @@ package ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import static java.util.function.Function.identity;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -30,6 +33,8 @@ import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.FacePreProcess
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.impl.FrameIteratorBase;
+import static ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.ErFeature.COLLECT_FRAMES;
+import static ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.ErFeature.GENERATE_JSON_OUTPUT;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.ImageFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.MediaFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
@@ -61,16 +66,19 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
     protected FrameIterator.ExceptionListener onExceptionListener;
     protected List<VideoFrameListener> onProcessedFrameListenerListeners;
 
+    protected int frameCount;
     protected List<VideoFrame> frames;
-
+    protected Map<ErFeature, Boolean> configuration;
 
     public SimpleEmotionRecognizer(String modelPath) throws IOException {
+        this.configuration = initConfiguration();
         this.onProcessedFrameListenerListeners = new ArrayList<>();
         this.frameIterator = new FrameIteratorBase();
         this.haarFaceDetector = new HaarFaceDetector();
         this.feedForwardCNN = new FeedForwardCNN(modelPath);
         this.frames = new ArrayList<>();
         this.toJson = new ObjectMapper();
+        this.frameCount = 0;
 
         this.frameIterator.setDeviceFrameRate(null);
         this.frameIterator.setFileFrameRate(30);
@@ -79,6 +87,7 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
                 stopListener.onVideoStopped(new VideoInfo(frames));
             }
             frames.clear();
+            frameCount = 0;
             try {
                 if (fileOutputStream != null) {
                     fileOutputStream.write("]}".getBytes());
@@ -92,18 +101,28 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         });
     }
 
+    private Map<ErFeature, Boolean> initConfiguration() {
+        return Arrays.stream(ErFeature.values()).collect(Collectors.toMap(
+            identity(),
+            f -> f.defaultState,
+            (l, r) -> {
+                throw new IllegalArgumentException("Duplicate keys " + l + "and " + r + ".");
+            },
+            () -> new EnumMap<>(ErFeature.class))
+        );
+    }
+
     @Override
     public synchronized ImageInfo processImage(BufferedImage image) {
         log.info("Finding faces and recognize emotions on them in the image...");
         List<ImageFace> imageFaceList = new ArrayList<>();
 
-        Mat matImage = ImageConverter.toMat(image);
-        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage, false);
+        Map<Rect, Mat> faces = haarFaceDetector.detect(ImageConverter.toMat(image), false);
         faces.forEach((rect, face) -> {
             try {
-                BufferedImage faceImage = ImageConverter.toBufferedImage(matImage.apply(rect));
+                BufferedImage faceImage = ImageConverter.toBufferedImage(face);
                 MediaFace.Location faceLocation = new MediaFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
                 if (imageNetInputListener != null) {
                     imageNetInputListener.onNextFace(preparedFace.clone());
                 }
@@ -121,11 +140,7 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
     @Override
     public synchronized void processVideo(String readFrom, ProcessedFrameListener listener) throws FrameGrabber.Exception {
         log.info("Starting video with emotion recognition...");
-        frameIterator.start(readFrom, frame -> {
-            FrameInfo frameInfo = new FrameInfo(processedFrame(frame));
-            notifyVideoFrameListeners(frames.get(frames.size() - 1));
-            listener.onNextFrame(frameInfo);
-        });
+        frameIterator.start(readFrom, frame -> listener.onNextFrame(new FrameInfo(processFrame(frame))));
     }
 
     @Override
@@ -133,9 +148,8 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         log.info("Starting video with emotion recognition...");
         initOutputStream(writeTo);
         frameIterator.start(readFrom, writeTo, frame -> {
-            FrameInfo frameInfo = processedFrame(frame);
+            FrameInfo frameInfo = processFrame(frame);
             Frame procFrame = ImageConverter.toFrame(frameInfo.getProcessedImage());
-            notifyVideoFrameListeners(frames.get(frames.size() - 1));
             listener.onNextFrame(new FrameInfo(frameInfo));
             return procFrame;
         });
@@ -146,10 +160,7 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         log.info("Write video info...");
 
         final String fileName = FilenameUtils.removeExtension(writeTo.getFileName().toString());
-        toJson.writeValue(
-                new File(writeTo.getParent() + "\\" + fileName + VIDEO_INFO_POSTFIX + ".json"),
-                videoInfo
-        );
+        toJson.writeValue(writeTo.getParent().resolve(fileName + VIDEO_INFO_POSTFIX + ".json").toFile(), videoInfo);
     }
 
     @Override
@@ -164,22 +175,20 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
                 ImageFace imageFace = imageFaces.get(i);
                 String emotionMame = imageFace.getPrediction().getEmotion().getName();
                 ImageIO.write(
-                        imageFace.getFaceImage(),
-                        "png",
-                        new File(writeTo.getParent() + "\\" + fileName
-                                + PROCESSED_IMAGE_FACE_POSTFIX + i + "-" + emotionMame + ".png")
+                    imageFace.getFaceImage(),
+                    "png",
+                    writeTo.getParent().resolve(
+                        fileName + PROCESSED_IMAGE_FACE_POSTFIX + i + "-" + emotionMame + ".png"
+                    ).toFile()
                 );
             }
         }
         ImageIO.write(
-                imageInfo.getProcessedImage(),
-                "png",
-                new File(writeTo.getParent() + "\\" + fileName + PROCESSED_IMAGE_POSTFIX + ".png")
+            imageInfo.getProcessedImage(),
+            "png",
+            writeTo.getParent().resolve(fileName + PROCESSED_IMAGE_POSTFIX + ".png").toFile()
         );
-        toJson.writeValue(
-                new File(writeTo.getParent() + "\\" + fileName + IMAGE_INFO_POSTFIX + ".json"),
-                imageInfo
-        );
+        toJson.writeValue(writeTo.getParent().resolve(fileName + IMAGE_INFO_POSTFIX + ".json").toFile(), imageInfo);
     }
 
     @Override
@@ -192,6 +201,15 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         this.frameIterator.stop();
     }
 
+    @Override
+    public void enable(ErFeature feature) {
+        configuration.put(feature, true);
+    }
+
+    @Override
+    public void disable(ErFeature feature) {
+        configuration.put(feature, false);
+    }
 
     public void setOnExceptionListener(FrameIterator.ExceptionListener exceptionListener) {
         this.onExceptionListener = exceptionListener;
@@ -228,26 +246,43 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         onProcessedFrameListenerListeners.remove(videoFrameListener);
     }
 
-
-    protected FrameInfo processedFrame(Frame frame) {
+    private FrameInfo processFrame(Frame frame) {
         if (frameListener != null) {
             frameListener.onNextFrame(frame);
         }
-        List<VideoFace> videoFacesList = new ArrayList<>();
 
-        Mat matImage = ImageConverter.toMat(frame);
-        BufferedImage image = ImageConverter.toBufferedImage(frame);
-        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage, false);
+        BufferedImage buffFrame = ImageConverter.toBufferedImage(frame);
+        Map<Rect, Mat> faces = haarFaceDetector.detect(ImageConverter.toMat(frame), false);
+
+        List<VideoFace> videoFacesList = processFaces(buffFrame, faces);
+
+        VideoFrame videoFrame = new VideoFrame(frameCount, videoFacesList);
+
+        if (configuration.get(GENERATE_JSON_OUTPUT)) {
+            writeVideoFrame(videoFrame);
+        }
+
+        if (configuration.get(COLLECT_FRAMES)) {
+            frames.add(videoFrame);
+        }
+
+        notifyVideoFrameListeners(videoFrame);
+
+        return new FrameInfo(frameCount++, buffFrame, videoFacesList);
+    }
+
+    protected List<VideoFace> processFaces(BufferedImage buffFrame, Map<Rect, Mat> faces) {
+        List<VideoFace> videoFacesList = new ArrayList<>();
 
         faces.forEach((rect, face) -> {
             try {
                 MediaFace.Location faceLocation = new MediaFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(matImage.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace.clone());
                 }
                 Prediction prediction = feedForwardCNN.predict(preparedFace);
-                BoundingBox.draw(image, rect, prediction);
+                BoundingBox.draw(buffFrame, rect, prediction);
                 videoFacesList.add(new VideoFace(prediction, faceLocation));
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
@@ -255,10 +290,7 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
             }
         });
 
-        VideoFrame videoFrame = new VideoFrame(frames.size(), videoFacesList);
-        writeVideoFrame(videoFrame);
-        frames.add(videoFrame);
-        return new FrameInfo(frames.size(), image, videoFacesList);
+        return videoFacesList;
     }
 
     private void initOutputStream(Path writeTo) {
@@ -289,10 +321,9 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         }
     }
 
-    private void notifyVideoFrameListeners(VideoFrame videoFrame){
+    private void notifyVideoFrameListeners(VideoFrame videoFrame) {
         onProcessedFrameListenerListeners.forEach(l -> l.onNextFrame(videoFrame));
     }
-
 
     protected void throwException(Throwable e) {
         if (onExceptionListener != null) {
