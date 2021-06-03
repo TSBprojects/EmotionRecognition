@@ -10,7 +10,7 @@ import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureS
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureAnchorPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureSerialNumberLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureWarnLabel;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildRemoveModelButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildRemoveButton;
 
 public final class FeatureFactory {
 
@@ -32,7 +32,7 @@ public final class FeatureFactory {
 
         Button configureFeatureButton = buildFeatureSettingsButton();
 
-        Button removeModelFeatureButton = buildRemoveModelButton();
+        Button removeModelFeatureButton = buildRemoveButton();
 
         Label serialNumberLabel = buildModelBodyFeatureSerialNumberLabel(serialNumber);
 

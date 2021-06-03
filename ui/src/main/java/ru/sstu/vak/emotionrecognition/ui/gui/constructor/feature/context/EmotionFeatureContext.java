@@ -74,7 +74,10 @@ public class EmotionFeatureContext extends FeatureContext<EmotionFeature> {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle(feature.getName() + " - конфигурация");
             stage.setScene(new Scene(root, 423, 317));
-            stage.setOnCloseRequest(e -> nameLabel.setText(feature.getName()));
+            stage.setOnCloseRequest(e -> {
+                nameLabel.setText(feature.getName());
+                nameLabel.getTooltip().setText(feature.getName());
+            });
             stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
             stage.showAndWait();
         };

@@ -99,7 +99,7 @@
           </Tab>
             <Tab text="Конструктор">
                <content>
-                  <SplitPane dividerPositions="0.7504690431519699" prefHeight="160.0" prefWidth="200.0">
+                  <SplitPane dividerPositions="0.807" prefHeight="160.0" prefWidth="200.0">
                     <items>
                         <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                           <items>

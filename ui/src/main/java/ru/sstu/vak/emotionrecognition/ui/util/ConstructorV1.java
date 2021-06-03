@@ -84,6 +84,7 @@ public final class ConstructorV1 {
 
     public static Button buildRemoveFeatureButton(EventHandler<ActionEvent> handler) {
         Button removeFeature = new Button("-");
+        removeFeature.getStyleClass().add("remove-btn");
         removeFeature.setOnAction(handler);
         removeFeature.setMaxWidth(25);
         removeFeature.setMinWidth(25);

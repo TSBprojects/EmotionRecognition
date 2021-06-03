@@ -1,7 +1,40 @@
-/*.button {*/
-/*    -fx-background-image: url('http://img.icons8.com/plasticine/2x/pencil.png');*/
-/*    -fx-background-repeat: no-repeat;*/
-/*    -fx-background-position: center;*/
-/*    -fx-background-size: 30;*/
-/*    -fx-effect: none;*/
-/*}*/
+.remove-btn {
+    -fx-background-color: -icon-paint;
+    -fx-min-height: -size;
+    -fx-min-width: -size;
+    -fx-max-height: -size;
+    -fx-max-width: -size;
+    -fx-shape: "M24 3.752l-4.423-3.752-7.771 9.039-7.647-9.008-4.159 4.278c2.285 2.885 5.284 5.903 8.362 8.708l-8.165 9.447 1.343 1.487c1.978-1.335 5.981-4.373 10.205-7.958 4.304 3.67 8.306 6.663 10.229 8.006l1.449-1.278-8.254-9.724c3.287-2.973 6.584-6.354 8.831-9.245z";
+
+    -size: 24px;
+    -icon-paint: red;
+}
+
+.remove-btn:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 5, 0, 0, 0);
+}
+
+.remove-btn:pressed {
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 5);
+}
+
+
+.settings-btn {
+    -fx-background-color: -icon-paint;
+    -fx-min-height: -size;
+    -fx-min-width: -size;
+    -fx-max-height: -size;
+    -fx-max-width: -size;
+    -fx-shape: "M1.438 16.872l-1.438 7.128 7.127-1.438 12.642-12.64-5.69-5.69-12.641 12.64zm2.271 2.253l-.85-.849 11.141-11.125.849.849-11.14 11.125zm20.291-13.436l-2.817 2.819-5.69-5.691 2.816-2.817 5.691 5.689z";
+
+    -size: 24px;
+    -icon-paint: rgb(232, 128, 31);
+}
+
+.settings-btn:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 5, 0, 0, 0);
+}
+
+.settings-btn:pressed {
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 5);
+}

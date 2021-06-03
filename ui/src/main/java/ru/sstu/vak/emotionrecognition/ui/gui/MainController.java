@@ -39,10 +39,10 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -118,10 +118,10 @@ import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBod
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelHeaderAnchorPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelScrollPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelSplitPane;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildRemoveModelButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildRemoveButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildSelectFeatureAnchorPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStateNameTextField;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStringencyRadioButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStringencyCheckBox;
 import static ru.sstu.vak.emotionrecognition.ui.util.NodeDecorator.shadow;
 
 public class MainController {
@@ -990,14 +990,14 @@ public class MainController {
 
         TextField state = buildStateNameTextField(stateName);
 
-        RadioButton stringencyBtn = buildStringencyRadioButton(stringency);
+        CheckBox stringencyCheckBox = buildStringencyCheckBox(stringency);
 
-        Button removeModelButton = buildRemoveModelButton();
+        Button removeModelButton = buildRemoveButton();
 
         SplitPane modelPane = buildModelSplitPane(
             buildModelHeaderAnchorPane(
                 state,
-                stringencyBtn,
+                stringencyCheckBox,
                 removeModelButton
             ),
             buildModelScrollPane(featuresHolder)
@@ -1007,7 +1007,7 @@ public class MainController {
 
         initStateNameChangeHandler(modelId, state);
 
-        initStringencyChangeHandler(modelId, stringencyBtn);
+        initStringencyChangeHandler(modelId, stringencyCheckBox);
 
         initAddFeatureToModelHandlers(modelId, featuresHolder, featuresHolder);
 
@@ -1016,7 +1016,7 @@ public class MainController {
         return SimpleModelPane.builder()
             .value(modelPane)
             .state(state)
-            .stringency(stringencyBtn)
+            .stringency(stringencyCheckBox)
             .remove(removeModelButton)
             .featureHolder(featuresHolder)
             .build();
@@ -1039,7 +1039,7 @@ public class MainController {
         });
     }
 
-    private void initStringencyChangeHandler(int modelId, RadioButton stringency) {
+    private void initStringencyChangeHandler(int modelId, CheckBox stringency) {
         stringency.setOnAction(event -> currentModels.get(modelId).setStrictly(stringency.isSelected()));
     }
 

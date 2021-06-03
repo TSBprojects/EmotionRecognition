@@ -1,15 +1,18 @@
 package ru.sstu.vak.emotionrecognition.ui.util;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import static javafx.geometry.Orientation.VERTICAL;
 import static javafx.geometry.Pos.CENTER;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
@@ -20,9 +23,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import static javafx.scene.paint.Color.RED;
 import javafx.scene.text.Font;
+import javafx.util.Duration;
 import static ru.sstu.vak.emotionrecognition.ui.util.NodeDecorator.tile;
 
 public final class ConstructorV2 {
+
+    private static final long TOOLTIP_SHOW_DELAY_MS = 150;
 
     private ConstructorV2() {
         throw new AssertionError();
@@ -54,22 +60,23 @@ public final class ConstructorV2 {
         return label;
     }
 
-    public static AnchorPane buildModelBodyPlaceHolderInner(Label text) {
-        AnchorPane placeHolder = new AnchorPane();
+    public static VBox buildModelBodyPlaceHolderInner(Label text) {
+        VBox placeHolder = new VBox();
         placeHolder.setStyle("-fx-border-style: dashed;");
         AnchorPane.setBottomAnchor(placeHolder, 5D);
         AnchorPane.setLeftAnchor(placeHolder, 5D);
         AnchorPane.setTopAnchor(placeHolder, 5D);
         AnchorPane.setRightAnchor(placeHolder, 5D);
+        placeHolder.setAlignment(CENTER);
         placeHolder.getChildren().add(text);
         return placeHolder;
     }
 
-    public static AnchorPane buildModelBodyPlaceHolderOuter(AnchorPane inner) {
+    public static AnchorPane buildModelBodyPlaceHolderOuter(VBox inner) {
         AnchorPane placeHolder = new AnchorPane();
         placeHolder.setStyle("-fx-border-style: dashed;");
-        placeHolder.setMaxWidth(305);
-        placeHolder.setMinWidth(305);
+        placeHolder.setMaxWidth(210);
+        placeHolder.setMinWidth(210);
         placeHolder.setMaxHeight(45);
         placeHolder.setMinHeight(45);
         placeHolder.getChildren().add(inner);
@@ -85,8 +92,8 @@ public final class ConstructorV2 {
         Button remove
     ) {
         AnchorPane feature = buildClearFeatureAnchorPane();
-        feature.setMaxWidth(305);
-        feature.setMinWidth(305);
+        feature.setMaxWidth(210);
+        feature.setMinWidth(210);
 
         HBox hBox = (HBox) feature.getChildren().get(0);
         HBox.setMargin(name, new Insets(0, 0, 0, 10));
@@ -139,7 +146,7 @@ public final class ConstructorV2 {
         return scrollPane;
     }
 
-    public static AnchorPane buildModelHeaderAnchorPane(TextField state, RadioButton stringency, Button remove) {
+    public static AnchorPane buildModelHeaderAnchorPane(TextField state, CheckBox stringency, Button remove) {
         AnchorPane header = new AnchorPane();
 
         AnchorPane.setLeftAnchor(state, 10D);
@@ -149,27 +156,28 @@ public final class ConstructorV2 {
         AnchorPane.setTopAnchor(stringency, 14D);
 
         AnchorPane.setTopAnchor(remove, 10D);
-        AnchorPane.setRightAnchor(remove, 10D);
+        AnchorPane.setRightAnchor(remove, 20D);
 
         header.getChildren().addAll(state, stringency, remove);
 
         return header;
     }
 
-    public static Button buildRemoveModelButton() {
-        Button remove = new Button("Удалить");
+    public static Button buildRemoveButton() {
+        Button remove = new Button();
         remove.setMaxWidth(62);
         remove.setMinWidth(62);
         remove.setMaxHeight(25);
         remove.setMinHeight(25);
+        remove.getStyleClass().add("remove-btn");
         return remove;
     }
 
-    public static RadioButton buildStringencyRadioButton(boolean value) {
-        RadioButton stringency = new RadioButton();
+    public static CheckBox buildStringencyCheckBox(boolean value) {
+        CheckBox stringency = new CheckBox();
         stringency.setText("строго");
         stringency.setSelected(value);
-        stringency.setTooltip(new Tooltip("Строго - все факторы должны быть истины, иначе достаточно одного"));
+        stringency.setTooltip(createTooltip("Строго - все факторы должны быть истины, иначе достаточно одного"));
         return stringency;
     }
 
@@ -186,8 +194,8 @@ public final class ConstructorV2 {
 
     public static AnchorPane buildSelectFeatureAnchorPane(Label name) {
         AnchorPane feature = buildClearFeatureAnchorPane();
-        feature.setMaxWidth(232);
-        feature.setMinWidth(232);
+        feature.setMaxWidth(173);
+        feature.setMinWidth(173);
 
         HBox hBox = (HBox) feature.getChildren().get(0);
         HBox.setMargin(name, new Insets(0, 0, 0, 10));
@@ -211,15 +219,17 @@ public final class ConstructorV2 {
         Label nameLabel = new Label(name);
         nameLabel.setMaxWidth(112);
         nameLabel.setMinWidth(112);
+        nameLabel.setTooltip(createTooltip(name));
         return nameLabel;
     }
 
     public static Button buildFeatureSettingsButton() {
-        Button settings = new Button("настройки");
+        Button settings = new Button();
         settings.setMaxWidth(82);
         settings.setMinWidth(82);
         settings.setMaxHeight(25);
         settings.setMinHeight(25);
+        settings.getStyleClass().add("settings-btn");
         return settings;
     }
 
@@ -264,6 +274,7 @@ public final class ConstructorV2 {
             propName.setMaxHeight(25);
             propName.setMinHeight(25);
             propName.setFont(new Font(14));
+            propName.setTooltip(createTooltip(name));
             HBox.setMargin(propName, new Insets(0, 0, 0, 20));
             return propName;
         }
@@ -289,6 +300,29 @@ public final class ConstructorV2 {
             input.setMinHeight(25);
             HBox.setMargin(input, new Insets(0, 0, 0, 15));
             return input;
+        }
+    }
+
+    public static Tooltip createTooltip(String text) {
+        Tooltip tooltip = new Tooltip(text);
+        setTooltipShowDelay(tooltip, TOOLTIP_SHOW_DELAY_MS);
+        return tooltip;
+    }
+
+    public static void setTooltipShowDelay(Tooltip tooltip, long delay) {
+        try {
+            Field fieldBehavior = tooltip.getClass().getDeclaredField("BEHAVIOR");
+            fieldBehavior.setAccessible(true);
+            Object objBehavior = fieldBehavior.get(tooltip);
+
+            Field fieldTimer = objBehavior.getClass().getDeclaredField("activationTimer");
+            fieldTimer.setAccessible(true);
+            Timeline objTimer = (Timeline) fieldTimer.get(objBehavior);
+
+            objTimer.getKeyFrames().clear();
+            objTimer.getKeyFrames().add(new KeyFrame(new Duration(delay)));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
