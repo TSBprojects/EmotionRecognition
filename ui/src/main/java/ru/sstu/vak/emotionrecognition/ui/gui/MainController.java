@@ -4,11 +4,7 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKN
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 import com.google.common.collect.Lists;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
@@ -17,10 +13,12 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,10 +32,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
@@ -66,9 +61,7 @@ import static javafx.scene.paint.Color.ORANGE;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javax.imageio.ImageIO;
 import lombok.var;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.apache.logging.log4j.LogManager;
@@ -88,14 +81,14 @@ import ru.sstu.vak.emotionrecognition.common.Satisfiable;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementHashMap;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
 import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageConverter;
-import ru.sstu.vak.emotionrecognition.graphicprep.imageprocessing.ImageCorrector;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.FrameIterator;
 import ru.sstu.vak.emotionrecognition.graphicprep.iterators.frameiterator.impl.FrameIteratorBase;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.ClosestFaceEmotionRecognizer;
 import ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.EmotionRecognizer;
+import static ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.ErFeature.COLLECT_FRAMES;
+import static ru.sstu.vak.emotionrecognition.identifyemotion.emotionrecognizer.ErFeature.GENERATE_JSON_OUTPUT;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.face.VideoFace;
 import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.FrameInfo;
-import ru.sstu.vak.emotionrecognition.identifyemotion.media.info.ImageInfo;
 import ru.sstu.vak.emotionrecognition.timeseries.TimeSeries;
 import ru.sstu.vak.emotionrecognition.timeseries.TimeSeriesCollector;
 import static ru.sstu.vak.emotionrecognition.timeseries.TimelineState.PARTIAL_FROM_END;
@@ -104,7 +97,6 @@ import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.EmotionFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.Feature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
-import static ru.sstu.vak.emotionrecognition.ui.Main.TITLE_IMAGE_PATH;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.HasChildren;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.PaneAdapter;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.SplitPaneAdapter;
@@ -115,7 +107,8 @@ import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.Feature
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.MetaFeatureContext;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.ModelPane;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.SimpleModelPane;
-import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.io.ModelsHolder;
+import ru.sstu.vak.emotionrecognition.ui.io.AnalysisHolder;
+import ru.sstu.vak.emotionrecognition.ui.io.ModelsHolder;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureSettingsButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFlowPane;
@@ -157,16 +150,10 @@ public class MainController {
     private ImageView videoImageView;
 
     @FXML
-    private Button startVideoBtn;
-
-    @FXML
     private Button startRcognVideoBtn;
 
     @FXML
     private AnchorPane videoPane;
-
-    @FXML
-    private Button screenshotBtn;
 
     @FXML
     private Button stopVideoBtn;
@@ -225,30 +212,6 @@ public class MainController {
     private ListView<String> stateListView;
 
     @FXML
-    private ImageView screenImageView;
-
-    @FXML
-    private Button recognScreenBtn;
-
-    @FXML
-    private ImageView faceFromScreen;
-
-    @FXML
-    private TextField imagePath;
-
-    @FXML
-    private Button browseImageBtn;
-
-    @FXML
-    private Button saveImageBtn;
-
-    @FXML
-    private ProgressBar recognImageProgressBar;
-
-    @FXML
-    private Button openImageBtn;
-
-    @FXML
     private VBox constructorVbox;
 
 
@@ -300,12 +263,6 @@ public class MainController {
 
     private Frame currentFrame;
 
-    private BufferedImage screenshotFrame;
-
-    private BufferedImage originalScreenShot;
-
-    private ImageInfo imageInfo;
-
 
     private TimeSeries chartTimeSeries;
 
@@ -326,11 +283,10 @@ public class MainController {
         }
         tryGracefully(() -> {
             emotionRecognizer = new ClosestFaceEmotionRecognizer(modelName);
+            emotionRecognizer.disable(COLLECT_FRAMES);
+            emotionRecognizer.disable(GENERATE_JSON_OUTPUT);
             emotionRecognizer.setOnStopListener(videoInfo -> onStopAction());
             emotionRecognizer.setFrameListener(frame -> currentFrame = frame);
-            emotionRecognizer.setImageNetInputListener(face -> runLater(() ->
-                faceFromScreen.setImage(ImageConverter.toJavaFXImage(face))
-            ));
             emotionRecognizer.setVideoNetInputListener(face -> runLater(() ->
                 faceFromVideo.setImage(ImageConverter.toJavaFXImage(face))
             ));
@@ -455,43 +411,13 @@ public class MainController {
     }
 
     @FXML
-    void openScreen(ActionEvent event) {
-        if (screenshotFrame != null) {
-            tryGracefully(() -> {
-                Dimension winSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-                FXMLLoader loader = new FXMLLoader();
-                loader.setLocation(getClass().getResource("/showImage.fxml"));
-
-                Parent root = null;
-                try {
-                    root = loader.load();
-                } catch (IOException e) {
-                    log.error("Cannot load root scene graph operations handler", e);
-                }
-
-                ShowImageController progressController = loader.getController();
-                progressController.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
-
-                Stage stage = new Stage();
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.setTitle("Изображение");
-                stage.setScene(new Scene(root, winSize.width - 150.0, winSize.height - 150.0));
-                stage.setResizable(true);
-                stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
-                stage.showAndWait();
-            });
-        }
-    }
-
-    @FXML
     void startRecognVideo(ActionEvent event) {
         if (emotionRecognizer.isRun() || frameIterator.isRun()) return;
 
         tryGracefully(() -> {
             boolean ok = showConfirm(
-                "Что делать с данными?",
-                "Сохранить обработанные данные и информацию о них?",
+                "Что делать с видео?",
+                "Сохранить обработанное видео?",
                 "Нажмите ОК для сохранения и Cancel для отмены"
             );
             startVidProgressBarOn();
@@ -540,11 +466,11 @@ public class MainController {
                 return;
             }
 
-            var r = AnalyzeEngine.analyze(analyzeTimeSeries, currentModels);
+            currentEmotionalStates = AnalyzeEngine.analyze(analyzeTimeSeries, currentModels);
 
             applyHighlighting(currentModels);
 
-            if (r.isEmpty()) {
+            if (currentEmotionalStates.isEmpty()) {
                 if (modelsList.get(0).equals(STATE_NO_MATCH)) return;
                 shadow(stateListView, GRAY);
                 stateListView.getItems().clear();
@@ -552,10 +478,10 @@ public class MainController {
                 return;
             }
 
-            if (modelsList.equals(new ArrayList<>(r))) return;
+            if (modelsList.equals(new ArrayList<>(currentEmotionalStates))) return;
             shadow(stateListView, GREEN);
             stateListView.getItems().clear();
-            stateListView.getItems().addAll(r);
+            stateListView.getItems().addAll(currentEmotionalStates);
         });
     }
 
@@ -687,20 +613,6 @@ public class MainController {
     }
 
     @FXML
-    void startVideo(ActionEvent event) {
-        if (emotionRecognizer.isRun() || frameIterator.isRun()) return;
-
-        tryGracefully(() -> {
-            startVidProgressBarOn();
-            frameIterator.start(videoPath.getText(), frame -> {
-                startVidProgressBarOff();
-                currentFrame = frame;
-                videoImageView.setImage(ImageConverter.toJavaFXImage(frame));
-            });
-        });
-    }
-
-    @FXML
     void stopVideo(ActionEvent event) {
         tryGracefully(() -> {
             if (emotionRecognizer.isRun()) {
@@ -714,67 +626,17 @@ public class MainController {
     }
 
     @FXML
-    void takeScreenshot(ActionEvent event) {
-        if (currentFrame != null) {
-            log.info("Take a screenshot...");
-            tryGracefully(() -> {
-                screenshotFrame = ImageConverter.toBufferedImage(currentFrame.clone());
-                originalScreenShot = ImageCorrector.copyBufferedImage(screenshotFrame);
-                screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
-            });
-        }
-    }
-
-    @FXML
-    void recognizeScreenshot(ActionEvent event) {
-        if (screenshotFrame != null) {
-            recognScreenProgressBarToggle();
-            executorService.submit(() ->
-                tryGracefully(() -> {
-                    imageInfo = emotionRecognizer.processImage(ImageCorrector.copyBufferedImage(originalScreenShot));
-                    screenshotFrame = imageInfo.getProcessedImage();
-                    screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
-                    recognScreenProgressBarToggle();
-                })
+    void saveTargetTimeSeries(ActionEvent event) {
+        tryIt(() -> {
+            File analysis = saveFile(
+                "Сохранить описание целевых кадров и результат анализа",
+                "Json",
+                "*.json"
             );
-        }
-    }
-
-    @FXML
-    void browseImage(ActionEvent event) {
-        log.info("Browse for image...");
-
-        tryGracefully(() -> {
-            File image = selectFile("Select image for recognize emotions!",
-                "Image", "*.png", "*.jpeg", "*.jpg", "*.bmp"
-            );
-            if (image != null) {
-                imagePath.setText(image.getPath());
-                screenshotFrame = ImageIO.read(image);
-                originalScreenShot = ImageCorrector.copyBufferedImage(screenshotFrame);
-                screenImageView.setImage(ImageConverter.toJavaFXImage(screenshotFrame));
+            if (analysis != null) {
+                mapper.writeValue(analysis, AnalysisHolder.from(currentEmotionalStates, analyzeTimeSeries));
             }
         });
-    }
-
-    @FXML
-    void saveScreen(ActionEvent event) {
-        log.info("Save image...");
-
-        if (screenshotFrame != null) {
-            tryGracefully(() -> {
-                File image = saveFile("Saving image",
-                    "Image", "*.png", "*.jpg", "*.jpeg", "*.bmp"
-                );
-                if (image != null) {
-                    if (imageInfo != null) {
-                        emotionRecognizer.writeImageInfo(imageInfo, image.toPath(), true);
-                    } else {
-                        ImageIO.write(screenshotFrame, "png", image);
-                    }
-                }
-            });
-        }
     }
 
     private void initEmotionChart() {
@@ -856,19 +718,8 @@ public class MainController {
         return String.format("%02d:%02d:%02d", lSeconds / 3600, (lSeconds % 3600) / 60, (lSeconds % 60));
     }
 
-    private void recognScreenProgressBarToggle() {
-        if (recognScreenBtn.isVisible()) {
-            recognScreenBtn.setVisible(false);
-            recognImageProgressBar.setVisible(true);
-        } else {
-            recognScreenBtn.setVisible(true);
-            recognImageProgressBar.setVisible(false);
-        }
-    }
-
     private void startVidProgressBarOn() {
         if (!startVideoProgressBar.isVisible()) {
-            startVideoBtn.setVisible(false);
             startRcognVideoBtn.setVisible(false);
             stopVideoBtn.setVisible(false);
             startVideoProgressBar.setVisible(true);
@@ -877,13 +728,11 @@ public class MainController {
 
     private void startVidProgressBarOff() {
         if (startVideoProgressBar.isVisible()) {
-            startVideoBtn.setVisible(true);
             startRcognVideoBtn.setVisible(true);
             stopVideoBtn.setVisible(true);
             startVideoProgressBar.setVisible(false);
         }
     }
-
 
     private void initExit() {
         runLater(() ->
@@ -1024,7 +873,9 @@ public class MainController {
     @FXML
     private VBox selectModelVBox;
 
-    private static final ObjectMapper mapper = initMapperForModels();
+    private Set<String> currentEmotionalStates = new HashSet<>();
+
+    private static final ObjectMapper mapper = initMapper();
 
     private static final AutoIncrementMap<AnalyzableModel> currentModels =
         new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
@@ -1047,11 +898,8 @@ public class MainController {
         return Collections.unmodifiableMap(features);
     }
 
-    private static ObjectMapper initMapperForModels() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(INDENT_OUTPUT);
-        mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper;
+    private static ObjectMapper initMapper() {
+        return new ObjectMapper().disable(FAIL_ON_UNKNOWN_PROPERTIES).enable(INDENT_OUTPUT);
     }
 
     private void initAddModelDragAndDropHandlers(Node node) {

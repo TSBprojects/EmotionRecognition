@@ -1,4 +1,4 @@
-package ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.io;
+package ru.sstu.vak.emotionrecognition.ui.io;
 
 import java.util.ArrayList;
 import java.util.List;

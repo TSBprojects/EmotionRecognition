@@ -39,10 +39,9 @@
                               </ImageView>
                            </children>
                         </AnchorPane>
-                        <Button fx:id="startVideoBtn" layoutX="490.0" layoutY="382.0" mnemonicParsing="false" onAction="#startVideo" prefHeight="25.0" prefWidth="95.0" text="Только видео" AnchorPane.rightAnchor="346.0" />
-                        <Button fx:id="startRcognVideoBtn" layoutX="595.0" layoutY="382.0" mnemonicParsing="false" onAction="#startRecognVideo" prefHeight="25.0" prefWidth="163.0" text="Видео с распознаванием" AnchorPane.rightAnchor="173.0" />
-                        <Button fx:id="screenshotBtn" layoutX="491.0" layoutY="415.0" mnemonicParsing="false" onAction="#takeScreenshot" prefHeight="25.0" prefWidth="343.0" text="Скриншот" AnchorPane.rightAnchor="97.0" />
-                        <Button fx:id="stopVideoBtn" layoutX="768.0" layoutY="382.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="66.0" text="Стоп" AnchorPane.rightAnchor="97.0" />
+                        <Button fx:id="startRcognVideoBtn" layoutX="626.0" layoutY="382.0" mnemonicParsing="false" onAction="#startRecognVideo" prefHeight="25.0" prefWidth="165.0" text="Старт" AnchorPane.rightAnchor="275.0" />
+                        <Button layoutX="491.0" layoutY="415.0" mnemonicParsing="false" onAction="#saveTargetTimeSeries" prefHeight="25.0" prefWidth="343.0" text="Сохранить описание целевых кадров и результат анализа" AnchorPane.rightAnchor="97.0" />
+                        <Button fx:id="stopVideoBtn" layoutX="768.0" layoutY="382.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="165.0" text="Стоп" AnchorPane.rightAnchor="97.0" />
                         <AnchorPane layoutX="852.0" layoutY="382.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;" AnchorPane.rightAnchor="21.0">
                            <children>
                               <ImageView fx:id="faceFromVideo" fitHeight="48.0" fitWidth="48.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -98,38 +97,6 @@
                   </AnchorPane>
             </content>
           </Tab>
-            <Tab text="Изображение">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="474.0" prefWidth="931.0">
-                     <children>
-                        <AnchorPane layoutX="323.0" layoutY="51.0" maxHeight="320.0" maxWidth="420.0" minHeight="320.0" minWidth="420.0" prefHeight="320.0" prefWidth="420.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;">
-                           <children>
-                              <ImageView fx:id="screenImageView" fitHeight="300.0" fitWidth="400.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <image>
-                                    <Image url="@image/videoPlaceHolder.png" />
-                                 </image>
-                              </ImageView>
-                           </children>
-                        </AnchorPane>
-                        <Button fx:id="recognScreenBtn" layoutX="323.0" layoutY="380.0" mnemonicParsing="false" onAction="#recognizeScreenshot" prefHeight="58.0" prefWidth="181.0" text="Распознать" />
-                        <AnchorPane layoutX="685.0" layoutY="380.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;">
-                           <children>
-                              <ImageView fx:id="faceFromScreen" fitHeight="48.0" fitWidth="48.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <image>
-                                    <Image url="@image/videoPlaceHolderForFace.png" />
-                                 </image>
-                              </ImageView>
-                           </children>
-                        </AnchorPane>
-                        <TextField fx:id="imagePath" disable="true" layoutX="323.0" layoutY="17.0" prefHeight="25.0" prefWidth="337.0" promptText="Путь к изображению" />
-                        <Button fx:id="browseImageBtn" layoutX="668.0" layoutY="17.0" mnemonicParsing="false" onAction="#browseImage" prefHeight="25.0" prefWidth="75.0" text="Обзор" />
-                        <Button fx:id="saveImageBtn" layoutX="601.0" layoutY="380.0" mnemonicParsing="false" onAction="#saveScreen" prefHeight="58.0" prefWidth="75.0" text="Сохранить" />
-                        <ProgressBar fx:id="recognImageProgressBar" layoutX="323.0" layoutY="380.0" prefHeight="59.0" prefWidth="181.0" visible="false" AnchorPane.rightAnchor="562.0" />
-                        <Button fx:id="openImageBtn" layoutX="515.0" layoutY="380.0" mnemonicParsing="false" onAction="#openScreen" prefHeight="58.0" prefWidth="75.0" text="Открыть" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
             <Tab text="Конструктор">
                <content>
                   <SplitPane dividerPositions="0.7504690431519699" prefHeight="160.0" prefWidth="200.0">
@@ -192,6 +159,11 @@
                         </SplitPane>
                     </items>
                   </SplitPane>
+               </content>
+            </Tab>
+            <Tab text="Слушатели событий">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="474.0" prefWidth="931.0" />
                </content>
             </Tab>
         </tabs>
