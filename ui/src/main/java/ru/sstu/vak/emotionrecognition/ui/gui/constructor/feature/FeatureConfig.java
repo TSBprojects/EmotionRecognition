@@ -9,7 +9,15 @@ import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.Feature
 @Builder
 public class FeatureConfig {
     private final int modelId;
+    private final String featureName;
     private final int featureNumberInModel;
     private final HasChildren<?> featureHolder;
     private final FeatureContext<?> featureContext;
+
+    public String getFeatureName() {
+        if (featureName != null) {
+            return featureName;
+        }
+        return featureContext.getFeature().getName();
+    }
 }

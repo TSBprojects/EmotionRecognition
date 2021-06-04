@@ -24,11 +24,11 @@ public final class FeatureFactory {
 
         int featureNumberInModel = config.getFeatureNumberInModel();
 
-        FeatureContext<?> featureInfo = config.getFeatureContext();
+        FeatureContext<?> featureContext = config.getFeatureContext();
 
-        String serialNumber = featureInfo.createSerialNumber(featureNumberInModel);
+        String serialNumber = featureContext.createSerialNumber(featureNumberInModel);
 
-        Label labelName = buildFeatureNameLabel(featureInfo.getFeature().getName());
+        Label labelName = buildFeatureNameLabel(config.getFeatureName());
 
         Button configureFeatureButton = buildFeatureSettingsButton();
 
@@ -57,14 +57,14 @@ public final class FeatureFactory {
             .value(feature)
             .build();
 
-        FeatureAction settingsHandler = featureInfo.getModelFeatureSettingHandler(modelId, featureNumberInModel);
+        FeatureAction settingsHandler = featureContext.getModelFeatureSettingHandler(modelId, featureNumberInModel);
         configureFeatureButton.setOnAction(settingsHandler.apply(
             configureFeatureButton,
             config.getFeatureHolder(),
             featureWrapper
         ));
 
-        FeatureAction removeHandler = featureInfo.getRemoveHandler(modelId, featureNumberInModel);
+        FeatureAction removeHandler = featureContext.getRemoveHandler(modelId, featureNumberInModel);
         removeModelFeatureButton.setOnAction(removeHandler.apply(
             removeModelFeatureButton,
             config.getFeatureHolder(),

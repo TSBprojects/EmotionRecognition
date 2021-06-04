@@ -1363,6 +1363,7 @@ public class MainController {
 
             FeatureConfig featureConfig = FeatureConfig.builder()
                 .modelId(modelId)
+                .featureName(feature.getName())
                 .featureNumberInModel(featureNumberInModel)
                 .featureHolder(new PaneAdapter(featuresHolder))
                 .featureContext(featureContext)
