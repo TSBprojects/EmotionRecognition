@@ -3,6 +3,8 @@ package ru.sstu.vak.emotionrecognition.common.collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class AutoIncrementHashMap<E> extends ForwardingMap<Integer, E> implements AutoIncrementMap<E> {
 
@@ -28,6 +30,26 @@ public class AutoIncrementHashMap<E> extends ForwardingMap<Integer, E> implement
     @Override
     public int getNextId() {
         return nextId;
+    }
+
+    @Override
+    public E putIfAbsent(Integer key, E value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public E computeIfAbsent(Integer key, Function<? super Integer, ? extends E> mappingFunction) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public E computeIfPresent(Integer key, BiFunction<? super Integer, ? super E, ? extends E> remappingFunction) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public E compute(Integer key, BiFunction<? super Integer, ? super E, ? extends E> remappingFunction) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

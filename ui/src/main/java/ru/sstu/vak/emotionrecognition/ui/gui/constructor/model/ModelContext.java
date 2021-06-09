@@ -1,0 +1,21 @@
+package ru.sstu.vak.emotionrecognition.ui.gui.constructor.model;
+
+import java.util.Map;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
+
+public interface ModelContext {
+
+    Map<Integer, AnalyzableModel> getModels();
+
+    Map<Integer, ModelPane> getPanes();
+
+    AnalyzableModel getModel(int id);
+
+    ModelPane getModelPane(int id);
+
+    void put(AnalyzableModel model, ModelPane pane);
+
+    void remove(int id);
+
+    int getNextId();
+}

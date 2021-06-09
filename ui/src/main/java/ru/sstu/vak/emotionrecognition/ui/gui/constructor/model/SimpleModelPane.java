@@ -14,6 +14,7 @@ public class SimpleModelPane implements ModelPane {
     private final CheckBox stringency;
     private final Button remove;
     private final FlowPane featureHolder;
+    private final FlowPane endpointHolder;
 
     @Override
     public SplitPane value() {
@@ -38,5 +39,10 @@ public class SimpleModelPane implements ModelPane {
     @Override
     public FlowPane getFeatureHolder() {
         return featureHolder;
+    }
+
+    @Override
+    public FlowPane getEndpointHolder() {
+        return endpointHolder;
     }
 }

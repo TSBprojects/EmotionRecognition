@@ -17,4 +17,6 @@ public interface ModelPane {
     Button getRemoveBtn();
 
     FlowPane getFeatureHolder();
+
+    FlowPane getEndpointHolder();
 }

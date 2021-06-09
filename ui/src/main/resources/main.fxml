@@ -14,10 +14,12 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -99,14 +101,49 @@
           </Tab>
             <Tab text="Конструктор">
                <content>
-                  <SplitPane dividerPositions="0.807" prefHeight="160.0" prefWidth="200.0">
+                  <SplitPane dividerPositions="0.217, 0.8068" prefHeight="160.0" prefWidth="200.0">
                     <items>
+                        <SplitPane dividerPositions="0.09251101321585903" orientation="VERTICAL" prefHeight="456.0" prefWidth="261.0">
+                           <items>
+                              <HBox alignment="CENTER" maxHeight="39.0" minHeight="39.0" prefHeight="39.0" prefWidth="200.0">
+                                 <children>
+                                    <Label text="Слушатели событий" textFill="#6b6b6b">
+                                       <font>
+                                          <Font name="Century" size="16.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets right="10.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <Button mnemonicParsing="false" onAction="#onAddEndpoint" styleClass="add-btn">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor></Button>
+                                 </children>
+                              </HBox>
+                              <ScrollPane fitToHeight="true" fitToWidth="true">
+                                 <content>
+                                    <FlowPane fx:id="selectEndpointPane">
+                                       <padding>
+                                          <Insets right="15.0" top="15.0" />
+                                       </padding>
+                                    </FlowPane>
+                                 </content>
+                              </ScrollPane>
+                           </items>
+                        </SplitPane>
                         <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                           <items>
                               <ToolBar maxHeight="39.0" minHeight="39.0" prefHeight="40.0" prefWidth="200.0">
                                  <items>
-                                    <Button mnemonicParsing="false" onAction="#onModelsLoad" text="Импорт" />
-                                    <Button mnemonicParsing="false" onAction="#onModelsSave" text="Экспорт" />
+                                    <Button mnemonicParsing="false" onAction="#onModelsLoad" text="Импорт">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor></Button>
+                                    <Button mnemonicParsing="false" onAction="#onModelsSave" text="Экспорт">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor></Button>
                                  </items>
                               </ToolBar>
                               <ScrollPane fitToWidth="true">
@@ -137,7 +174,7 @@
                         </SplitPane>
                         <SplitPane dividerPositions="0.09251101321585903" orientation="VERTICAL" prefHeight="456.0" prefWidth="261.0">
                           <items>
-                              <VBox alignment="CENTER" maxHeight="39.0" minHeight="39.0" prefHeight="200.0" prefWidth="100.0">
+                              <VBox alignment="CENTER" maxHeight="39.0" minHeight="39.0" prefHeight="39.0" prefWidth="100.0">
                                  <children>
                                     <Label text="Библиотека факторов" textFill="#6b6b6b">
                                        <font>

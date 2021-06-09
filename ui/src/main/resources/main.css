@@ -38,3 +38,79 @@
 .settings-btn:pressed {
     -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 5);
 }
+
+
+.add-btn {
+    -fx-background-color: -icon-paint;
+    -fx-min-height: -size;
+    -fx-min-width: -size;
+    -fx-max-height: -size;
+    -fx-max-width: -size;
+    -fx-shape: "M24 9h-9v-9h-6v9h-9v6h9v9h6v-9h9z";
+
+    -size: 24px;
+    -icon-paint: rgb(0, 230, 0);
+}
+
+.add-btn:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 5, 0, 0, 0);
+}
+
+.add-btn:pressed {
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 5);
+}
+
+
+.start-listen-all {
+    -fx-background-color: -icon-paint;
+    -fx-min-height: -size;
+    -fx-min-width: -size;
+    -fx-max-height: -size;
+    -fx-max-width: -size;
+    -fx-shape: "M20 15h4.071v2h-4.071v4.071h-2v-4.071h-4.071v-2h4.071v-4.071h2v4.071zm-8 6h-12v-2h12v2zm0-4.024h-12v-2h12v2zm0-3.976h-12v-2h12v2zm12-4h-24v-2h24v2zm0-4h-24v-2h24v2z";
+
+    -size: 24px;
+    -icon-paint: green;
+}
+
+.start-listen-all:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 5, 0, 0, 0);
+}
+
+.start-listen-all:pressed {
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 5);
+}
+
+
+.stop-listen-all {
+    -fx-background-color: -icon-paint;
+    -fx-min-height: -size;
+    -fx-min-width: -size;
+    -fx-max-height: -size;
+    -fx-max-width: -size;
+    -fx-shape: "M5.662 23l-5.369-5.365c-.195-.195-.293-.45-.293-.707 0-.256.098-.512.293-.707l14.929-14.928c.195-.194.451-.293.707-.293.255 0 .512.099.707.293l7.071 7.073c.196.195.293.451.293.708 0 .256-.097.511-.293.707l-11.216 11.219h5.514v2h-12.343zm3.657-2l-5.486-5.486-1.419 1.414 4.076 4.072h2.829zm.456-11.429l-4.528 4.528 5.658 5.659 4.527-4.53-5.657-5.657z";
+
+    -size: 24px;
+    -icon-paint: red;
+}
+
+.stop-listen-all:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 5, 0, 0, 0);
+}
+
+.stop-listen-all:pressed {
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 5);
+}
+
+.endpoint .settings-btn, .endpoint .remove-btn, .endpoint .start-listen-all, .endpoint .stop-listen-all {
+    -fx-min-height: -size;
+    -fx-min-width: -size;
+    -fx-max-height: -size;
+    -fx-max-width: -size;
+    -size: 15px;
+}
+
+.tool-bar {
+    -fx-background-radius: 5px 5px 0 0
+}
+

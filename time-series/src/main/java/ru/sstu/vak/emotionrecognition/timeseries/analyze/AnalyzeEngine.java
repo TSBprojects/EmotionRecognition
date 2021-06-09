@@ -2,9 +2,9 @@ package ru.sstu.vak.emotionrecognition.timeseries.analyze;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import lombok.var;
-import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
 import ru.sstu.vak.emotionrecognition.timeseries.TimeSeries;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
 
@@ -14,7 +14,7 @@ public final class AnalyzeEngine {
         throw new AssertionError();
     }
 
-    public static Set<String> analyze(TimeSeries target, AutoIncrementMap<AnalyzableModel> models) {
+    public static Set<String> analyze(TimeSeries target, Map<Integer, AnalyzableModel> models) {
         if (models.isEmpty()) return Collections.emptySet();
 
         applyFramesToFeatures(target, models);
@@ -32,7 +32,7 @@ public final class AnalyzeEngine {
         return matchedStates;
     }
 
-    private static void applyFramesToFeatures(TimeSeries target, AutoIncrementMap<AnalyzableModel> models) {
+    private static void applyFramesToFeatures(TimeSeries target, Map<Integer, AnalyzableModel> models) {
         boolean isFirst = true;
         for (var tsEntry : target.getRaw().entrySet()) {
             for (var model : models.values()) {

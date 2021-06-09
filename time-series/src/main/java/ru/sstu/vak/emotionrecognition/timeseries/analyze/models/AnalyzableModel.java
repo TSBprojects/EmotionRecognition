@@ -1,8 +1,10 @@
 package ru.sstu.vak.emotionrecognition.timeseries.analyze.models;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.Map;
 import ru.sstu.vak.emotionrecognition.common.Satisfiable;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.endpoint.Endpoint;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.EmotionFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
 
@@ -20,4 +22,6 @@ public interface AnalyzableModel extends Satisfiable {
     AutoIncrementMap<MetaFeature> getMetaFeatures();
 
     AutoIncrementMap<EmotionFeature> getFeatures();
+
+    Map<Integer, Endpoint> getEndpoints();
 }

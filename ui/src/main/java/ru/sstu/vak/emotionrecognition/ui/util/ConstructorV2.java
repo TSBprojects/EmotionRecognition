@@ -6,8 +6,10 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import static javafx.geometry.Orientation.HORIZONTAL;
 import static javafx.geometry.Orientation.VERTICAL;
 import static javafx.geometry.Pos.CENTER;
+import static javafx.scene.Cursor.HAND;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -16,25 +18,39 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import static javafx.scene.layout.Priority.ALWAYS;
 import javafx.scene.layout.VBox;
 import static javafx.scene.paint.Color.RED;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.endpoint.Endpoint;
 import static ru.sstu.vak.emotionrecognition.ui.util.NodeDecorator.tile;
 
 public final class ConstructorV2 {
 
     private static final long TOOLTIP_SHOW_DELAY_MS = 150;
 
+    private static final String ENDPOINT_CLASS = "endpoint";
+
+    private static final String START_LISTEN_ALL_CLASS = "start-listen-all";
+
+    private static final String STOP_LISTEN_ALL_CLASS = "stop-listen-all";
+
+    private static final String SETTINGS_CLASS = "settings-btn";
+
+    private static final String REMOVE_CLASS = "remove-btn";
+
     private ConstructorV2() {
         throw new AssertionError();
     }
 
-    public static SplitPane buildModelSplitPane(AnchorPane header, ScrollPane body) {
+    public static SplitPane buildModelSplitPane(AnchorPane header, SplitPane body) {
         SplitPane model = new SplitPane();
 
         model.setMaxHeight(236);
@@ -52,8 +68,17 @@ public final class ConstructorV2 {
         return model;
     }
 
-    public static Label buildModelBodyPlaceHolderLabel() {
-        Label label = new Label("Перетащите фактор");
+    public static SplitPane buildModelBodySplitPane(ScrollPane endpoints, ScrollPane features) {
+        SplitPane model = new SplitPane();
+        model.setOrientation(HORIZONTAL);
+        model.getItems().addAll(endpoints, features);
+        model.setDividerPosition(0, 0.3692);
+        model.setDividerPosition(1, 0.7);
+        return model;
+    }
+
+    public static Label buildModelBodyPlaceHolderLabel(String text) {
+        Label label = new Label(text);
         label.setOpacity(0.34);
         label.setLayoutX(88);
         label.setLayoutY(8);
@@ -72,7 +97,7 @@ public final class ConstructorV2 {
         return placeHolder;
     }
 
-    public static AnchorPane buildModelBodyPlaceHolderOuter(VBox inner) {
+    public static AnchorPane buildModelBodyFeaturePlaceHolderOuter(VBox inner) {
         AnchorPane placeHolder = new AnchorPane();
         placeHolder.setStyle("-fx-border-style: dashed;");
         placeHolder.setMaxWidth(210);
@@ -82,6 +107,131 @@ public final class ConstructorV2 {
         placeHolder.getChildren().add(inner);
         FlowPane.setMargin(placeHolder, new Insets(0, 0, 15, 15));
         return placeHolder;
+    }
+
+    public static AnchorPane buildModelBodyEndpointPlaceHolderOuter(VBox inner) {
+        AnchorPane placeHolder = new AnchorPane();
+        placeHolder.setStyle("-fx-border-style: dashed;");
+        placeHolder.setMaxWidth(180);
+        placeHolder.setMinWidth(180);
+        placeHolder.setMaxHeight(35);
+        placeHolder.setMinHeight(35);
+        placeHolder.getChildren().add(inner);
+        FlowPane.setMargin(placeHolder, new Insets(0, 0, 15, 15));
+        return placeHolder;
+    }
+
+    public static AnchorPane buildModelEndpointAnchorPane(Label name, Button remove) {
+        AnchorPane endpoint = new AnchorPane();
+
+        endpoint.setMaxWidth(180);
+        endpoint.setMinWidth(180);
+        endpoint.setMaxHeight(30);
+        endpoint.setMinHeight(30);
+        endpoint.getStyleClass().add(ENDPOINT_CLASS);
+        FlowPane.setMargin(endpoint, new Insets(0, 0, 15, 15));
+        tile(endpoint);
+
+        HBox hBox = new HBox();
+        hBox.setAlignment(CENTER);
+        AnchorPane.setBottomAnchor(hBox, 0D);
+        AnchorPane.setLeftAnchor(hBox, 0D);
+        AnchorPane.setTopAnchor(hBox, 0D);
+        AnchorPane.setRightAnchor(hBox, 0D);
+        endpoint.getChildren().add(hBox);
+
+        HBox.setMargin(name, new Insets(0, 0, 0, 10));
+        name.setMaxWidth(135);
+        name.setMinWidth(135);
+        HBox.setMargin(remove, new Insets(0, 10, 0, 10));
+        hBox.getChildren().addAll(name, remove);
+
+        return endpoint;
+    }
+
+    public static AnchorPane buildEndpointAnchorPane(ToolBar header, HBox name) {
+        AnchorPane endpoint = new AnchorPane();
+
+        endpoint.setMaxWidth(200);
+        endpoint.setMinWidth(200);
+        endpoint.setMaxHeight(60);
+        endpoint.setMinHeight(60);
+        endpoint.getStyleClass().add(ENDPOINT_CLASS);
+        FlowPane.setMargin(endpoint, new Insets(0, 0, 15, 15));
+        tile(endpoint);
+
+        VBox vBox = new VBox();
+        vBox.setAlignment(CENTER);
+        AnchorPane.setBottomAnchor(vBox, 0D);
+        AnchorPane.setLeftAnchor(vBox, 0D);
+        AnchorPane.setTopAnchor(vBox, 0D);
+        AnchorPane.setRightAnchor(vBox, 0D);
+        endpoint.getChildren().add(vBox);
+
+        vBox.getChildren().addAll(header, name);
+
+        return endpoint;
+    }
+
+    public static HBox buildEndpointHBoxWithLabel(Label nameLabel) {
+        HBox hBox = new HBox();
+        hBox.setMaxHeight(35);
+        hBox.setMinHeight(35);
+        hBox.setAlignment(CENTER);
+        hBox.setCursor(HAND);
+
+        nameLabel.setMaxWidth(180);
+        nameLabel.setMinWidth(180);
+        nameLabel.setAlignment(CENTER);
+        hBox.getChildren().add(nameLabel);
+
+        return hBox;
+    }
+
+    public static Label buildEndpointLabel(Endpoint endpoint) {
+        Label label = new Label(endpoint.getName());
+        label.setTooltip(createTooltip(endpoint));
+        return label;
+    }
+
+    public static ToolBar buildEndpointToolbar(
+        Button startListenAll,
+        Button stopListenAll,
+        Button settings,
+        Button remove
+    ) {
+        ToolBar toolBar = new ToolBar();
+        toolBar.setMaxHeight(25);
+        toolBar.setMinHeight(25);
+
+        Pane separator = new Pane();
+        HBox.setHgrow(separator, ALWAYS);
+
+        toolBar.getItems().addAll(
+            startListenAll,
+            stopListenAll,
+            separator,
+            settings,
+            remove
+        );
+
+        return toolBar;
+    }
+
+    public static Button buildStartListenAllButton() {
+        Button start = new Button();
+        start.getStyleClass().add(START_LISTEN_ALL_CLASS);
+        start.setCursor(HAND);
+        start.setTooltip(createTooltip("Слушать все конфигурации"));
+        return start;
+    }
+
+    public static Button buildStopListenAllButton() {
+        Button stop = new Button();
+        stop.getStyleClass().add(STOP_LISTEN_ALL_CLASS);
+        stop.setCursor(HAND);
+        stop.setTooltip(createTooltip("Перестать слушать все конфигурации"));
+        return stop;
     }
 
     public static AnchorPane buildModelBodyFeatureAnchorPane(
@@ -169,7 +319,8 @@ public final class ConstructorV2 {
         remove.setMinWidth(62);
         remove.setMaxHeight(25);
         remove.setMinHeight(25);
-        remove.getStyleClass().add("remove-btn");
+        remove.getStyleClass().add(REMOVE_CLASS);
+        remove.setCursor(HAND);
         return remove;
     }
 
@@ -223,13 +374,14 @@ public final class ConstructorV2 {
         return nameLabel;
     }
 
-    public static Button buildFeatureSettingsButton() {
+    public static Button buildSettingsButton() {
         Button settings = new Button();
         settings.setMaxWidth(82);
         settings.setMinWidth(82);
         settings.setMaxHeight(25);
         settings.setMinHeight(25);
-        settings.getStyleClass().add("settings-btn");
+        settings.getStyleClass().add(SETTINGS_CLASS);
+        settings.setCursor(HAND);
         return settings;
     }
 
@@ -242,6 +394,7 @@ public final class ConstructorV2 {
         FlowPane.setMargin(feature, new Insets(0, 0, 15, 15));
 
         HBox hBox = new HBox();
+        hBox.setCursor(HAND);
         hBox.setAlignment(CENTER);
         AnchorPane.setBottomAnchor(hBox, 0D);
         AnchorPane.setLeftAnchor(hBox, 0D);
@@ -305,8 +458,18 @@ public final class ConstructorV2 {
 
     public static Tooltip createTooltip(String text) {
         Tooltip tooltip = new Tooltip(text);
+        tooltip.setWrapText(true);
+        tooltip.setMaxWidth(250);
         setTooltipShowDelay(tooltip, TOOLTIP_SHOW_DELAY_MS);
         return tooltip;
+    }
+
+    public static Tooltip createTooltip(Endpoint endpoint) {
+        return createTooltip(
+            "name: " + endpoint.getName()
+                + "\n ip: " + endpoint.getIp()
+                + "\n port: " + endpoint.getPort()
+        );
     }
 
     public static void setTooltipShowDelay(Tooltip tooltip, long delay) {

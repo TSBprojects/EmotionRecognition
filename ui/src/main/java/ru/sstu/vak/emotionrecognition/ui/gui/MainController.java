@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 import com.google.common.collect.Lists;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,7 +33,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
@@ -45,6 +49,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
@@ -53,6 +58,7 @@ import javafx.scene.input.MouseEvent;
 import static javafx.scene.input.TransferMode.ANY;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import static javafx.scene.paint.Color.GRAY;
@@ -61,6 +67,7 @@ import static javafx.scene.paint.Color.ORANGE;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.var;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -93,10 +100,12 @@ import ru.sstu.vak.emotionrecognition.timeseries.TimeSeries;
 import ru.sstu.vak.emotionrecognition.timeseries.TimeSeriesCollector;
 import static ru.sstu.vak.emotionrecognition.timeseries.TimelineState.PARTIAL_FROM_END;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.AnalyzeEngine;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.endpoint.Endpoint;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.EmotionFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.Feature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
+import static ru.sstu.vak.emotionrecognition.ui.Main.TITLE_IMAGE_PATH;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.HasChildren;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.PaneAdapter;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.SplitPaneAdapter;
@@ -105,23 +114,38 @@ import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.FeatureFactory;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.EmotionFeatureContext;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.FeatureContext;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.MetaFeatureContext;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.ModelContext;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.ModelPane;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.SimpleModelContext;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.SimpleModelPane;
+import ru.sstu.vak.emotionrecognition.ui.gui.dragdrop.DragDropData;
+import static ru.sstu.vak.emotionrecognition.ui.gui.dragdrop.DragDropData.Type.ENDPOINT;
+import static ru.sstu.vak.emotionrecognition.ui.gui.dragdrop.DragDropData.Type.FEATURE;
 import ru.sstu.vak.emotionrecognition.ui.io.AnalysisHolder;
 import ru.sstu.vak.emotionrecognition.ui.io.ModelsHolder;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointAnchorPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointHBoxWithLabel;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointLabel;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointToolbar;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureSettingsButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyEndpointPlaceHolderOuter;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeaturePlaceHolderOuter;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFlowPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyPlaceHolderInner;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyPlaceHolderLabel;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyPlaceHolderOuter;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodySplitPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelEndpointAnchorPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelHeaderAnchorPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelScrollPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelSplitPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildRemoveButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildSelectFeatureAnchorPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildSettingsButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStartListenAllButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStateNameTextField;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStopListenAllButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStringencyCheckBox;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.createTooltip;
 import static ru.sstu.vak.emotionrecognition.ui.util.NodeDecorator.shadow;
 
 public class MainController {
@@ -458,7 +482,9 @@ public class MainController {
 
             var modelsList = stateListView.getItems();
 
-            if (currentModels.isEmpty()) {
+            var models = modelContext.getModels();
+
+            if (models.isEmpty()) {
                 if (modelsList.get(0).equals(STATE_MODEL_NOT_SET)) return;
                 shadow(stateListView, ORANGE);
                 modelsList.clear();
@@ -466,9 +492,9 @@ public class MainController {
                 return;
             }
 
-            currentEmotionalStates = AnalyzeEngine.analyze(analyzeTimeSeries, currentModels);
+            currentEmotionalStates = AnalyzeEngine.analyze(analyzeTimeSeries, models);
 
-            applyHighlighting(currentModels);
+            applyHighlighting(models);
 
             if (currentEmotionalStates.isEmpty()) {
                 if (modelsList.get(0).equals(STATE_NO_MATCH)) return;
@@ -485,7 +511,7 @@ public class MainController {
         });
     }
 
-    private void applyHighlighting(AutoIncrementMap<AnalyzableModel> models) {
+    private void applyHighlighting(Map<Integer, AnalyzableModel> models) {
         if (models.isEmpty()) return;
 
         var scene = mainAnchorPane.getScene();
@@ -857,6 +883,10 @@ public class MainController {
 
     public static final String MODEL_ID_SUFFIX = "_model";
 
+    public static final String ENDPOINT_ID_SUFFIX = "_endpoint";
+
+    public static final String ENDPOINT_LABEL_ID_SUFFIX = "_endpoint_label";
+
     public static final String FEATURE_ID_SUFFIX = "_feature";
 
     public static final String META_FEATURE_ID_SUFFIX = "_meta";
@@ -868,6 +898,9 @@ public class MainController {
     private AnchorPane addModelPlaceHolder;
 
     @FXML
+    private FlowPane selectEndpointPane;
+
+    @FXML
     private FlowPane selectFeaturePane;
 
     @FXML
@@ -877,8 +910,10 @@ public class MainController {
 
     private static final ObjectMapper mapper = initMapper();
 
-    private static final AutoIncrementMap<AnalyzableModel> currentModels =
+    private static final AutoIncrementMap<Endpoint> endpoints =
         new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
+
+    private static final ModelContext modelContext = new SimpleModelContext();
 
     private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
 
@@ -888,11 +923,11 @@ public class MainController {
         Map<Integer, FeatureContext<?>> features = new HashMap<>();
 
         for (var feature : Lists.newArrayList(ServiceLoader.load(MetaFeature.class))) {
-            features.put(feature.getId(), new MetaFeatureContext(feature, currentModels));
+            features.put(feature.getId(), new MetaFeatureContext(feature, modelContext));
         }
 
         for (var feature : Lists.newArrayList(ServiceLoader.load(EmotionFeature.class))) {
-            features.put(feature.getId(), new EmotionFeatureContext(feature, currentModels));
+            features.put(feature.getId(), new EmotionFeatureContext(feature, modelContext));
         }
 
         return Collections.unmodifiableMap(features);
@@ -906,7 +941,10 @@ public class MainController {
         node.setOnDragOver(event -> {
             /* accept it only if it is  not dragged from the same node
              * and if it has a string data */
-            if (event.getGestureSource() != node && event.getDragboard().hasString()) {
+            Dragboard db = event.getDragboard();
+            if (event.getGestureSource() != node
+                && db.hasString()
+                && DragDropData.deserialize(db.getString()).getValue() == FEATURE) {
                 /* allow for both copying and moving, whatever user chooses */
                 event.acceptTransferModes(ANY);
             }
@@ -943,13 +981,14 @@ public class MainController {
             Dragboard db = event.getDragboard();
             if (db.hasString()) {
                 int featureNumberInModel = 0;
-                int modelId = currentModels.getNextId();
+                int modelId = modelContext.getNextId();
                 String stateName = "Модель " + modelId;
-                int featureId = Integer.parseInt(db.getString());
+                int featureId = DragDropData.deserialize(db.getString()).getKey();
                 var featureContext = BASE_FEATURE_CONTEXTS.get(featureId);
-                featureContext.createAndPutModel(stateName);
 
                 ModelPane modelPane = createModelPane(modelId, stateName);
+
+                featureContext.createAndPutModel(stateName, modelPane);
 
                 FlowPane featuresHolder = modelPane.getFeatureHolder();
 
@@ -980,10 +1019,18 @@ public class MainController {
     }
 
     private ModelPane createModelPane(int modelId, String stateName, boolean stringency) {
+        FlowPane endpointHolder = buildModelBodyFlowPane();
+
+        AnchorPane addEndpointPlaceHolder = buildModelBodyEndpointPlaceHolderOuter(
+            buildModelBodyPlaceHolderInner(buildModelBodyPlaceHolderLabel("Перетащите слушателя"))
+        );
+
+        endpointHolder.getChildren().add(addEndpointPlaceHolder);
+
         FlowPane featuresHolder = buildModelBodyFlowPane();
 
-        AnchorPane addFeaturePlaceHolder = buildModelBodyPlaceHolderOuter(
-            buildModelBodyPlaceHolderInner(buildModelBodyPlaceHolderLabel())
+        AnchorPane addFeaturePlaceHolder = buildModelBodyFeaturePlaceHolderOuter(
+            buildModelBodyPlaceHolderInner(buildModelBodyPlaceHolderLabel("Перетащите фактор"))
         );
 
         featuresHolder.getChildren().add(addFeaturePlaceHolder);
@@ -1000,7 +1047,10 @@ public class MainController {
                 stringencyCheckBox,
                 removeModelButton
             ),
-            buildModelScrollPane(featuresHolder)
+            buildModelBodySplitPane(
+                buildModelScrollPane(endpointHolder),
+                buildModelScrollPane(featuresHolder)
+            )
         );
 
         modelPane.setId(modelId + MODEL_ID_SUFFIX);
@@ -1011,6 +1061,8 @@ public class MainController {
 
         initAddFeatureToModelHandlers(modelId, featuresHolder, featuresHolder);
 
+        initAddEndpointToModelHandlers(modelId, endpointHolder, endpointHolder);
+
         initRemoveModelHandler(modelId, selectModelVBox, modelPane, removeModelButton);
 
         return SimpleModelPane.builder()
@@ -1019,12 +1071,13 @@ public class MainController {
             .stringency(stringencyCheckBox)
             .remove(removeModelButton)
             .featureHolder(featuresHolder)
+            .endpointHolder(endpointHolder)
             .build();
     }
 
     private void initStateNameChangeHandler(int modelId, TextField stateTextField) {
         stateTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            var model = currentModels.get(modelId);
+            var model = modelContext.getModel(modelId);
             String newName = stateTextField.getText();
             if (isBlank(newName)) {
                 String oldName = model.getName();
@@ -1040,13 +1093,13 @@ public class MainController {
     }
 
     private void initStringencyChangeHandler(int modelId, CheckBox stringency) {
-        stringency.setOnAction(event -> currentModels.get(modelId).setStrictly(stringency.isSelected()));
+        stringency.setOnAction(event -> modelContext.getModel(modelId).setStrictly(stringency.isSelected()));
     }
 
     private void initRemoveModelHandler(int modelId, Pane holder, Node target, Button removeBtn) {
         removeBtn.setOnAction(event -> {
             holder.getChildren().remove(target);
-            currentModels.remove(modelId);
+            modelContext.remove(modelId);
         });
     }
 
@@ -1055,7 +1108,10 @@ public class MainController {
         target.setOnDragOver(event -> {
             /* accept it only if it is  not dragged from the same node
              * and if it has a string data */
-            if (event.getGestureSource() != target && event.getDragboard().hasString()) {
+            Dragboard db = event.getDragboard();
+            if (event.getGestureSource() != target
+                && db.hasString()
+                && DragDropData.deserialize(db.getString()).getValue() == FEATURE) {
                 /* allow for both copying and moving, whatever user chooses */
                 event.acceptTransferModes(ANY);
             }
@@ -1092,7 +1148,7 @@ public class MainController {
 
             Dragboard db = event.getDragboard();
             if (db.hasString()) {
-                int featureId = Integer.parseInt(db.getString());
+                int featureId = DragDropData.deserialize(db.getString()).getKey();
 
                 var featureContext = BASE_FEATURE_CONTEXTS.get(featureId);
 
@@ -1118,12 +1174,51 @@ public class MainController {
         });
     }
 
+    private void initAddEndpointToModelHandlers(int modelId, Pane target, Pane addTo) {
+        target.setOnDragOver(event -> {
+            /* accept it only if it is  not dragged from the same node
+             * and if it has a string data */
+            Dragboard db = event.getDragboard();
+            if (event.getGestureSource() != target && db.hasString()) {
+                var model = modelContext.getModel(modelId);
+                var data = DragDropData.deserialize(db.getString());
+
+                if (data.getValue() == ENDPOINT && !model.getEndpoints().containsKey(data.getKey())) {
+                    /* allow for both copying and moving, whatever user chooses */
+                    event.acceptTransferModes(ANY);
+                }
+            }
+
+            event.consume();
+        });
+
+        target.setOnDragDropped(event -> {
+            boolean success = false;
+
+            Dragboard db = event.getDragboard();
+            if (db.hasString()) {
+                int endpointId = DragDropData.deserialize(db.getString()).getKey();
+                Endpoint endpoint = endpoints.get(endpointId);
+                AnchorPane endpointPain = createModelEndpointPane(modelId, endpointId);
+
+                modelContext.getModel(modelId).getEndpoints().put(endpointId, endpoint);
+                var addToChildren = addTo.getChildren();
+                addToChildren.add(addToChildren.size() - 1, endpointPain);
+
+                success = true;
+            }
+
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
     private void addConstructorFeatures() {
         for (var entry : BASE_FEATURE_CONTEXTS.entrySet()) {
             final int id = entry.getKey();
             final var featureContext = entry.getValue();
 
-            Button settingsButton = buildFeatureSettingsButton();
+            Button settingsButton = buildSettingsButton();
 
             Label labelName = buildFeatureNameLabel(featureContext.getFeature().getName());
 
@@ -1141,7 +1236,7 @@ public class MainController {
 
                 /* put a string on dragboard */
                 ClipboardContent content = new ClipboardContent();
-                content.putString(Integer.toString(id));
+                content.putString(DragDropData.serialize(FEATURE, id));
                 db.setContent(content);
 
                 event.consume();
@@ -1165,7 +1260,7 @@ public class MainController {
                 "*.ercc"
             );
             if (configFile != null) {
-                byte[] json = mapper.writeValueAsBytes(ModelsHolder.from(currentModels));
+                byte[] json = mapper.writeValueAsBytes(ModelsHolder.from(modelContext.getModels()));
                 Files.write(configFile.toPath(), Base64.getEncoder().encode(json));
             }
         });
@@ -1188,18 +1283,54 @@ public class MainController {
     }
 
     private void addLoadedModels(List<AnalyzableModel> models) {
+        int newEndpointsStartId = -1;
+        Map<Integer, Endpoint> uniqueEndpoints = new HashMap<>();
+        List<Runnable> delayedEndpointIdsUpdates = new ArrayList<>();
+
         for (var model : models) {
-            int modelId = currentModels.getNextId();
-            currentModels.put(model);
+            int modelId = modelContext.getNextId();
 
             ModelPane modelPane = createModelPane(modelId, model.getName(), model.isStrictly());
-            FlowPane featuresHolder = modelPane.getFeatureHolder();
+            modelContext.put(model, modelPane);
 
+            FlowPane featuresHolder = modelPane.getFeatureHolder();
             addLoadedFeatures(modelId, model.getFeatures(), featuresHolder);
             addLoadedFeatures(modelId, model.getMetaFeatures(), featuresHolder);
 
+            var modelEndpoints = model.getEndpoints();
+            for (var endpointEntry : modelEndpoints.entrySet()) {
+                int newEndpointId = endpoints.getNextId();
+                int oldEndpointId = endpointEntry.getKey();
+                Endpoint endpoint = endpointEntry.getValue();
+
+                if (newEndpointsStartId == -1) {
+                    newEndpointsStartId = newEndpointId;
+                }
+
+                var prevEndpoint = uniqueEndpoints.putIfAbsent(oldEndpointId, endpoint);
+                if (prevEndpoint == null) {
+                    delayedEndpointIdsUpdates.add(() -> {
+                        modelEndpoints.remove(oldEndpointId);
+                        modelEndpoints.put(newEndpointId, endpoint);
+                        addLoadedEndpoint(modelId, newEndpointId, endpoint, modelPane.getEndpointHolder());
+                    });
+                    endpoints.put(endpoint);
+                    selectEndpointPane.getChildren().add(createSelectEndpointPane(newEndpointId));
+                }
+            }
+
             var paneModels = selectModelVBox.getChildren();
             paneModels.add(paneModels.size() - 1, modelPane.value());
+        }
+
+        var maxOldIdOpt = uniqueEndpoints.keySet().stream().max(Integer::compareTo);
+        if (maxOldIdOpt.isPresent()) {
+            int maxOldId = maxOldIdOpt.get();
+            int newEndpointsEndId = newEndpointsStartId + uniqueEndpoints.size() - 1;
+            if (newEndpointsStartId <= maxOldId && maxOldId < newEndpointsEndId) {
+                Collections.reverse(delayedEndpointIdsUpdates);
+            }
+            delayedEndpointIdsUpdates.forEach(Runnable::run);
         }
     }
 
@@ -1220,6 +1351,172 @@ public class MainController {
 
             var addToChildren = featuresHolder.getChildren();
             addToChildren.add(addToChildren.size() - 1, featurePane);
+        }
+    }
+
+    private void addLoadedEndpoint(int modelId, int endpointId, Endpoint endpoint, FlowPane endpointHolder) {
+        AnchorPane endpointPane = createModelEndpointPane(modelId, endpointId);
+        var addToChildren = endpointHolder.getChildren();
+        addToChildren.add(addToChildren.size() - 1, endpointPane);
+    }
+
+    @FXML
+    void onAddEndpoint(ActionEvent event) {
+        int id = endpoints.getNextId();
+        String endpointName = "Endpoint " + id;
+        Endpoint newEndpoint = Endpoint.of(endpointName, "localhost", "8080");
+
+        showEndpointSettingsForm(newEndpoint, () -> {
+            endpoints.put(newEndpoint);
+            selectEndpointPane.getChildren().add(createSelectEndpointPane(id));
+        });
+    }
+
+    private void showEndpointSettingsForm(Endpoint endpoint, Runnable onOk) {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("/endpointSettings.fxml"));
+
+        Parent root = null;
+        try {
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        EndpointSettingsController endpointController = loader.getController();
+        endpointController.setEndpoint(endpoint);
+
+        Stage stage = new Stage();
+        endpointController.setCurrentStage(stage);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle(endpoint.getName() + " - конфигурация");
+        stage.setScene(new Scene(root, 311, 316));
+        stage.setOnCloseRequest(e -> {
+            if (endpointController.isOk()) {
+                onOk.run();
+            }
+        });
+        stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
+        stage.showAndWait();
+    }
+
+    private AnchorPane createSelectEndpointPane(int endpointId) {
+        Button startListen = buildStartListenAllButton();
+        Button stopListen = buildStopListenAllButton();
+        Button settings = buildSettingsButton();
+        Button remove = buildRemoveButton();
+        ToolBar header = buildEndpointToolbar(startListen, stopListen, settings, remove);
+        Label nameLabel = buildEndpointLabel(endpoints.get(endpointId));
+        HBox labelHolder = buildEndpointHBoxWithLabel(nameLabel);
+        AnchorPane endpoint = buildEndpointAnchorPane(header, labelHolder);
+
+        initStartListenAllEndpointHandler(endpointId, startListen);
+        initStopListenAllEndpointHandler(endpointId, stopListen);
+        initRemoveEndpointHandler(endpointId, remove, endpoint);
+        initEditEndpointHandler(endpointId, settings, nameLabel);
+
+        endpoint.setOnDragDetected(event -> {
+            /* allow any transfer mode */
+            Dragboard db = endpoint.startDragAndDrop(ANY);
+
+            /* put a string on dragboard */
+            ClipboardContent content = new ClipboardContent();
+            content.putString(DragDropData.serialize(ENDPOINT, endpointId));
+            db.setContent(content);
+
+            event.consume();
+        });
+
+        return endpoint;
+    }
+
+    // TODO fix UI bug with broken scroll bar. Height of panes seems to be larger than it looks like
+    private AnchorPane createModelEndpointPane(int modelId, int endpointId) {
+        Button remove = buildRemoveButton();
+        Label nameLabel = buildEndpointLabel(endpoints.get(endpointId));
+        AnchorPane endpoint = buildModelEndpointAnchorPane(nameLabel, remove);
+
+        nameLabel.setId(endpointId + ENDPOINT_LABEL_ID_SUFFIX);
+        endpoint.setId(endpointId + ENDPOINT_ID_SUFFIX);
+
+        initRemoveModelEndpointHandler(modelId, endpointId, remove, endpoint);
+
+        return endpoint;
+    }
+
+    private void initEditEndpointHandler(int endpointId, Button settings, Label label) {
+        Endpoint endpoint = endpoints.get(endpointId);
+        settings.setOnAction(e -> showEndpointSettingsForm(endpoint, () -> {
+            label.setText(endpoint.getName());
+            label.setTooltip(createTooltip(endpoint));
+            updateEndpointLabelInAllModels(endpointId);
+        }));
+    }
+
+    private void initRemoveEndpointHandler(int endpointId, Button remove, AnchorPane target) {
+        remove.setOnAction(e -> {
+            endpoints.remove(endpointId);
+            removeEndpointFromModels(endpointId);
+            selectEndpointPane.getChildren().remove(target);
+        });
+    }
+
+    private void initRemoveModelEndpointHandler(int modelId, int endpointId, Button remove, AnchorPane target) {
+        remove.setOnAction(e -> {
+            modelContext.getModel(modelId).getEndpoints().remove(endpointId);
+            modelContext.getModelPane(modelId).getEndpointHolder().getChildren().remove(target);
+        });
+    }
+
+    private void initStartListenAllEndpointHandler(int endpointId, Button startListen) {
+        startListen.setOnAction(e -> {
+            Endpoint endpoint = endpoints.get(endpointId);
+            var modelsIterator = modelContext.getModels().values().iterator();
+            var panesIterator = modelContext.getPanes().entrySet().iterator();
+            while (modelsIterator.hasNext() && panesIterator.hasNext()) {
+                var model = modelsIterator.next();
+                var panesEntry = panesIterator.next();
+                var modelId = panesEntry.getKey();
+                var modelPane = panesEntry.getValue();
+
+                var prevEndpoint = model.getEndpoints().putIfAbsent(endpointId, endpoint);
+                if (prevEndpoint == null) {
+                    var endpChildren = modelPane.getEndpointHolder().getChildren();
+                    endpChildren.add(endpChildren.size() - 1, createModelEndpointPane(modelId, endpointId));
+                }
+            }
+        });
+    }
+
+    private void initStopListenAllEndpointHandler(int endpointId, Button stopListen) {
+        stopListen.setOnAction(e -> removeEndpointFromModels(endpointId));
+    }
+
+    private void removeEndpointFromModels(int endpointId) {
+        var modelsIterator = modelContext.getModels().values().iterator();
+        var panesIterator = modelContext.getPanes().values().iterator();
+        while (modelsIterator.hasNext() && panesIterator.hasNext()) {
+            var model = modelsIterator.next();
+            var modelPane = panesIterator.next();
+
+            model.getEndpoints().remove(endpointId);
+            var endpointPane = modelPane.value().lookup("#" + endpointId + ENDPOINT_ID_SUFFIX);
+            modelPane.getEndpointHolder().getChildren().remove(endpointPane);
+        }
+    }
+
+    private void updateEndpointLabelInAllModels(int endpointId) {
+        var endpoint = endpoints.get(endpointId);
+        for (ModelPane modelPane : modelContext.getPanes().values()) {
+            FlowPane endpointHolder = modelPane.getEndpointHolder();
+            if (!endpointHolder.getChildren().isEmpty()) {
+                String labelSelector = "#" + endpointId + ENDPOINT_LABEL_ID_SUFFIX;
+                var endpointLabel = (Label) endpointHolder.lookup(labelSelector);
+                if (endpointLabel != null) {
+                    endpointLabel.setText(endpoint.getName());
+                    endpointLabel.setTooltip(createTooltip(endpoint));
+                }
+            }
         }
     }
 }
