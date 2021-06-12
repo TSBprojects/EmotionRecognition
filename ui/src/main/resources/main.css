@@ -114,3 +114,22 @@
     -fx-background-radius: 5px 5px 0 0
 }
 
+.show-tree-view-btn {
+    -fx-background-color: -icon-paint;
+    -fx-min-height: -size;
+    -fx-min-width: -size;
+    -fx-max-height: -size;
+    -fx-max-width: -size;
+    -fx-shape: "M16,6h-2v32c0,1.657,1.343,3,3,3h9v-2h-9c-0.552,0-1-0.448-1-1V25h10v-2H16V6z M22,3H8C7.448,3,7,3.448,7,4v8c0,0.552,0.448,1,1,1h14c0.552,0,1-0.448,1-1V4	C23,3.448,22.552,3,22,3z M40,19H26c-0.552,0-1,0.448-1,1v8c0,0.552,0.448,1,1,1h14c0.552,0,1-0.448,1-1v-8 C41,19.448,40.552,19,40,19z M40,35H26c-0.552,0-1,0.448-1,1v8c0,0.552,0.448,1,1,1h14c0.552,0,1-0.448,1-1v-8	C41,35.448,40.552,35,40,35z";
+
+    -size: 24px;
+    -icon-paint: #B5015A;
+}
+
+.show-tree-view-btn:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 5, 0, 0, 0);
+}
+
+.show-tree-view-btn:pressed {
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 5);
+}

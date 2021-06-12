@@ -109,7 +109,7 @@
                                  <children>
                                     <Label text="Слушатели событий" textFill="#6b6b6b">
                                        <font>
-                                          <Font name="Century" size="16.0" />
+                                          <Font name="Century" size="14.0" />
                                        </font>
                                        <HBox.margin>
                                           <Insets right="10.0" />
@@ -118,7 +118,15 @@
                                     <Button mnemonicParsing="false" onAction="#onAddEndpoint" styleClass="add-btn">
                                        <cursor>
                                           <Cursor fx:constant="HAND" />
-                                       </cursor></Button>
+                                       </cursor>
+                                       <HBox.margin>
+                                          <Insets right="10.0" />
+                                       </HBox.margin></Button>
+                                    <Button mnemonicParsing="false" onAction="#onShowEndpointsTreeView" styleClass="show-tree-view-btn">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
+                                    </Button>
                                  </children>
                               </HBox>
                               <ScrollPane fitToHeight="true" fitToWidth="true">
@@ -178,7 +186,7 @@
                                  <children>
                                     <Label text="Библиотека факторов" textFill="#6b6b6b">
                                        <font>
-                                          <Font name="Century" size="16.0" />
+                                          <Font name="Century" size="14.0" />
                                        </font>
                                     </Label>
                                  </children>

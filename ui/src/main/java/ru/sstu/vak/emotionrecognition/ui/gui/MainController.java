@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -73,7 +72,6 @@ import lombok.var;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bytedeco.javacv.Frame;
 import org.controlsfx.control.RangeSlider;
 import ru.sstu.vak.emotionrecognition.common.Emotion;
 import static ru.sstu.vak.emotionrecognition.common.Emotion.ANGER;
@@ -281,12 +279,7 @@ public class MainController {
         analyzeTargetRangeChange(o, oldV, newV);
     };
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
-
     private Stage currentStage;
-
-    private Frame currentFrame;
-
 
     private TimeSeries chartTimeSeries;
 
@@ -310,7 +303,6 @@ public class MainController {
             emotionRecognizer.disable(COLLECT_FRAMES);
             emotionRecognizer.disable(GENERATE_JSON_OUTPUT);
             emotionRecognizer.setOnStopListener(videoInfo -> onStopAction());
-            emotionRecognizer.setFrameListener(frame -> currentFrame = frame);
             emotionRecognizer.setVideoNetInputListener(face -> runLater(() ->
                 faceFromVideo.setImage(ImageConverter.toJavaFXImage(face))
             ));
@@ -326,7 +318,6 @@ public class MainController {
         startVidProgressBarOff();
         videoImageView.setImage(VIDEO_PLACE_HOLDER);
         faceFromVideo.setImage(VIDEO_PLACE_HOLDER_FOR_FACE);
-        currentFrame = null;
     }
 
 
@@ -1428,6 +1419,30 @@ public class MainController {
         });
 
         return endpoint;
+    }
+
+    @FXML
+    void onShowEndpointsTreeView(ActionEvent event) {
+
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("/endpointsTreeView.fxml"));
+
+        Parent root = null;
+        try {
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        EndpointsTreeViewController endpointsTreeView = loader.getController();
+        endpointsTreeView.setEndpointsAndModels(endpoints, modelContext);
+
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Структура отношений");
+        stage.setScene(new Scene(root, 311, 320));
+        stage.getIcons().add(new Image(TITLE_IMAGE_PATH));
+        stage.showAndWait();
     }
 
     // TODO fix UI bug with broken scroll bar. Height of panes seems to be larger than it looks like
