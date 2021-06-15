@@ -3,12 +3,20 @@ package ru.sstu.vak.emotionrecognition.ui.gui;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import static java.time.ZoneOffset.UTC;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -21,7 +29,9 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static javafx.application.Platform.runLater;
@@ -43,6 +53,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
@@ -107,6 +118,12 @@ import static ru.sstu.vak.emotionrecognition.ui.Main.TITLE_IMAGE_PATH;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.HasChildren;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.PaneAdapter;
 import ru.sstu.vak.emotionrecognition.ui.gui.adapter.SplitPaneAdapter;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.endpoint.EndpointStatus;
+import static ru.sstu.vak.emotionrecognition.ui.gui.constructor.endpoint.EndpointStatus.ERROR;
+import static ru.sstu.vak.emotionrecognition.ui.gui.constructor.endpoint.EndpointStatus.OK;
+import static ru.sstu.vak.emotionrecognition.ui.gui.constructor.endpoint.EndpointStatus.PROGRESS;
+import static ru.sstu.vak.emotionrecognition.ui.gui.constructor.endpoint.EndpointStatus.WARN;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.endpoint.EventRequestContext;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.FeatureConfig;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.FeatureFactory;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.EmotionFeatureContext;
@@ -121,10 +138,17 @@ import static ru.sstu.vak.emotionrecognition.ui.gui.dragdrop.DragDropData.Type.E
 import static ru.sstu.vak.emotionrecognition.ui.gui.dragdrop.DragDropData.Type.FEATURE;
 import ru.sstu.vak.emotionrecognition.ui.io.AnalysisHolder;
 import ru.sstu.vak.emotionrecognition.ui.io.ModelsHolder;
+import ru.sstu.vak.emotionrecognition.ui.io.TrueModelEvent;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.ENDPOINT_STATUS_CLASS;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointAnchorPane;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointErrorButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointHBoxWithLabel;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointIdleButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointLabel;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointOkButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointProgressIndicator;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointToolbar;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointWarnButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyEndpointPlaceHolderOuter;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeaturePlaceHolderOuter;
@@ -143,7 +167,7 @@ import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStartLis
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStateNameTextField;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStopListenAllButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildStringencyCheckBox;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.createTooltip;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.newTooltipBuilder;
 import static ru.sstu.vak.emotionrecognition.ui.util.NodeDecorator.shadow;
 
 public class MainController {
@@ -153,6 +177,8 @@ public class MainController {
     private static final Image VIDEO_PLACE_HOLDER = new Image("image/videoPlaceHolder.png");
 
     private static final Image VIDEO_PLACE_HOLDER_FOR_FACE = new Image("image/videoPlaceHolderForFace.png");
+
+    private static final String CONSTRUCTOR_CONFIGURATION_NAME = "constructor.ercc";
 
     private static final String NO_EMOTION = "NONE";
 
@@ -236,6 +262,7 @@ public class MainController {
     @FXML
     private VBox constructorVbox;
 
+    private final OkHttpClient client = new OkHttpClient();
 
     private final EventHandler<? super MouseEvent> mouseConsumeEvent = MouseEvent::consume;
 
@@ -279,6 +306,8 @@ public class MainController {
         analyzeTargetRangeChange(o, oldV, newV);
     };
 
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+
     private Stage currentStage;
 
     private TimeSeries chartTimeSeries;
@@ -311,6 +340,7 @@ public class MainController {
             timeSeriesCollector = new TimeSeriesCollector(emotionRecognizer);
             chartTimeSeries = timeSeriesCollector.addTargetTimeSeries(CHART_RANGE_NAME);
             analyzeTimeSeries = timeSeriesCollector.addTargetTimeSeries(ANALYZE_RANGE_NAME);
+            loadConfiguration(new File(CONSTRUCTOR_CONFIGURATION_NAME));
         });
     }
 
@@ -471,15 +501,15 @@ public class MainController {
             refreshSliderLabels(fullRange, analyzeRangeSlider, analyzeHighSliderLabel, analyzeLowSliderLabel, analyzeRangeTotalLabel);
 
 
-            var modelsList = stateListView.getItems();
+            var prevStatesList = new ArrayList<>(stateListView.getItems());
 
             var models = modelContext.getModels();
 
             if (models.isEmpty()) {
-                if (modelsList.get(0).equals(STATE_MODEL_NOT_SET)) return;
+                if (prevStatesList.get(0).equals(STATE_MODEL_NOT_SET)) return;
                 shadow(stateListView, ORANGE);
-                modelsList.clear();
-                modelsList.add(STATE_MODEL_NOT_SET);
+                prevStatesList.clear();
+                prevStatesList.add(STATE_MODEL_NOT_SET);
                 return;
             }
 
@@ -488,17 +518,31 @@ public class MainController {
             applyHighlighting(models);
 
             if (currentEmotionalStates.isEmpty()) {
-                if (modelsList.get(0).equals(STATE_NO_MATCH)) return;
+                if (prevStatesList.get(0).equals(STATE_NO_MATCH)) return;
                 shadow(stateListView, GRAY);
                 stateListView.getItems().clear();
                 stateListView.getItems().add(STATE_NO_MATCH);
                 return;
             }
 
-            if (modelsList.equals(new ArrayList<>(currentEmotionalStates))) return;
+            List<String> newStates = new ArrayList<>(currentEmotionalStates);
+            if (prevStatesList.equals(newStates)) return;
             shadow(stateListView, GREEN);
             stateListView.getItems().clear();
             stateListView.getItems().addAll(currentEmotionalStates);
+
+            newStates.removeAll(prevStatesList);
+            if (!newStates.isEmpty()) {
+                for (var state : newStates) {
+                    for (var entry : models.entrySet()) {
+                        var modelId = entry.getKey();
+                        var model = entry.getValue();
+                        if (model.getName().equals(state)) {
+                            notifyEventListeners(modelId);
+                        }
+                    }
+                }
+            }
         });
     }
 
@@ -564,6 +608,80 @@ public class MainController {
         } else {
             node.setStyle(nodeStyle + lastStyle);
         }
+    }
+
+    private void notifyEventListeners(int modelId) {
+        AnalyzableModel model = modelContext.getModel(modelId);
+        if (!model.isSatisfied()) return;
+
+        var mName = model.getName();
+        var mEndpoints = model.getEndpoints();
+
+        log.info("Sending {} notifications because state configuration '{}' is true", mEndpoints.size(), mName);
+
+        for (var endpointId : mEndpoints.keySet()) {
+            notifyEventListener(modelId, endpointId);
+        }
+    }
+
+    private void notifyEventListener(int modelId, int endpointId) {
+        AnalyzableModel model = modelContext.getModel(modelId);
+        EventRequestContext requestContext = modelContext.getEventRequestContext();
+        if (!model.isSatisfied() || requestContext.contains(modelId, endpointId)) return;
+
+        Future<?> requestFuture = executorService.submit(() -> {
+            applyEndpointStatus(modelId, endpointId, PROGRESS, "Отправка запроса ...");
+            Endpoint endpoint = endpoints.get(endpointId);
+            var event = new TrueModelEvent(LocalDateTime.now(UTC), model.getName());
+            try {
+                Request request = new Request.Builder()
+                    .url(endpoint.getUrl())
+                    .post(RequestBody.create(MediaType.parse("application/json"), mapper.writeValueAsString(event)))
+                    .build();
+
+                Response response = client.newCall(request).execute();
+                int responseCode = response.code();
+                response.body().close();
+                if (responseCode != 200) {
+                    log.warn("Endpoint '{}' responded with failure code {}", endpoint, responseCode);
+                    applyEndpointStatus(modelId, endpointId, WARN, "Слушатель вернул код: " + responseCode);
+                    return;
+                }
+
+                applyEndpointStatus(modelId, endpointId, OK, "Слушатель успешно обработал запрос");
+            } catch (Exception e) {
+                log.error("Sending notification to {} is failed", endpoint.getUrl(), e);
+                applyEndpointStatus(modelId, endpointId, ERROR, "Ошибка при отправке запроса: " + e.getMessage());
+            }
+
+            requestContext.remove(modelId, endpointId);
+        });
+
+        requestContext.add(modelId, endpointId, requestFuture);
+    }
+
+    private void applyEndpointStatus(int modelId, int endpointId, EndpointStatus status, String msg) {
+        runLater(() -> {
+            FlowPane endpointHolder = modelContext.getModelPane(modelId).getEndpointHolder();
+            String labelSelector = "#" + endpointId + ENDPOINT_ID_SUFFIX;
+            var endpointPane = (AnchorPane) endpointHolder.lookup(labelSelector);
+            if (endpointPane != null) {
+                var endpointHBox = (HBox) endpointPane.getChildren().get(0);
+                for (var child : endpointHBox.getChildren()) {
+                    var childClasses = child.getStyleClass();
+                    if (childClasses.contains(status.getStyleClass())) {
+                        child.setVisible(true);
+                        child.setManaged(true);
+                        ((Control) child).setTooltip(newTooltipBuilder(msg).build());
+                        continue;
+                    }
+                    if (childClasses.contains(ENDPOINT_STATUS_CLASS)) {
+                        child.setVisible(false);
+                        child.setManaged(false);
+                    }
+                }
+            }
+        });
     }
 
     private void drawFixedRange(Instant now, FrameInfo frameInfo) {
@@ -876,6 +994,16 @@ public class MainController {
 
     public static final String ENDPOINT_ID_SUFFIX = "_endpoint";
 
+    public static final String ENDPOINT_PROGRESS_ID_SUFFIX = "_endpoint_progress";
+
+    public static final String ENDPOINT_OK_STATUS_ID_SUFFIX = "_endpoint_ok";
+
+    public static final String ENDPOINT_WARN_STATUS_ID_SUFFIX = "_endpoint_warn";
+
+    public static final String ENDPOINT_ERROR_STATUS_ID_SUFFIX = "_endpoint_error";
+
+    public static final String ENDPOINT_IDLE_STATUS_ID_SUFFIX = "_endpoint_idle";
+
     public static final String ENDPOINT_LABEL_ID_SUFFIX = "_endpoint_label";
 
     public static final String FEATURE_ID_SUFFIX = "_feature";
@@ -901,8 +1029,7 @@ public class MainController {
 
     private static final ObjectMapper mapper = initMapper();
 
-    private static final AutoIncrementMap<Endpoint> endpoints =
-        new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
+    private static final AutoIncrementMap<Endpoint> endpoints = new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
 
     private static final ModelContext modelContext = new SimpleModelContext();
 
@@ -925,7 +1052,10 @@ public class MainController {
     }
 
     private static ObjectMapper initMapper() {
-        return new ObjectMapper().disable(FAIL_ON_UNKNOWN_PROPERTIES).enable(INDENT_OUTPUT);
+        return new ObjectMapper()
+            .disable(FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(INDENT_OUTPUT)
+            .registerModule(new JavaTimeModule());
     }
 
     private void initAddModelDragAndDropHandlers(Node node) {
@@ -1190,9 +1320,10 @@ public class MainController {
             if (db.hasString()) {
                 int endpointId = DragDropData.deserialize(db.getString()).getKey();
                 Endpoint endpoint = endpoints.get(endpointId);
-                AnchorPane endpointPain = createModelEndpointPane(modelId, endpointId);
-
                 modelContext.getModel(modelId).getEndpoints().put(endpointId, endpoint);
+                notifyEventListener(modelId, endpointId);
+
+                AnchorPane endpointPain = createModelEndpointPane(modelId, endpointId);
                 var addToChildren = addTo.getChildren();
                 addToChildren.add(addToChildren.size() - 1, endpointPain);
 
@@ -1213,6 +1344,9 @@ public class MainController {
 
             Label labelName = buildFeatureNameLabel(featureContext.getFeature().getName());
 
+            //TODO Need to fix UI bug with broken scroll bar.
+            // Height of panes seems to be larger than it looks like.
+            // Scroll bar doesn't appear for some reason
             AnchorPane featurePane = buildSelectFeatureAnchorPane(labelName, settingsButton);
 
             settingsButton.setOnAction(featureContext.getLibraryFeatureSettingHandler(labelName).apply(
@@ -1265,12 +1399,16 @@ public class MainController {
                 "Emotion recognition constructor configuration",
                 "*.ercc"
             );
-            if (configFile != null) {
-                byte[] encodedJson = Files.readAllBytes(configFile.toPath());
-                ModelsHolder holder = mapper.readValue(Base64.getDecoder().decode(encodedJson), ModelsHolder.class);
-                addLoadedModels(holder.getModels());
-            }
+            loadConfiguration(configFile);
         });
+    }
+
+    private void loadConfiguration(File configFile) throws IOException {
+        if (configFile != null && configFile.exists()) {
+            byte[] encodedJson = Files.readAllBytes(configFile.toPath());
+            ModelsHolder holder = mapper.readValue(Base64.getDecoder().decode(encodedJson), ModelsHolder.class);
+            addLoadedModels(holder.getModels());
+        }
     }
 
     private void addLoadedModels(List<AnalyzableModel> models) {
@@ -1303,7 +1441,7 @@ public class MainController {
                     delayedEndpointIdsUpdates.add(() -> {
                         modelEndpoints.remove(oldEndpointId);
                         modelEndpoints.put(newEndpointId, endpoint);
-                        addLoadedEndpoint(modelId, newEndpointId, endpoint, modelPane.getEndpointHolder());
+                        addLoadedEndpoint(modelId, newEndpointId, modelPane.getEndpointHolder());
                     });
                     endpoints.put(endpoint);
                     selectEndpointPane.getChildren().add(createSelectEndpointPane(newEndpointId));
@@ -1345,7 +1483,7 @@ public class MainController {
         }
     }
 
-    private void addLoadedEndpoint(int modelId, int endpointId, Endpoint endpoint, FlowPane endpointHolder) {
+    private void addLoadedEndpoint(int modelId, int endpointId, FlowPane endpointHolder) {
         AnchorPane endpointPane = createModelEndpointPane(modelId, endpointId);
         var addToChildren = endpointHolder.getChildren();
         addToChildren.add(addToChildren.size() - 1, endpointPane);
@@ -1354,8 +1492,9 @@ public class MainController {
     @FXML
     void onAddEndpoint(ActionEvent event) {
         int id = endpoints.getNextId();
-        String endpointName = "Endpoint " + id;
-        Endpoint newEndpoint = Endpoint.of(endpointName, "localhost", "8080");
+        int port = 8080 + id;
+        String endpointName = "Слушатель " + id;
+        Endpoint newEndpoint = Endpoint.of(endpointName, "http://localhost:" + port + "/event");
 
         showEndpointSettingsForm(newEndpoint, () -> {
             endpoints.put(newEndpoint);
@@ -1381,7 +1520,7 @@ public class MainController {
         endpointController.setCurrentStage(stage);
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(endpoint.getName() + " - конфигурация");
-        stage.setScene(new Scene(root, 311, 316));
+        stage.setScene(new Scene(root, 311, 274));
         stage.setOnCloseRequest(e -> {
             if (endpointController.isOk()) {
                 onOk.run();
@@ -1445,11 +1584,18 @@ public class MainController {
         stage.showAndWait();
     }
 
-    // TODO fix UI bug with broken scroll bar. Height of panes seems to be larger than it looks like
     private AnchorPane createModelEndpointPane(int modelId, int endpointId) {
         Button remove = buildRemoveButton();
         Label nameLabel = buildEndpointLabel(endpoints.get(endpointId));
-        AnchorPane endpoint = buildModelEndpointAnchorPane(nameLabel, remove);
+        AnchorPane endpoint = buildModelEndpointAnchorPane(
+            buildEndpointProgressIndicator(endpointId + ENDPOINT_PROGRESS_ID_SUFFIX),
+            buildEndpointOkButton(endpointId + ENDPOINT_OK_STATUS_ID_SUFFIX),
+            buildEndpointWarnButton(endpointId + ENDPOINT_WARN_STATUS_ID_SUFFIX),
+            buildEndpointErrorButton(endpointId + ENDPOINT_ERROR_STATUS_ID_SUFFIX),
+            buildEndpointIdleButton(endpointId + ENDPOINT_IDLE_STATUS_ID_SUFFIX),
+            nameLabel,
+            remove
+        );
 
         nameLabel.setId(endpointId + ENDPOINT_LABEL_ID_SUFFIX);
         endpoint.setId(endpointId + ENDPOINT_ID_SUFFIX);
@@ -1463,7 +1609,7 @@ public class MainController {
         Endpoint endpoint = endpoints.get(endpointId);
         settings.setOnAction(e -> showEndpointSettingsForm(endpoint, () -> {
             label.setText(endpoint.getName());
-            label.setTooltip(createTooltip(endpoint));
+            label.setTooltip(newTooltipBuilder(endpoint).build());
             updateEndpointLabelInAllModels(endpointId);
         }));
     }
@@ -1480,6 +1626,7 @@ public class MainController {
         remove.setOnAction(e -> {
             modelContext.getModel(modelId).getEndpoints().remove(endpointId);
             modelContext.getModelPane(modelId).getEndpointHolder().getChildren().remove(target);
+            modelContext.getEventRequestContext().remove(modelId, endpointId);
         });
     }
 
@@ -1498,6 +1645,7 @@ public class MainController {
                 if (prevEndpoint == null) {
                     var endpChildren = modelPane.getEndpointHolder().getChildren();
                     endpChildren.add(endpChildren.size() - 1, createModelEndpointPane(modelId, endpointId));
+                    notifyEventListener(modelId, endpointId);
                 }
             }
         });
@@ -1508,15 +1656,18 @@ public class MainController {
     }
 
     private void removeEndpointFromModels(int endpointId) {
-        var modelsIterator = modelContext.getModels().values().iterator();
+        var modelsEntryIterator = modelContext.getModels().entrySet().iterator();
         var panesIterator = modelContext.getPanes().values().iterator();
-        while (modelsIterator.hasNext() && panesIterator.hasNext()) {
-            var model = modelsIterator.next();
+        while (modelsEntryIterator.hasNext() && panesIterator.hasNext()) {
+            var modelEntry = modelsEntryIterator.next();
+            var modelId = modelEntry.getKey();
+            var model = modelEntry.getValue();
             var modelPane = panesIterator.next();
 
             model.getEndpoints().remove(endpointId);
-            var endpointPane = modelPane.value().lookup("#" + endpointId + ENDPOINT_ID_SUFFIX);
+            var endpointPane = modelPane.getEndpointHolder().lookup("#" + endpointId + ENDPOINT_ID_SUFFIX);
             modelPane.getEndpointHolder().getChildren().remove(endpointPane);
+            modelContext.getEventRequestContext().remove(modelId, endpointId);
         }
     }
 
@@ -1529,7 +1680,7 @@ public class MainController {
                 var endpointLabel = (Label) endpointHolder.lookup(labelSelector);
                 if (endpointLabel != null) {
                     endpointLabel.setText(endpoint.getName());
-                    endpointLabel.setTooltip(createTooltip(endpoint));
+                    endpointLabel.setTooltip(newTooltipBuilder(endpoint).build());
                 }
             }
         }

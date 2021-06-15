@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<ScrollPane fitToWidth="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="316.0" prefWidth="311.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionrecognition.ui.gui.EndpointSettingsController">
+<ScrollPane fitToWidth="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="274.0" prefWidth="311.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionrecognition.ui.gui.EndpointSettingsController">
    <content>
       <VBox fx:id="settingsVBox">
          <children>
@@ -47,7 +47,7 @@
                   <Insets right="19.0" top="20.0" />
                </padding>
                <children>
-                  <Label maxHeight="25.0" maxWidth="1000.0" minHeight="25.0" minWidth="50.0" text="Ip:">
+                  <Label maxHeight="25.0" maxWidth="1000.0" minHeight="25.0" minWidth="50.0" text="URL:">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -55,27 +55,7 @@
                         <Insets left="20.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField fx:id="ipTextField" maxHeight="25.0" maxWidth="1000.0" minHeight="25.0" minWidth="150.0" prefWidth="1000.0">
-                     <HBox.margin>
-                        <Insets left="15.0" />
-                     </HBox.margin>
-                  </TextField>
-               </children>
-            </HBox>
-            <HBox>
-               <padding>
-                  <Insets right="19.0" top="20.0" />
-               </padding>
-               <children>
-                  <Label maxHeight="25.0" maxWidth="1000.0" minHeight="25.0" minWidth="50.0" text="Порт:">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                     <HBox.margin>
-                        <Insets left="20.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField fx:id="portTextField" maxHeight="25.0" maxWidth="1000.0" minHeight="25.0" minWidth="150.0" prefWidth="1000.0">
+                  <TextField fx:id="urlTextField" maxHeight="25.0" maxWidth="1000.0" minHeight="25.0" minWidth="150.0" prefWidth="1000.0">
                      <HBox.margin>
                         <Insets left="15.0" />
                      </HBox.margin>

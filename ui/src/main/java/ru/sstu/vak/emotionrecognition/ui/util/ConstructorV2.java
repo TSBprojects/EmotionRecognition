@@ -1,9 +1,8 @@
 package ru.sstu.vak.emotionrecognition.ui.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.List;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import static javafx.geometry.Orientation.HORIZONTAL;
@@ -15,6 +14,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
@@ -29,22 +30,42 @@ import javafx.scene.layout.VBox;
 import static javafx.scene.paint.Color.RED;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.endpoint.Endpoint;
 import static ru.sstu.vak.emotionrecognition.ui.util.NodeDecorator.tile;
 
 public final class ConstructorV2 {
 
-    private static final long TOOLTIP_SHOW_DELAY_MS = 150;
+    private static final Logger log = LogManager.getLogger(ConstructorV2.class.getName());
 
-    private static final String ENDPOINT_CLASS = "endpoint";
+    public static final long TOOLTIP_OPEN_DELAY_MS = 150;
 
-    private static final String START_LISTEN_ALL_CLASS = "start-listen-all";
+    public static final long TOOLTIP_VISIBLE_DURATION_MS = 5000;
 
-    private static final String STOP_LISTEN_ALL_CLASS = "stop-listen-all";
+    public static final long TOOLTIP_CLOSE_DELAY_MS = 200;
 
-    private static final String SETTINGS_CLASS = "settings-btn";
+    public static final String ENDPOINT_STATUS_CLASS = "endpoint-status";
 
-    private static final String REMOVE_CLASS = "remove-btn";
+    public static final String ENDPOINT_PROGRESS_STATUS_CLASS = "endpoint-progress";
+
+    public static final String ENDPOINT_OK_STATUS_CLASS = "endpoint-ok";
+
+    public static final String ENDPOINT_WARN_STATUS_CLASS = "endpoint-warn";
+
+    public static final String ENDPOINT_ERROR_STATUS_CLASS = "endpoint-error";
+
+    public static final String ENDPOINT_IDLE_STATUS_CLASS = "endpoint-idle";
+
+    public static final String ENDPOINT_CLASS = "endpoint";
+
+    public static final String START_LISTEN_ALL_CLASS = "start-listen-all";
+
+    public static final String STOP_LISTEN_ALL_CLASS = "stop-listen-all";
+
+    public static final String SETTINGS_CLASS = "settings-btn";
+
+    public static final String REMOVE_CLASS = "remove-btn";
 
     private ConstructorV2() {
         throw new AssertionError();
@@ -59,10 +80,7 @@ public final class ConstructorV2 {
         VBox.setMargin(model, new Insets(20, 20, 20, 20));
 
         model.getItems().addAll(header, body);
-
         model.setDividerPosition(0, 0.1923);
-        model.setDividerPosition(1, 0.7991);
-
         tile(model);
 
         return model;
@@ -72,8 +90,9 @@ public final class ConstructorV2 {
         SplitPane model = new SplitPane();
         model.setOrientation(HORIZONTAL);
         model.getItems().addAll(endpoints, features);
+
         model.setDividerPosition(0, 0.3692);
-        model.setDividerPosition(1, 0.7);
+
         return model;
     }
 
@@ -121,7 +140,15 @@ public final class ConstructorV2 {
         return placeHolder;
     }
 
-    public static AnchorPane buildModelEndpointAnchorPane(Label name, Button remove) {
+    public static AnchorPane buildModelEndpointAnchorPane(
+        ProgressIndicator progressIndicator,
+        Node okIndicator,
+        Node warnIndicator,
+        Node errorIndicator,
+        Node idleIndicator,
+        Label name,
+        Button remove
+    ) {
         AnchorPane endpoint = new AnchorPane();
 
         endpoint.setMaxWidth(180);
@@ -138,13 +165,32 @@ public final class ConstructorV2 {
         AnchorPane.setLeftAnchor(hBox, 0D);
         AnchorPane.setTopAnchor(hBox, 0D);
         AnchorPane.setRightAnchor(hBox, 0D);
+        hBox.setPadding(new Insets(0, 10, 0, 10));
         endpoint.getChildren().add(hBox);
 
-        HBox.setMargin(name, new Insets(0, 0, 0, 10));
-        name.setMaxWidth(135);
-        name.setMinWidth(135);
-        HBox.setMargin(remove, new Insets(0, 10, 0, 10));
-        hBox.getChildren().addAll(name, remove);
+        Insets rightIndent = new Insets(0, 7, 0, 0);
+        Insets rightLeftIndent = new Insets(0, 10, 1, 2);
+
+        HBox.setMargin(progressIndicator, rightIndent);
+        HBox.setMargin(okIndicator, rightLeftIndent);
+        HBox.setMargin(warnIndicator, rightLeftIndent);
+        HBox.setMargin(errorIndicator, rightLeftIndent);
+        HBox.setMargin(idleIndicator, rightLeftIndent);
+        HBox.setMargin(name, rightIndent);
+
+        name.setPrefWidth(110);
+        name.setMaxWidth(110);
+        name.setMinWidth(110);
+
+        hBox.getChildren().addAll(
+            progressIndicator,
+            okIndicator,
+            warnIndicator,
+            errorIndicator,
+            idleIndicator,
+            name,
+            remove
+        );
 
         return endpoint;
     }
@@ -190,8 +236,55 @@ public final class ConstructorV2 {
 
     public static Label buildEndpointLabel(Endpoint endpoint) {
         Label label = new Label(endpoint.getName());
-        label.setTooltip(createTooltip(endpoint));
+        label.setTooltip(newTooltipBuilder(endpoint).build());
         return label;
+    }
+
+    public static ProgressIndicator buildEndpointProgressIndicator(String id) {
+        ProgressIndicator indicator = new ProgressIndicator();
+        indicator.setManaged(false);
+        indicator.setVisible(false);
+        indicator.setProgress(INDETERMINATE_PROGRESS);
+        indicator.setMaxHeight(20);
+        indicator.setMinHeight(20);
+        indicator.setMaxWidth(20);
+        indicator.setMinWidth(20);
+        indicator.getStyleClass().addAll(ENDPOINT_PROGRESS_STATUS_CLASS, ENDPOINT_STATUS_CLASS);
+        indicator.setId(id);
+        return indicator;
+    }
+
+    public static Button buildEndpointOkButton(String id) {
+        return buildEndpointStatusButton(id, ENDPOINT_OK_STATUS_CLASS);
+    }
+
+    public static Button buildEndpointWarnButton(String id) {
+        return buildEndpointStatusButton(id, ENDPOINT_WARN_STATUS_CLASS);
+    }
+
+    public static Button buildEndpointErrorButton(String id) {
+        return buildEndpointStatusButton(id, ENDPOINT_ERROR_STATUS_CLASS);
+    }
+
+    public static Button buildEndpointIdleButton(String id) {
+        Button idle = buildEndpointStatusButton(id, ENDPOINT_IDLE_STATUS_CLASS);
+        idle.setManaged(true);
+        idle.setVisible(true);
+        idle.setTooltip(newTooltipBuilder("В ожидании отправки запроса").build());
+        return idle;
+    }
+
+    public static Button buildEndpointStatusButton(String id, String clazz) {
+        Button button = new Button();
+        button.setManaged(false);
+        button.setVisible(false);
+        button.setMaxHeight(15);
+        button.setMinHeight(15);
+        button.setMaxWidth(15);
+        button.setMinWidth(15);
+        button.getStyleClass().addAll(clazz, ENDPOINT_STATUS_CLASS);
+        button.setId(id);
+        return button;
     }
 
     public static ToolBar buildEndpointToolbar(
@@ -222,7 +315,7 @@ public final class ConstructorV2 {
         Button start = new Button();
         start.getStyleClass().add(START_LISTEN_ALL_CLASS);
         start.setCursor(HAND);
-        start.setTooltip(createTooltip("Слушать все конфигурации"));
+        start.setTooltip(newTooltipBuilder("Слушать все конфигурации").build());
         return start;
     }
 
@@ -230,7 +323,7 @@ public final class ConstructorV2 {
         Button stop = new Button();
         stop.getStyleClass().add(STOP_LISTEN_ALL_CLASS);
         stop.setCursor(HAND);
-        stop.setTooltip(createTooltip("Перестать слушать все конфигурации"));
+        stop.setTooltip(newTooltipBuilder("Перестать слушать все конфигурации").build());
         return stop;
     }
 
@@ -285,6 +378,7 @@ public final class ConstructorV2 {
         FlowPane body = new FlowPane();
         body.setPadding(new Insets(15, 15, 0, 0));
         body.getChildren().addAll(features);
+        body.setPrefWrapLength(200);
         return body;
     }
 
@@ -325,10 +419,11 @@ public final class ConstructorV2 {
     }
 
     public static CheckBox buildStringencyCheckBox(boolean value) {
+        String tooltipMsg = "Строго - все факторы должны быть истины, иначе достаточно одного";
         CheckBox stringency = new CheckBox();
         stringency.setText("строго");
         stringency.setSelected(value);
-        stringency.setTooltip(createTooltip("Строго - все факторы должны быть истины, иначе достаточно одного"));
+        stringency.setTooltip(newTooltipBuilder(tooltipMsg).build());
         return stringency;
     }
 
@@ -370,7 +465,7 @@ public final class ConstructorV2 {
         Label nameLabel = new Label(name);
         nameLabel.setMaxWidth(112);
         nameLabel.setMinWidth(112);
-        nameLabel.setTooltip(createTooltip(name));
+        nameLabel.setTooltip(newTooltipBuilder(name).build());
         return nameLabel;
     }
 
@@ -427,7 +522,7 @@ public final class ConstructorV2 {
             propName.setMaxHeight(25);
             propName.setMinHeight(25);
             propName.setFont(new Font(14));
-            propName.setTooltip(createTooltip(name));
+            propName.setTooltip(newTooltipBuilder(name).build());
             HBox.setMargin(propName, new Insets(0, 0, 0, 20));
             return propName;
         }
@@ -456,36 +551,72 @@ public final class ConstructorV2 {
         }
     }
 
-    public static Tooltip createTooltip(String text) {
-        Tooltip tooltip = new Tooltip(text);
-        tooltip.setWrapText(true);
-        tooltip.setMaxWidth(250);
-        setTooltipShowDelay(tooltip, TOOLTIP_SHOW_DELAY_MS);
-        return tooltip;
+    public static TooltipBuilder newTooltipBuilder(String text) {
+        return new TooltipBuilder(text);
     }
 
-    public static Tooltip createTooltip(Endpoint endpoint) {
-        return createTooltip(
-            "name: " + endpoint.getName()
-                + "\n ip: " + endpoint.getIp()
-                + "\n port: " + endpoint.getPort()
-        );
+    public static TooltipBuilder newTooltipBuilder(Endpoint endpoint) {
+        return newTooltipBuilder("name: " + endpoint.getName() + "\n url: " + endpoint.getUrl());
     }
 
-    public static void setTooltipShowDelay(Tooltip tooltip, long delay) {
-        try {
-            Field fieldBehavior = tooltip.getClass().getDeclaredField("BEHAVIOR");
-            fieldBehavior.setAccessible(true);
-            Object objBehavior = fieldBehavior.get(tooltip);
+    public static class TooltipBuilder {
+        private final String text;
+        private long openDelay = TOOLTIP_OPEN_DELAY_MS;
+        private long visibleDuration = TOOLTIP_VISIBLE_DURATION_MS;
+        private long closeDelay = TOOLTIP_CLOSE_DELAY_MS;
+        private boolean hideOnExit = false;
 
-            Field fieldTimer = objBehavior.getClass().getDeclaredField("activationTimer");
-            fieldTimer.setAccessible(true);
-            Timeline objTimer = (Timeline) fieldTimer.get(objBehavior);
+        private TooltipBuilder(String text) {
+            this.text = text;
+        }
 
-            objTimer.getKeyFrames().clear();
-            objTimer.getKeyFrames().add(new KeyFrame(new Duration(delay)));
-        } catch (Exception e) {
-            e.printStackTrace();
+        public TooltipBuilder openDelay(long openDelay) {
+            this.openDelay = openDelay;
+            return this;
+        }
+
+        public TooltipBuilder visibleDuration(long visibleDuration) {
+            this.visibleDuration = visibleDuration;
+            return this;
+        }
+
+        public TooltipBuilder closeDelay(long closeDelay) {
+            this.closeDelay = closeDelay;
+            return this;
+        }
+
+        public TooltipBuilder hideOnExit(boolean hideOnExit) {
+            this.hideOnExit = hideOnExit;
+            return this;
+        }
+
+        public Tooltip build() {
+            Tooltip tooltip = new Tooltip(text);
+            tooltip.setWrapText(true);
+            tooltip.setMaxWidth(250);
+
+            try {
+                Class<?> innerClass = Class.forName("javafx.scene.control.Tooltip$TooltipBehavior");
+                Constructor<?> constructor = innerClass.getDeclaredConstructors()[0];
+                constructor.setAccessible(true);
+                Object behavior = constructor.newInstance(
+                    new Duration(openDelay),
+                    new Duration(visibleDuration),
+                    new Duration(closeDelay),
+                    hideOnExit
+                );
+
+                Field fieldBehavior = tooltip.getClass().getDeclaredField("BEHAVIOR");
+                fieldBehavior.setAccessible(true);
+                fieldBehavior.set(tooltip, behavior);
+            } catch (Exception e) {
+                log.warn(
+                    "Cannot set custom open/visible/close tooltip behavior. Default values will be used! Reason: {}",
+                    e.getMessage()
+                );
+            }
+
+            return tooltip;
         }
     }
 }

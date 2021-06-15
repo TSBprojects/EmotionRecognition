@@ -157,7 +157,9 @@
                               <ScrollPane fitToWidth="true">
                                  <content>
                                     <VBox fx:id="selectModelVBox">
-                                       <children>
+
+
+                                        <children>
                                           <AnchorPane fx:id="addModelPlaceHolder" prefHeight="86.0" prefWidth="607.0" style="-fx-border-style: dashed;">
                                              <VBox.margin>
                                                 <Insets bottom="35.0" left="50.0" right="50.0" top="30.0" />
@@ -204,11 +206,6 @@
                         </SplitPane>
                     </items>
                   </SplitPane>
-               </content>
-            </Tab>
-            <Tab text="Слушатели событий">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="474.0" prefWidth="931.0" />
                </content>
             </Tab>
         </tabs>

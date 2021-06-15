@@ -20,16 +20,12 @@ public class EndpointSettingsController {
     private TextField nameTextField;
 
     @FXML
-    private TextField ipTextField;
-
-    @FXML
-    private TextField portTextField;
+    private TextField urlTextField;
 
     @FXML
     void onOk(ActionEvent event) {
         endpoint.setName(nameTextField.getText());
-        endpoint.setIp(ipTextField.getText());
-        endpoint.setPort(portTextField.getText());
+        endpoint.setUrl(urlTextField.getText());
         ok = true;
         closeForm();
     }
@@ -43,8 +39,7 @@ public class EndpointSettingsController {
     public void setEndpoint(Endpoint endpoint) {
         this.endpoint = endpoint;
         nameTextField.setText(endpoint.getName());
-        ipTextField.setText(endpoint.getIp());
-        portTextField.setText(endpoint.getPort());
+        urlTextField.setText(endpoint.getUrl());
     }
 
     public void setCurrentStage(Stage currentStage) {

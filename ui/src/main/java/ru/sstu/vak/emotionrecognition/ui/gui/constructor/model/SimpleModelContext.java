@@ -6,12 +6,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementHashMap;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.endpoint.EventRequestContext;
 
 public class SimpleModelContext implements ModelContext {
+
+    private final SimpleEventRequestContext endpointActionContext = new SimpleEventRequestContext();
 
     private final AutoIncrementMap<ModelPane> panes = new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
 
     private final AutoIncrementMap<AnalyzableModel> models = new AutoIncrementHashMap<>(new ConcurrentHashMap<>());
+
+    @Override
+    public EventRequestContext getEventRequestContext() {
+        return endpointActionContext;
+    }
 
     @Override
     public Map<Integer, AnalyzableModel> getModels() {
@@ -43,6 +51,7 @@ public class SimpleModelContext implements ModelContext {
     public void remove(int id) {
         models.remove(id);
         panes.remove(id);
+        endpointActionContext.removeModel(id);
     }
 
     @Override

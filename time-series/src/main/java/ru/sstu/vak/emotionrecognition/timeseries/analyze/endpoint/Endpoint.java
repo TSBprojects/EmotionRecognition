@@ -9,25 +9,22 @@ public class Endpoint {
 
     private String name;
 
-    private String ip;
-
-    private String port;
+    private String url;
 
     protected Endpoint() {
     }
 
-    protected Endpoint(String name, String ip, String port) {
+    protected Endpoint(String name, String url) {
         this.name = name;
-        this.ip = ip;
-        this.port = port;
+        this.url = url;
     }
 
-    public static Endpoint of(String name, String ip, String port) {
-        return new Endpoint(name, ip, port);
+    public static Endpoint of(String name, String url) {
+        return new Endpoint(name, url);
     }
 
     @Override
     public String toString() {
-        return name + "[" + ip + ":" + port + "]";
+        return name + "[" + url + "]";
     }
 }

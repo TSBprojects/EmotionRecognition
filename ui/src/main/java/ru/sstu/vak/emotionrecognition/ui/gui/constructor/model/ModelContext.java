@@ -2,8 +2,11 @@ package ru.sstu.vak.emotionrecognition.ui.gui.constructor.model;
 
 import java.util.Map;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.endpoint.EventRequestContext;
 
 public interface ModelContext {
+
+    EventRequestContext getEventRequestContext();
 
     Map<Integer, AnalyzableModel> getModels();
 
