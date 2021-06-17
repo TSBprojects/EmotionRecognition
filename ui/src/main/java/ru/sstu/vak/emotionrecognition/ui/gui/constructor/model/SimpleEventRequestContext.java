@@ -27,7 +27,7 @@ public class SimpleEventRequestContext implements EventRequestContext {
         Map<Integer, Future<?>> endpointIds = endpointsInProgress.get(modelId);
         if (endpointIds != null) {
             Future<?> requestFuture = endpointIds.get(endpointId);
-            if(requestFuture != null) {
+            if (requestFuture != null) {
                 endpointIds.remove(endpointId);
                 requestFuture.cancel(true);
             }
@@ -35,6 +35,12 @@ public class SimpleEventRequestContext implements EventRequestContext {
     }
 
     void removeModel(int modelId) {
-        endpointsInProgress.remove(modelId);
+        Map<Integer, Future<?>> endpointIds = endpointsInProgress.get(modelId);
+        if (endpointIds != null) {
+            for (int endpointId : endpointIds.keySet()) {
+                remove(modelId, endpointId);
+            }
+            endpointsInProgress.remove(modelId);
+        }
     }
 }

@@ -75,6 +75,7 @@ import javafx.scene.layout.VBox;
 import static javafx.scene.paint.Color.GRAY;
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.ORANGE;
+import static javafx.scene.paint.Color.rgb;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -350,6 +351,7 @@ public class MainController {
     }
 
     private void onStopAction() {
+        freezeStatesList();
         startVidProgressBarOff();
         videoImageView.setImage(VIDEO_PLACE_HOLDER);
         faceFromVideo.setImage(VIDEO_PLACE_HOLDER_FOR_FACE);
@@ -552,6 +554,17 @@ public class MainController {
         });
     }
 
+    private void freezeStatesList() {
+        var states = stateListView.getItems();
+        if (states.isEmpty() || !states.get(0).equals(STATE_MODEL_STOPPED)) {
+            runLater(() -> {
+                states.clear();
+                shadow(stateListView, rgb(143, 235, 204));
+                states.add(STATE_MODEL_STOPPED);
+            });
+        }
+    }
+
     private void applyHighlighting(Map<Integer, AnalyzableModel> models) {
         if (models.isEmpty()) return;
 
@@ -668,6 +681,7 @@ public class MainController {
 
     private void applyEndpointStatus(int modelId, int endpointId, EndpointStatus status, String msg) {
         runLater(() -> {
+            if (!modelContext.containsKey(modelId)) return;
             FlowPane endpointHolder = modelContext.getModelPane(modelId).getEndpointHolder();
             String labelSelector = "#" + endpointId + ENDPOINT_ID_SUFFIX;
             var endpointPane = (AnchorPane) endpointHolder.lookup(labelSelector);
@@ -805,7 +819,7 @@ public class MainController {
     }
 
     private void initStateListView() {
-        stateListView.getItems().add(STATE_MODEL_NOT_SET);
+        freezeStatesList();
         stateListView.setFixedCellSize(23);
     }
 
@@ -993,6 +1007,8 @@ public class MainController {
     ///////////////////////////////////////////////
 
     public static final String STATE_NO_MATCH = "НЕТ СОВПАДЕНИЙ";
+
+    public static final String STATE_MODEL_STOPPED = "ОСТАНОВЛЕНО";
 
     public static final String STATE_MODEL_NOT_SET = "НЕ ЗАДАНО";
 

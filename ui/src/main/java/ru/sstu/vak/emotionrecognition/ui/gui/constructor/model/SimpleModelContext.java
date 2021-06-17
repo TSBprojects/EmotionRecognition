@@ -48,6 +48,11 @@ public class SimpleModelContext implements ModelContext {
     }
 
     @Override
+    public boolean containsKey(int modelId) {
+        return models.containsKey(modelId);
+    }
+
+    @Override
     public void remove(int id) {
         models.remove(id);
         panes.remove(id);

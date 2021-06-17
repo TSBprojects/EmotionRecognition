@@ -18,6 +18,8 @@ public interface ModelContext {
 
     void put(AnalyzableModel model, ModelPane pane);
 
+    boolean containsKey(int modelId);
+
     void remove(int id);
 
     int getNextId();
