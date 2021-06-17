@@ -23,7 +23,6 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 <AnchorPane fx:id="mainAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="1066.0" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionrecognition.ui.gui.MainController">
    <children>
       <TabPane layoutX="-21.0" layoutY="14.0" prefHeight="485.0" prefWidth="1064.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -54,7 +53,7 @@
                            </children>
                         </AnchorPane>
                         <ProgressBar fx:id="startVideoProgressBar" layoutX="501.0" layoutY="382.0" prefHeight="25.0" prefWidth="344.0" visible="false" AnchorPane.rightAnchor="97.0" />
-                        <TextField fx:id="videoPath" layoutX="490.0" layoutY="19.0" prefHeight="25.0" prefWidth="421.0" promptText="ID камеры | Путь к камере | Путь к файлу" AnchorPane.rightAnchor="21.0" />
+                        <TextField fx:id="videoPath" layoutX="490.0" layoutY="19.0" prefHeight="25.0" prefWidth="257.0" promptText="ID камеры | Путь к камере | Путь к файлу" AnchorPane.rightAnchor="21.0" />
                         <LineChart fx:id="emotionChart" layoutX="22.0" layoutY="15.0" legendVisible="false" prefHeight="337.0" prefWidth="586.0" title="Эмоции в течении отрезка времени">
                           <xAxis>
                               <CategoryAxis fx:id="emotionChartX" side="BOTTOM" />
@@ -66,10 +65,10 @@
                         <Pane fx:id="chartRangeHolder" layoutX="147.0" layoutY="346.0" prefHeight="54.0" prefWidth="464.0">
                            <children>
                               <Slider fx:id="rangeSliderOld" layoutX="115.0" layoutY="9.0" max="6.0" min="3.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="38.0" prefWidth="239.0" value="6.0" visible="false" />
-                              <Text fx:id="chartHighSliderLabel" layoutX="364.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06/00:00:00" />
-                              <Text fx:id="chartLowSliderLabel" layoutX="11.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:00/00:00:00" />
-                              <Text fx:id="chartRangeTotalLabel" layoutX="217.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06" />
-                              <Label layoutX="310.0" layoutY="35.0" text="график" textFill="#f3622d">
+                              <Label fx:id="chartHighSliderLabel" layoutX="364.0" layoutY="20.0" text="00:00:06/00:00:00" />
+                              <Label fx:id="chartLowSliderLabel" layoutX="11.0" layoutY="20.0" text="00:00:00/00:00:00" />
+                              <Label fx:id="chartRangeTotalLabel" layoutX="217.0" layoutY="4.0" text="00:00:06" />
+                              <Label layoutX="310.0" layoutY="37.0" text="график" textFill="#f3622d">
                                  <font>
                                     <Font name="System Bold Italic" size="11.0" />
                                  </font>
@@ -79,9 +78,9 @@
                         <Pane fx:id="analyzeRangeHolder" layoutX="147.0" layoutY="388.0" prefHeight="54.0" prefWidth="464.0">
                            <children>
                               <Slider fx:id="rangeSliderOld1" layoutX="115.0" layoutY="9.0" max="6.0" min="3.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="38.0" prefWidth="239.0" value="6.0" visible="false" />
-                              <Text fx:id="analyzeHighSliderLabel" layoutX="364.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06/00:00:00" />
-                              <Text fx:id="analyzeLowSliderLabel" layoutX="11.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:00/00:00:00" />
-                              <Text fx:id="analyzeRangeTotalLabel" layoutX="217.0" layoutY="18.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06" />
+                              <Label fx:id="analyzeHighSliderLabel" layoutX="364.0" layoutY="20.0" text="00:00:06/00:00:00" />
+                              <Label fx:id="analyzeLowSliderLabel" layoutX="11.0" layoutY="20.0" text="00:00:00/00:00:00" />
+                              <Label fx:id="analyzeRangeTotalLabel" layoutX="217.0" layoutY="5.0" text="00:00:06" />
                               <Label layoutX="311.0" layoutY="34.0" prefHeight="16.0" prefWidth="39.0" text="анализ" textFill="#30b90e">
                                  <font>
                                     <Font name="System Bold Italic" size="11.0" />
@@ -90,11 +89,18 @@
                            </children>
                         </Pane>
                         <ListView fx:id="stateListView" layoutX="23.0" layoutY="360.0" prefHeight="72.0" prefWidth="121.0" style="-fx-effect: dropshadow(three-pass-box, rgba(255,165,0,0.8), 10, 0, 0, 0);" />
-                        <Label layoutX="24.0" layoutY="341.0" prefHeight="16.0" prefWidth="64.0" text="Состояние:" textFill="#30b90e">
+                        <Label layoutX="23.0" layoutY="341.0" prefHeight="16.0" prefWidth="121.0" text="Показатель состояния" textFill="#30b90e">
                            <font>
-                              <Font name="System Bold Italic" size="11.0" />
+                              <Font name="Consolas Bold Italic" size="11.0" />
                            </font>
                         </Label>
+                        <Label layoutX="625.0" layoutY="21.0" text="Источник видео потока:">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="graphicRangeInfoFirst" layoutX="505.0" layoutY="384.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="15.0" styleClass="graphic-range-info" />
+                        <Button fx:id="graphicRangeInfoSecond" layoutX="525.0" layoutY="384.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="15.0" styleClass="graphic-range-info" />
                      </children>
                   </AnchorPane>
             </content>
@@ -115,14 +121,14 @@
                                           <Insets right="10.0" />
                                        </HBox.margin>
                                     </Label>
-                                    <Button mnemonicParsing="false" onAction="#onAddEndpoint" styleClass="add-btn">
+                                    <Button fx:id="addEndpoint" mnemonicParsing="false" onAction="#onAddEndpoint" styleClass="add-btn">
                                        <cursor>
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
                                        <HBox.margin>
                                           <Insets right="10.0" />
                                        </HBox.margin></Button>
-                                    <Button mnemonicParsing="false" onAction="#onShowEndpointsTreeView" styleClass="show-tree-view-btn">
+                                    <Button fx:id="showTreeViewBtn" mnemonicParsing="false" onAction="#onShowEndpointsTreeView" styleClass="show-tree-view-btn">
                                        <cursor>
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
@@ -144,11 +150,11 @@
                           <items>
                               <ToolBar maxHeight="39.0" minHeight="39.0" prefHeight="40.0" prefWidth="200.0">
                                  <items>
-                                    <Button mnemonicParsing="false" onAction="#onModelsLoad" text="Импорт">
+                                    <Button fx:id="loadConstructorBtn" mnemonicParsing="false" onAction="#onModelsLoad" text="Импорт">
                                        <cursor>
                                           <Cursor fx:constant="HAND" />
                                        </cursor></Button>
-                                    <Button mnemonicParsing="false" onAction="#onModelsSave" text="Экспорт">
+                                    <Button fx:id="saveConstructorBtn" mnemonicParsing="false" onAction="#onModelsSave" text="Экспорт">
                                        <cursor>
                                           <Cursor fx:constant="HAND" />
                                        </cursor></Button>
@@ -167,7 +173,7 @@
                                              <children>
                                                 <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" style="-fx-border-style: dashed;" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
                                                    <children>
-                                                      <Label opacity="0.34" prefWidth="461.0" text="Перетащите фактор чтобы добавить модель">
+                                                      <Label opacity="0.34" prefWidth="461.0" text="Перетащите фактор чтобы добавить показатель состояния" textAlignment="CENTER" wrapText="true">
                                                          <font>
                                                             <Font name="Arial" size="22.0" />
                                                          </font>

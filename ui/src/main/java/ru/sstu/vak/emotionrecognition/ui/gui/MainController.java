@@ -60,6 +60,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
@@ -74,7 +75,6 @@ import javafx.scene.layout.VBox;
 import static javafx.scene.paint.Color.GRAY;
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.ORANGE;
-import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -194,6 +194,8 @@ public class MainController {
 
     private static final Duration TARGET_FIXED_RANGE = Duration.ofSeconds(6);
 
+    private static final long GRAPHIC_TOOLTIP_VISIBLE_DELAY = 60_000;
+
     @FXML
     private ImageView videoImageView;
 
@@ -236,31 +238,34 @@ public class MainController {
     private Pane chartRangeHolder;
 
     @FXML
-    private Text chartHighSliderLabel;
+    private Label chartHighSliderLabel;
 
     @FXML
-    private Text chartLowSliderLabel;
+    private Label chartLowSliderLabel;
 
     @FXML
-    private Text chartRangeTotalLabel;
+    private Label chartRangeTotalLabel;
 
     @FXML
     private Pane analyzeRangeHolder;
 
     @FXML
-    private Text analyzeHighSliderLabel;
+    private Label analyzeHighSliderLabel;
 
     @FXML
-    private Text analyzeLowSliderLabel;
+    private Label analyzeLowSliderLabel;
 
     @FXML
-    private Text analyzeRangeTotalLabel;
+    private Label analyzeRangeTotalLabel;
+
+    @FXML
+    private Button graphicRangeInfoFirst;
+
+    @FXML
+    private Button graphicRangeInfoSecond;
 
     @FXML
     private ListView<String> stateListView;
-
-    @FXML
-    private VBox constructorVbox;
 
     private final OkHttpClient client = new OkHttpClient();
 
@@ -356,6 +361,7 @@ public class MainController {
         log.info("Initialize main components...");
         tryGracefully(() -> {
             initExit();
+            initTooltips();
             initEmotionChart();
             initStateListView();
             addConstructorFeatures();
@@ -500,16 +506,16 @@ public class MainController {
             refreshSliderLabels(fullRange, chartRangeSlider, chartHighSliderLabel, chartLowSliderLabel, chartRangeTotalLabel);
             refreshSliderLabels(fullRange, analyzeRangeSlider, analyzeHighSliderLabel, analyzeLowSliderLabel, analyzeRangeTotalLabel);
 
-
-            var prevStatesList = new ArrayList<>(stateListView.getItems());
+            var statesList = stateListView.getItems();
+            var statesListCopy = new ArrayList<>(statesList);
 
             var models = modelContext.getModels();
 
             if (models.isEmpty()) {
-                if (prevStatesList.get(0).equals(STATE_MODEL_NOT_SET)) return;
+                if (statesList.get(0).equals(STATE_MODEL_NOT_SET)) return;
                 shadow(stateListView, ORANGE);
-                prevStatesList.clear();
-                prevStatesList.add(STATE_MODEL_NOT_SET);
+                statesList.clear();
+                statesList.add(STATE_MODEL_NOT_SET);
                 return;
             }
 
@@ -518,20 +524,20 @@ public class MainController {
             applyHighlighting(models);
 
             if (currentEmotionalStates.isEmpty()) {
-                if (prevStatesList.get(0).equals(STATE_NO_MATCH)) return;
+                if (statesList.get(0).equals(STATE_NO_MATCH)) return;
                 shadow(stateListView, GRAY);
-                stateListView.getItems().clear();
-                stateListView.getItems().add(STATE_NO_MATCH);
+                statesList.clear();
+                statesList.add(STATE_NO_MATCH);
                 return;
             }
 
             List<String> newStates = new ArrayList<>(currentEmotionalStates);
-            if (prevStatesList.equals(newStates)) return;
+            if (statesList.equals(newStates)) return;
             shadow(stateListView, GREEN);
-            stateListView.getItems().clear();
-            stateListView.getItems().addAll(currentEmotionalStates);
+            statesList.clear();
+            statesList.addAll(currentEmotionalStates);
 
-            newStates.removeAll(prevStatesList);
+            newStates.removeAll(statesListCopy);
             if (!newStates.isEmpty()) {
                 for (var state : newStates) {
                     for (var entry : models.entrySet()) {
@@ -632,7 +638,7 @@ public class MainController {
         Future<?> requestFuture = executorService.submit(() -> {
             applyEndpointStatus(modelId, endpointId, PROGRESS, "Отправка запроса ...");
             Endpoint endpoint = endpoints.get(endpointId);
-            var event = new TrueModelEvent(LocalDateTime.now(UTC), model.getName());
+            var event = new TrueModelEvent(model.getName(), LocalDateTime.now(UTC));
             try {
                 Request request = new Request.Builder()
                     .url(endpoint.getUrl())
@@ -732,9 +738,9 @@ public class MainController {
     private void refreshSliderLabels(
         Duration fullRange,
         RangeSlider slider,
-        Text highSliderLabel,
-        Text lowSliderLabel,
-        Text rangeTotalLabel
+        Label highSliderLabel,
+        Label lowSliderLabel,
+        Label rangeTotalLabel
     ) {
         if (fullRange.toMillis() >= slider.getMax()) {
             slider.setMax(fullRange.toMillis());
@@ -1011,6 +1017,18 @@ public class MainController {
     public static final String META_FEATURE_ID_SUFFIX = "_meta";
 
     @FXML
+    private Button addEndpoint;
+
+    @FXML
+    private Button showTreeViewBtn;
+
+    @FXML
+    private Button loadConstructorBtn;
+
+    @FXML
+    private Button saveConstructorBtn;
+
+    @FXML
     private AnchorPane mainAnchorPane;
 
     @FXML
@@ -1058,6 +1076,44 @@ public class MainController {
             .registerModule(new JavaTimeModule());
     }
 
+    private void initTooltips() {
+        addEndpoint.setTooltip(newTooltipBuilder("Добавить слушателя").build());
+        showTreeViewBtn.setTooltip(newTooltipBuilder("Показать дерево слушателей").build());
+        loadConstructorBtn.setTooltip(newTooltipBuilder("Загрузить конфигурацию конструктора из файла").build());
+        saveConstructorBtn.setTooltip(newTooltipBuilder("Сохранить конфигурацию конструктора в файл").build());
+        Tooltip leftTimeLabel = newTooltipBuilder(
+            "Время от старта в соответствии с текущим положением левого ползунка / Общее время от старта"
+        ).build();
+        chartLowSliderLabel.setTooltip(leftTimeLabel);
+        analyzeLowSliderLabel.setTooltip(leftTimeLabel);
+        Tooltip rightTimeLabel = newTooltipBuilder(
+            "Время от старта в соответствии с текущим положением правого ползунка / Общее время от старта"
+        ).build();
+        chartHighSliderLabel.setTooltip(rightTimeLabel);
+        analyzeHighSliderLabel.setTooltip(rightTimeLabel);
+        chartRangeSlider.setTooltip(newTooltipBuilder(
+            "Целевой отрезок времени отображаемый на усредненном(отезок > 5сек) графике эмоций"
+        ).build());
+        analyzeRangeSlider.setTooltip(newTooltipBuilder(
+            "Целевой отрезок времени анализируемый на основе конфигурации конструктора"
+        ).build());
+        graphicRangeInfoFirst.setTooltip(newTooltipBuilder(
+            "Ползунки анализируемого отрезка синхронизированы с ползунками отрезка отображаемого на графике. "
+                + "Т.е. при изменении положения ползунков отрезка отвечающего за график - "
+                + "соответсвенно изменится положение ползунков анализируемого отрезка."
+        ).visibleDuration(GRAPHIC_TOOLTIP_VISIBLE_DELAY).build());
+        graphicRangeInfoSecond.setTooltip(newTooltipBuilder(
+            "Для комфортного отображения не усредненного графика в реальном времени "
+                + "используется отрезок равный 5 секундам от текущего момента времени.\n\n"
+                + "В связи с этим, при приведении правого ползунка в крайнее правое положение до упора - "
+                + "он приклеится (как и правый ползунок анализируемого отрезка), "
+                + "что соответсвует положению \"в реальном времени\". Левый ползунок в свою очередь "
+                + "будет занимать положение на 5 секунд ранее относительно правого.\n"
+                + "Левый ползунок анализируемого отрезка заблокирован НЕ будет.\n\n"
+                + "Чтобы отклеить правый ползунок достаточно переместить левый ползунок влево."
+        ).visibleDuration(GRAPHIC_TOOLTIP_VISIBLE_DELAY).build());
+    }
+
     private void initAddModelDragAndDropHandlers(Node node) {
         node.setOnDragOver(event -> {
             /* accept it only if it is  not dragged from the same node
@@ -1103,7 +1159,7 @@ public class MainController {
             if (db.hasString()) {
                 int featureNumberInModel = 0;
                 int modelId = modelContext.getNextId();
-                String stateName = "Модель " + modelId;
+                String stateName = "Показатель состояния " + modelId;
                 int featureId = DragDropData.deserialize(db.getString()).getKey();
                 var featureContext = BASE_FEATURE_CONTEXTS.get(featureId);
 

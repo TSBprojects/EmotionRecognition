@@ -19,7 +19,7 @@ public class SimpleMetaFeature implements MetaFeature {
     private static final int ID = 6;
 
     private static final String DESCRIPTION =
-        "Мета фактор. выражение, описывающее отношение (>,<,=) между факторами, указанными в текущей модели";
+        "Мета фактор. выражение, описывающее отношение (>,<,=) между факторами, указанными в текущей конфигурации";
 
     private final String name;
 

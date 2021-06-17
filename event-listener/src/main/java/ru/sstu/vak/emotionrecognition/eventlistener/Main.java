@@ -22,13 +22,13 @@ public class Main {
         HttpServer server = HttpServer.create(new InetSocketAddress("localhost", port), 0);
 
         server.createContext(path, httpExchange -> {
-            log.info("[{}] Received event: {}", name, requestToString(httpExchange));
+            log.info("'{}' received event:\n{}", name, requestToString(httpExchange));
             httpExchange.sendResponseHeaders(200, 0);
         });
 
         server.start();
 
-        log.info("'{}' started listen on port {} and path {}", name, port, path);
+        log.info("'{}' started listen on port {} with path '{}'", name, port, path);
     }
 
     private static String requestToString(HttpExchange httpExchange) throws IOException {

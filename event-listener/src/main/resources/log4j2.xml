@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5level] [%d{yyyy-MM-dd HH:mm:ss.SSS}] - %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="ru.sstu.vak.emotionrecognition.eventlistener" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+    </Loggers>
+</Configuration>

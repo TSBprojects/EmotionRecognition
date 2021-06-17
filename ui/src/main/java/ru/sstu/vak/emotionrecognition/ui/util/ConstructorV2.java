@@ -415,6 +415,7 @@ public final class ConstructorV2 {
         remove.setMinHeight(25);
         remove.getStyleClass().add(REMOVE_CLASS);
         remove.setCursor(HAND);
+        remove.setTooltip(newTooltipBuilder("Удалить").build());
         return remove;
     }
 
@@ -444,6 +445,7 @@ public final class ConstructorV2 {
         feature.setMinWidth(173);
 
         HBox hBox = (HBox) feature.getChildren().get(0);
+        hBox.setCursor(HAND);
         HBox.setMargin(name, new Insets(0, 0, 0, 10));
         hBox.getChildren().addAll(name);
 
@@ -477,6 +479,7 @@ public final class ConstructorV2 {
         settings.setMinHeight(25);
         settings.getStyleClass().add(SETTINGS_CLASS);
         settings.setCursor(HAND);
+        settings.setTooltip(newTooltipBuilder("Редактировать").build());
         return settings;
     }
 
@@ -489,7 +492,6 @@ public final class ConstructorV2 {
         FlowPane.setMargin(feature, new Insets(0, 0, 15, 15));
 
         HBox hBox = new HBox();
-        hBox.setCursor(HAND);
         hBox.setAlignment(CENTER);
         AnchorPane.setBottomAnchor(hBox, 0D);
         AnchorPane.setLeftAnchor(hBox, 0D);
@@ -556,7 +558,7 @@ public final class ConstructorV2 {
     }
 
     public static TooltipBuilder newTooltipBuilder(Endpoint endpoint) {
-        return newTooltipBuilder("name: " + endpoint.getName() + "\n url: " + endpoint.getUrl());
+        return newTooltipBuilder("Имя: " + endpoint.getName() + "\nURL: " + endpoint.getUrl());
     }
 
     public static class TooltipBuilder {
