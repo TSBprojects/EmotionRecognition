@@ -1,10 +1,10 @@
-package ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.io;
+package ru.sstu.vak.emotionrecognition.ui.io;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.ToString;
-import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
 
 @Getter
@@ -21,7 +21,7 @@ public class ModelsHolder {
         this.models = models;
     }
 
-    public static ModelsHolder from(AutoIncrementMap<AnalyzableModel> models) {
+    public static ModelsHolder from(Map<Integer, AnalyzableModel> models) {
         return new ModelsHolder(new ArrayList<>(models.values()));
     }
 }

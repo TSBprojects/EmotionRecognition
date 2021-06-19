@@ -1,7 +1,7 @@
 package ru.sstu.vak.emotionrecognition.ui.gui.constructor.model;
 
 import javafx.scene.control.Button;
-import javafx.scene.control.RadioButton;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
@@ -11,9 +11,10 @@ import lombok.Builder;
 public class SimpleModelPane implements ModelPane {
     private final SplitPane value;
     private final TextField state;
-    private final RadioButton stringency;
+    private final CheckBox stringency;
     private final Button remove;
     private final FlowPane featureHolder;
+    private final FlowPane endpointHolder;
 
     @Override
     public SplitPane value() {
@@ -26,7 +27,7 @@ public class SimpleModelPane implements ModelPane {
     }
 
     @Override
-    public RadioButton getStringency() {
+    public CheckBox getStringency() {
         return stringency;
     }
 
@@ -38,5 +39,10 @@ public class SimpleModelPane implements ModelPane {
     @Override
     public FlowPane getFeatureHolder() {
         return featureHolder;
+    }
+
+    @Override
+    public FlowPane getEndpointHolder() {
+        return endpointHolder;
     }
 }

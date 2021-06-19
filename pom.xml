@@ -24,6 +24,7 @@
         <module>face-detector</module>
         <module>common</module>
         <module>shared-resources</module>
+        <module>event-listener</module>
     </modules>
 
     <dependencies>

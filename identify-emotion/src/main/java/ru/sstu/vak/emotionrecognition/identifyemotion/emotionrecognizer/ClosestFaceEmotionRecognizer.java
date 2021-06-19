@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -27,19 +27,17 @@ public class ClosestFaceEmotionRecognizer extends SimpleEmotionRecognizer {
     }
 
     @Override
-    protected List<VideoFace> processFaces(BufferedImage buffFrame, Map<Rect, Mat> faces) {
+    protected List<VideoFace> processFaces(Mat matFrame, BufferedImage buffFrame, Set<Rect> faces) {
         List<VideoFace> videoFacesList = new ArrayList<>();
 
         Size maxSize = new Size(0, 0);
         Prediction closestFacePrediction = null;
         MediaFace.Location maxLocation = null;
 
-        for (Map.Entry<Rect, Mat> entry : faces.entrySet()) {
+        for (Rect rect : faces) {
             try {
-                Rect rect = entry.getKey();
-                Mat face = entry.getValue();
                 MediaFace.Location videoLocation = new MediaFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(matFrame.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace.clone());
                 }

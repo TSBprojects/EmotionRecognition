@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import static java.util.function.Function.identity;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
@@ -117,12 +118,14 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         log.info("Finding faces and recognize emotions on them in the image...");
         List<ImageFace> imageFaceList = new ArrayList<>();
 
-        Map<Rect, Mat> faces = haarFaceDetector.detect(ImageConverter.toMat(image), false);
-        faces.forEach((rect, face) -> {
+        Mat matImage = ImageConverter.toMat(image);
+        Map<Rect, Mat> faces = haarFaceDetector.detect(matImage, false);
+        faces.keySet().forEach(rect -> {
             try {
-                BufferedImage faceImage = ImageConverter.toBufferedImage(face);
+                Mat croppedFace = matImage.apply(rect);
+                BufferedImage faceImage = ImageConverter.toBufferedImage(croppedFace);
                 MediaFace.Location faceLocation = new MediaFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(croppedFace, INPUT_WIDTH, INPUT_HEIGHT);
                 if (imageNetInputListener != null) {
                     imageNetInputListener.onNextFace(preparedFace.clone());
                 }
@@ -251,16 +254,15 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
             frameListener.onNextFrame(frame);
         }
 
+        Mat matFrame = ImageConverter.toMat(frame);
         BufferedImage buffFrame = ImageConverter.toBufferedImage(frame);
-        Map<Rect, Mat> faces = haarFaceDetector.detect(ImageConverter.toMat(frame), false);
+        Map<Rect, Mat> faces = haarFaceDetector.detect(matFrame, false);
 
-        List<VideoFace> videoFacesList = processFaces(buffFrame, faces);
+        List<VideoFace> videoFacesList = processFaces(matFrame, buffFrame, faces.keySet());
 
         VideoFrame videoFrame = new VideoFrame(frameCount, videoFacesList);
 
-        if (configuration.get(GENERATE_JSON_OUTPUT)) {
-            writeVideoFrame(videoFrame);
-        }
+        writeVideoFrame(videoFrame);
 
         if (configuration.get(COLLECT_FRAMES)) {
             frames.add(videoFrame);
@@ -271,13 +273,13 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
         return new FrameInfo(frameCount++, buffFrame, videoFacesList);
     }
 
-    protected List<VideoFace> processFaces(BufferedImage buffFrame, Map<Rect, Mat> faces) {
+    protected List<VideoFace> processFaces(Mat matFrame, BufferedImage buffFrame, Set<Rect> faces) {
         List<VideoFace> videoFacesList = new ArrayList<>();
 
-        faces.forEach((rect, face) -> {
+        faces.forEach(rect -> {
             try {
                 MediaFace.Location faceLocation = new MediaFace.Location(rect.x(), rect.y(), rect.width(), rect.height());
-                Mat preparedFace = FacePreProcessing.process(face, INPUT_WIDTH, INPUT_HEIGHT);
+                Mat preparedFace = FacePreProcessing.process(matFrame.apply(rect), INPUT_WIDTH, INPUT_HEIGHT);
                 if (videoNetInputListener != null) {
                     videoNetInputListener.onNextFace(preparedFace.clone());
                 }
@@ -294,6 +296,7 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
     }
 
     private void initOutputStream(Path writeTo) {
+        if (!configuration.get(GENERATE_JSON_OUTPUT)) return;
         try {
             final String fileName = FilenameUtils.removeExtension(writeTo.getFileName().toString());
             final Path jsonFile = Paths.get(writeTo.getParent() + "\\" + fileName + "-videoInfo.json");
@@ -308,6 +311,7 @@ public class SimpleEmotionRecognizer implements EmotionRecognizer {
     }
 
     private void writeVideoFrame(VideoFrame videoFrame) {
+        if (!configuration.get(GENERATE_JSON_OUTPUT)) return;
         try {
             if (fileOutputStream != null) {
                 byte[] frame = toJson.writeValueAsBytes(videoFrame);

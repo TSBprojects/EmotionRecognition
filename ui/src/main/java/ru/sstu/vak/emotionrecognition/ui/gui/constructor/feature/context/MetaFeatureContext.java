@@ -10,7 +10,6 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.var;
-import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.AnalyzableModel;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.models.SimpleAnalyzableModel;
@@ -18,16 +17,18 @@ import static ru.sstu.vak.emotionrecognition.ui.Main.TITLE_IMAGE_PATH;
 import ru.sstu.vak.emotionrecognition.ui.gui.MainController;
 import ru.sstu.vak.emotionrecognition.ui.gui.MetaFeatureSettingsController;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.FeatureAction;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.ModelContext;
+import ru.sstu.vak.emotionrecognition.ui.gui.constructor.model.ModelPane;
 
 public class MetaFeatureContext extends FeatureContext<MetaFeature> {
 
-    public MetaFeatureContext(MetaFeature feature, AutoIncrementMap<AnalyzableModel> models) {
-        super(feature, models);
+    public MetaFeatureContext(MetaFeature feature, ModelContext modelContext) {
+        super(feature, modelContext);
     }
 
     @Override
     public int putFeature(int modelId) {
-        return getModels().get(modelId).getMetaFeatures().put(getFeature().copy());
+        return getModelContext().getModel(modelId).getMetaFeatures().put(getFeature().copy());
     }
 
     @Override
@@ -39,7 +40,7 @@ public class MetaFeatureContext extends FeatureContext<MetaFeature> {
     public FeatureAction getRemoveHandler(int modelId, int featureId) {
         return (button, holder, feature) -> event -> {
             holder.getChildren().remove(feature.value());
-            getModels().get(modelId).getMetaFeatures().remove(featureId);
+            getModelContext().getModel(modelId).getMetaFeatures().remove(featureId);
         };
     }
 
@@ -57,7 +58,7 @@ public class MetaFeatureContext extends FeatureContext<MetaFeature> {
     public FeatureAction getModelFeatureSettingHandler(int modelId, int featureId) {
         return (ignore1, ignore2, ignore3) -> event -> {
 
-            var model = getModels().get(modelId);
+            var model = getModelContext().getModel(modelId);
 
             MetaFeature feature = model.getMetaFeatures().get(featureId);
 
@@ -71,8 +72,8 @@ public class MetaFeatureContext extends FeatureContext<MetaFeature> {
                 e.printStackTrace();
             }
 
-            MetaFeatureSettingsController progressController = loader.getController();
-            progressController.setData(feature, model.getFeatures());
+            MetaFeatureSettingsController featureSettings = loader.getController();
+            featureSettings.setData(feature, model.getFeatures());
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -84,12 +85,14 @@ public class MetaFeatureContext extends FeatureContext<MetaFeature> {
     }
 
     @Override
-    public void createAndPutModel(String stateName) {
-        getModels().put(new SimpleAnalyzableModel(
+    public void createAndPutModel(String stateName, ModelPane modelPane) {
+        AnalyzableModel model = new SimpleAnalyzableModel(
             stateName,
             true,
             Collections.emptyMap(),
-            Collections.singletonMap(0, getFeature().copy())
-        ));
+            Collections.singletonMap(0, getFeature().copy()),
+            Collections.emptyMap()
+        );
+        getModelContext().put(model, modelPane);
     }
 }

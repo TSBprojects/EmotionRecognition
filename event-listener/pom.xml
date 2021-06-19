@@ -9,8 +9,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>common</artifactId>
-    <version>1.2.1</version>
+    <artifactId>event-listener</artifactId>
+    <version>1.1</version>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
 
     <build>
         <plugins>
@@ -25,11 +30,10 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>ru.sstu.vak.emotionrecognition.common.Main</mainClass>
+                                    <mainClass>ru.sstu.vak.emotionrecognition.eventlistener.Main</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>
@@ -59,19 +63,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>ru.sstu.vak.emotionrecognition</groupId>
-            <artifactId>shared-resources</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>RELEASE</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.26</version>
         </dependency>
     </dependencies>
 

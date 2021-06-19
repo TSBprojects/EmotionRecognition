@@ -14,14 +14,15 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 <AnchorPane fx:id="mainAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="485.0" prefWidth="1066.0" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.sstu.vak.emotionrecognition.ui.gui.MainController">
    <children>
       <TabPane layoutX="-21.0" layoutY="14.0" prefHeight="485.0" prefWidth="1064.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -39,10 +40,9 @@
                               </ImageView>
                            </children>
                         </AnchorPane>
-                        <Button fx:id="startVideoBtn" layoutX="490.0" layoutY="382.0" mnemonicParsing="false" onAction="#startVideo" prefHeight="25.0" prefWidth="95.0" text="Только видео" AnchorPane.rightAnchor="346.0" />
-                        <Button fx:id="startRcognVideoBtn" layoutX="595.0" layoutY="382.0" mnemonicParsing="false" onAction="#startRecognVideo" prefHeight="25.0" prefWidth="163.0" text="Видео с распознаванием" AnchorPane.rightAnchor="173.0" />
-                        <Button fx:id="screenshotBtn" layoutX="491.0" layoutY="415.0" mnemonicParsing="false" onAction="#takeScreenshot" prefHeight="25.0" prefWidth="343.0" text="Скриншот" AnchorPane.rightAnchor="97.0" />
-                        <Button fx:id="stopVideoBtn" layoutX="768.0" layoutY="382.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="66.0" text="Стоп" AnchorPane.rightAnchor="97.0" />
+                        <Button fx:id="startRcognVideoBtn" layoutX="626.0" layoutY="382.0" mnemonicParsing="false" onAction="#startRecognVideo" prefHeight="25.0" prefWidth="165.0" text="Старт" AnchorPane.rightAnchor="275.0" />
+                        <Button layoutX="491.0" layoutY="415.0" mnemonicParsing="false" onAction="#saveTargetTimeSeries" prefHeight="25.0" prefWidth="343.0" text="Сохранить описание целевых кадров и результат анализа" AnchorPane.rightAnchor="97.0" />
+                        <Button fx:id="stopVideoBtn" layoutX="768.0" layoutY="382.0" mnemonicParsing="false" onAction="#stopVideo" prefHeight="25.0" prefWidth="165.0" text="Стоп" AnchorPane.rightAnchor="97.0" />
                         <AnchorPane layoutX="852.0" layoutY="382.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;" AnchorPane.rightAnchor="21.0">
                            <children>
                               <ImageView fx:id="faceFromVideo" fitHeight="48.0" fitWidth="48.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -53,7 +53,7 @@
                            </children>
                         </AnchorPane>
                         <ProgressBar fx:id="startVideoProgressBar" layoutX="501.0" layoutY="382.0" prefHeight="25.0" prefWidth="344.0" visible="false" AnchorPane.rightAnchor="97.0" />
-                        <TextField fx:id="videoPath" layoutX="490.0" layoutY="19.0" prefHeight="25.0" prefWidth="421.0" promptText="ID камеры | Путь к камере | Путь к файлу" AnchorPane.rightAnchor="21.0" />
+                        <TextField fx:id="videoPath" layoutX="490.0" layoutY="19.0" prefHeight="25.0" prefWidth="257.0" promptText="ID камеры | Путь к камере | Путь к файлу" AnchorPane.rightAnchor="21.0" />
                         <LineChart fx:id="emotionChart" layoutX="22.0" layoutY="15.0" legendVisible="false" prefHeight="337.0" prefWidth="586.0" title="Эмоции в течении отрезка времени">
                           <xAxis>
                               <CategoryAxis fx:id="emotionChartX" side="BOTTOM" />
@@ -65,10 +65,10 @@
                         <Pane fx:id="chartRangeHolder" layoutX="147.0" layoutY="346.0" prefHeight="54.0" prefWidth="464.0">
                            <children>
                               <Slider fx:id="rangeSliderOld" layoutX="115.0" layoutY="9.0" max="6.0" min="3.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="38.0" prefWidth="239.0" value="6.0" visible="false" />
-                              <Text fx:id="chartHighSliderLabel" layoutX="364.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06/00:00:00" />
-                              <Text fx:id="chartLowSliderLabel" layoutX="11.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:00/00:00:00" />
-                              <Text fx:id="chartRangeTotalLabel" layoutX="217.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06" />
-                              <Label layoutX="310.0" layoutY="35.0" text="график" textFill="#f3622d">
+                              <Label fx:id="chartHighSliderLabel" layoutX="364.0" layoutY="20.0" text="00:00:06/00:00:00" />
+                              <Label fx:id="chartLowSliderLabel" layoutX="11.0" layoutY="20.0" text="00:00:00/00:00:00" />
+                              <Label fx:id="chartRangeTotalLabel" layoutX="217.0" layoutY="4.0" text="00:00:06" />
+                              <Label layoutX="310.0" layoutY="37.0" text="график" textFill="#f3622d">
                                  <font>
                                     <Font name="System Bold Italic" size="11.0" />
                                  </font>
@@ -78,9 +78,9 @@
                         <Pane fx:id="analyzeRangeHolder" layoutX="147.0" layoutY="388.0" prefHeight="54.0" prefWidth="464.0">
                            <children>
                               <Slider fx:id="rangeSliderOld1" layoutX="115.0" layoutY="9.0" max="6.0" min="3.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="38.0" prefWidth="239.0" value="6.0" visible="false" />
-                              <Text fx:id="analyzeHighSliderLabel" layoutX="364.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06/00:00:00" />
-                              <Text fx:id="analyzeLowSliderLabel" layoutX="11.0" layoutY="33.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:00/00:00:00" />
-                              <Text fx:id="analyzeRangeTotalLabel" layoutX="217.0" layoutY="18.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00:06" />
+                              <Label fx:id="analyzeHighSliderLabel" layoutX="364.0" layoutY="20.0" text="00:00:06/00:00:00" />
+                              <Label fx:id="analyzeLowSliderLabel" layoutX="11.0" layoutY="20.0" text="00:00:00/00:00:00" />
+                              <Label fx:id="analyzeRangeTotalLabel" layoutX="217.0" layoutY="5.0" text="00:00:06" />
                               <Label layoutX="311.0" layoutY="34.0" prefHeight="16.0" prefWidth="39.0" text="анализ" textFill="#30b90e">
                                  <font>
                                     <Font name="System Bold Italic" size="11.0" />
@@ -89,63 +89,83 @@
                            </children>
                         </Pane>
                         <ListView fx:id="stateListView" layoutX="23.0" layoutY="360.0" prefHeight="72.0" prefWidth="121.0" style="-fx-effect: dropshadow(three-pass-box, rgba(255,165,0,0.8), 10, 0, 0, 0);" />
-                        <Label layoutX="24.0" layoutY="341.0" prefHeight="16.0" prefWidth="64.0" text="Состояние:" textFill="#30b90e">
+                        <Label layoutX="23.0" layoutY="341.0" prefHeight="16.0" prefWidth="121.0" text="Показатель состояния" textFill="#30b90e">
                            <font>
-                              <Font name="System Bold Italic" size="11.0" />
+                              <Font name="Consolas Bold Italic" size="11.0" />
                            </font>
                         </Label>
+                        <Label layoutX="625.0" layoutY="21.0" text="Источник видео потока:">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="graphicRangeInfoFirst" layoutX="505.0" layoutY="384.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="15.0" styleClass="graphic-range-info" />
+                        <Button fx:id="graphicRangeInfoSecond" layoutX="525.0" layoutY="384.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="15.0" styleClass="graphic-range-info" />
                      </children>
                   </AnchorPane>
             </content>
           </Tab>
-            <Tab text="Изображение">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="474.0" prefWidth="931.0">
-                     <children>
-                        <AnchorPane layoutX="323.0" layoutY="51.0" maxHeight="320.0" maxWidth="420.0" minHeight="320.0" minWidth="420.0" prefHeight="320.0" prefWidth="420.0" style="-fx-padding: 10; -fx-background-color: #C4CEDE;">
-                           <children>
-                              <ImageView fx:id="screenImageView" fitHeight="300.0" fitWidth="400.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <image>
-                                    <Image url="@image/videoPlaceHolder.png" />
-                                 </image>
-                              </ImageView>
-                           </children>
-                        </AnchorPane>
-                        <Button fx:id="recognScreenBtn" layoutX="323.0" layoutY="380.0" mnemonicParsing="false" onAction="#recognizeScreenshot" prefHeight="58.0" prefWidth="181.0" text="Распознать" />
-                        <AnchorPane layoutX="685.0" layoutY="380.0" prefHeight="58.0" prefWidth="30.0" style="-fx-padding: 5; -fx-background-color: #C4CEDE;">
-                           <children>
-                              <ImageView fx:id="faceFromScreen" fitHeight="48.0" fitWidth="48.0" layoutX="-71.0" layoutY="-40.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <image>
-                                    <Image url="@image/videoPlaceHolderForFace.png" />
-                                 </image>
-                              </ImageView>
-                           </children>
-                        </AnchorPane>
-                        <TextField fx:id="imagePath" disable="true" layoutX="323.0" layoutY="17.0" prefHeight="25.0" prefWidth="337.0" promptText="Путь к изображению" />
-                        <Button fx:id="browseImageBtn" layoutX="668.0" layoutY="17.0" mnemonicParsing="false" onAction="#browseImage" prefHeight="25.0" prefWidth="75.0" text="Обзор" />
-                        <Button fx:id="saveImageBtn" layoutX="601.0" layoutY="380.0" mnemonicParsing="false" onAction="#saveScreen" prefHeight="58.0" prefWidth="75.0" text="Сохранить" />
-                        <ProgressBar fx:id="recognImageProgressBar" layoutX="323.0" layoutY="380.0" prefHeight="59.0" prefWidth="181.0" visible="false" AnchorPane.rightAnchor="562.0" />
-                        <Button fx:id="openImageBtn" layoutX="515.0" layoutY="380.0" mnemonicParsing="false" onAction="#openScreen" prefHeight="58.0" prefWidth="75.0" text="Открыть" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
             <Tab text="Конструктор">
                <content>
-                  <SplitPane dividerPositions="0.7504690431519699" prefHeight="160.0" prefWidth="200.0">
+                  <SplitPane dividerPositions="0.217, 0.8068" prefHeight="160.0" prefWidth="200.0">
                     <items>
+                        <SplitPane dividerPositions="0.09251101321585903" orientation="VERTICAL" prefHeight="456.0" prefWidth="261.0">
+                           <items>
+                              <HBox alignment="CENTER" maxHeight="39.0" minHeight="39.0" prefHeight="39.0" prefWidth="200.0">
+                                 <children>
+                                    <Label text="Слушатели событий" textFill="#6b6b6b">
+                                       <font>
+                                          <Font name="Century" size="14.0" />
+                                       </font>
+                                       <HBox.margin>
+                                          <Insets right="10.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <Button fx:id="addEndpoint" mnemonicParsing="false" onAction="#onAddEndpoint" styleClass="add-btn">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
+                                       <HBox.margin>
+                                          <Insets right="10.0" />
+                                       </HBox.margin></Button>
+                                    <Button fx:id="showTreeViewBtn" mnemonicParsing="false" onAction="#onShowEndpointsTreeView" styleClass="show-tree-view-btn">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                              <ScrollPane fitToHeight="true" fitToWidth="true">
+                                 <content>
+                                    <FlowPane fx:id="selectEndpointPane">
+                                       <padding>
+                                          <Insets right="15.0" top="15.0" />
+                                       </padding>
+                                    </FlowPane>
+                                 </content>
+                              </ScrollPane>
+                           </items>
+                        </SplitPane>
                         <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                           <items>
                               <ToolBar maxHeight="39.0" minHeight="39.0" prefHeight="40.0" prefWidth="200.0">
                                  <items>
-                                    <Button mnemonicParsing="false" onAction="#onModelsLoad" text="Импорт" />
-                                    <Button mnemonicParsing="false" onAction="#onModelsSave" text="Экспорт" />
+                                    <Button fx:id="loadConstructorBtn" mnemonicParsing="false" onAction="#onModelsLoad" text="Импорт">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor></Button>
+                                    <Button fx:id="saveConstructorBtn" mnemonicParsing="false" onAction="#onModelsSave" text="Экспорт">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor></Button>
                                  </items>
                               </ToolBar>
                               <ScrollPane fitToWidth="true">
                                  <content>
                                     <VBox fx:id="selectModelVBox">
-                                       <children>
+
+
+                                        <children>
                                           <AnchorPane fx:id="addModelPlaceHolder" prefHeight="86.0" prefWidth="607.0" style="-fx-border-style: dashed;">
                                              <VBox.margin>
                                                 <Insets bottom="35.0" left="50.0" right="50.0" top="30.0" />
@@ -153,7 +173,7 @@
                                              <children>
                                                 <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" style="-fx-border-style: dashed;" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
                                                    <children>
-                                                      <Label opacity="0.34" prefWidth="461.0" text="Перетащите фактор чтобы добавить модель">
+                                                      <Label opacity="0.34" prefWidth="461.0" text="Перетащите фактор чтобы добавить показатель состояния" textAlignment="CENTER" wrapText="true">
                                                          <font>
                                                             <Font name="Arial" size="22.0" />
                                                          </font>
@@ -170,11 +190,11 @@
                         </SplitPane>
                         <SplitPane dividerPositions="0.09251101321585903" orientation="VERTICAL" prefHeight="456.0" prefWidth="261.0">
                           <items>
-                              <VBox alignment="CENTER" maxHeight="39.0" minHeight="39.0" prefHeight="200.0" prefWidth="100.0">
+                              <VBox alignment="CENTER" maxHeight="39.0" minHeight="39.0" prefHeight="39.0" prefWidth="100.0">
                                  <children>
                                     <Label text="Библиотека факторов" textFill="#6b6b6b">
                                        <font>
-                                          <Font name="Century" size="16.0" />
+                                          <Font name="Century" size="14.0" />
                                        </font>
                                     </Label>
                                  </children>

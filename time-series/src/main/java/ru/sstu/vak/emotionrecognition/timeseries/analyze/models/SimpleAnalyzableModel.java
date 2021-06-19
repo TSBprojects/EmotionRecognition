@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.var;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementHashMap;
 import ru.sstu.vak.emotionrecognition.common.collection.AutoIncrementMap;
+import ru.sstu.vak.emotionrecognition.timeseries.analyze.endpoint.Endpoint;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.EmotionFeature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.Feature;
 import ru.sstu.vak.emotionrecognition.timeseries.analyze.feature.MetaFeature;
@@ -25,17 +26,21 @@ public class SimpleAnalyzableModel implements AnalyzableModel {
 
     private final AutoIncrementMap<EmotionFeature> features;
 
+    private final Map<Integer, Endpoint> endpoints;
+
     @JsonCreator
     public SimpleAnalyzableModel(
         @JsonProperty("name") String name,
         @JsonProperty("strictly") boolean strictly,
         @JsonProperty("features") Map<Integer, EmotionFeature> features,
-        @JsonProperty("metaFeatures") Map<Integer, MetaFeature> metaFeatures
+        @JsonProperty("metaFeatures") Map<Integer, MetaFeature> metaFeatures,
+        @JsonProperty("endpoints") Map<Integer, Endpoint> endpoints
     ) {
         this.name = name;
         this.strictly = strictly;
         this.features = new AutoIncrementHashMap<>(new ConcurrentHashMap<>(features));
         this.metaFeatures = new AutoIncrementHashMap<>(new ConcurrentHashMap<>(metaFeatures));
+        this.endpoints = new ConcurrentHashMap<>(endpoints);
     }
 
     @Override
@@ -52,5 +57,10 @@ public class SimpleAnalyzableModel implements AnalyzableModel {
         }
 
         return strictly && !allFeatures.isEmpty();
+    }
+
+    @Override
+    public Map<Integer, Endpoint> getEndpoints() {
+        return endpoints;
     }
 }

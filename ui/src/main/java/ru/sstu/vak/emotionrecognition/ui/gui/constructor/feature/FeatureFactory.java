@@ -6,11 +6,11 @@ import javafx.scene.layout.AnchorPane;
 import static ru.sstu.vak.emotionrecognition.ui.gui.MainController.FEATURE_ID_SUFFIX;
 import ru.sstu.vak.emotionrecognition.ui.gui.constructor.feature.context.FeatureContext;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureNameLabel;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildFeatureSettingsButton;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureAnchorPane;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureSerialNumberLabel;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildModelBodyFeatureWarnLabel;
-import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildRemoveModelButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildRemoveButton;
+import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildSettingsButton;
 
 public final class FeatureFactory {
 
@@ -30,9 +30,9 @@ public final class FeatureFactory {
 
         Label labelName = buildFeatureNameLabel(config.getFeatureName());
 
-        Button configureFeatureButton = buildFeatureSettingsButton();
+        Button configureFeatureButton = buildSettingsButton();
 
-        Button removeModelFeatureButton = buildRemoveModelButton();
+        Button removeModelFeatureButton = buildRemoveButton();
 
         Label serialNumberLabel = buildModelBodyFeatureSerialNumberLabel(serialNumber);
 
