@@ -1108,7 +1108,7 @@ public class MainController {
         chartHighSliderLabel.setTooltip(rightTimeLabel);
         analyzeHighSliderLabel.setTooltip(rightTimeLabel);
         chartRangeSlider.setTooltip(newTooltipBuilder(
-            "Целевой отрезок времени отображаемый на усредненном(отезок > 5сек) графике эмоций"
+            "Целевой отрезок времени отображаемый на усредненном(отезок > 6сек) графике эмоций"
         ).build());
         analyzeRangeSlider.setTooltip(newTooltipBuilder(
             "Целевой отрезок времени анализируемый на основе конфигурации конструктора"
@@ -1120,11 +1120,11 @@ public class MainController {
         ).visibleDuration(GRAPHIC_TOOLTIP_VISIBLE_DELAY).build());
         graphicRangeInfoSecond.setTooltip(newTooltipBuilder(
             "Для комфортного отображения не усредненного графика в реальном времени "
-                + "используется отрезок равный 5 секундам от текущего момента времени.\n\n"
+                + "используется отрезок равный 6 секундам от текущего момента времени.\n\n"
                 + "В связи с этим, при приведении правого ползунка в крайнее правое положение до упора - "
                 + "он приклеится (как и правый ползунок анализируемого отрезка), "
                 + "что соответсвует положению \"в реальном времени\". Левый ползунок в свою очередь "
-                + "будет занимать положение на 5 секунд ранее относительно правого.\n"
+                + "будет занимать положение на 6 секунд ранее относительно правого.\n"
                 + "Левый ползунок анализируемого отрезка заблокирован НЕ будет.\n\n"
                 + "Чтобы отклеить правый ползунок достаточно переместить левый ползунок влево."
         ).visibleDuration(GRAPHIC_TOOLTIP_VISIBLE_DELAY).build());
@@ -1175,7 +1175,7 @@ public class MainController {
             if (db.hasString()) {
                 int featureNumberInModel = 0;
                 int modelId = modelContext.getNextId();
-                String stateName = "Показатель состояния " + modelId;
+                String stateName = "Состояние " + modelId;
                 int featureId = DragDropData.deserialize(db.getString()).getKey();
                 var featureContext = BASE_FEATURE_CONTEXTS.get(featureId);
 
@@ -1416,9 +1416,6 @@ public class MainController {
 
             Label labelName = buildFeatureNameLabel(featureContext.getFeature().getName());
 
-            //TODO Need to fix UI bug with broken scroll bar.
-            // Height of panes seems to be larger than it looks like.
-            // Scroll bar doesn't appear for some reason
             AnchorPane featurePane = buildSelectFeatureAnchorPane(labelName, settingsButton);
 
             settingsButton.setOnAction(featureContext.getLibraryFeatureSettingHandler(labelName).apply(
