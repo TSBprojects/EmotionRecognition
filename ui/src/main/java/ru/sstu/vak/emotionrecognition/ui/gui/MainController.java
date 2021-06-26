@@ -19,7 +19,8 @@ import java.time.LocalDateTime;
 import static java.time.ZoneOffset.UTC;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
+import static java.util.Base64.getDecoder;
+import static java.util.Base64.getEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -138,7 +139,7 @@ import ru.sstu.vak.emotionrecognition.ui.gui.dragdrop.DragDropData;
 import static ru.sstu.vak.emotionrecognition.ui.gui.dragdrop.DragDropData.Type.ENDPOINT;
 import static ru.sstu.vak.emotionrecognition.ui.gui.dragdrop.DragDropData.Type.FEATURE;
 import ru.sstu.vak.emotionrecognition.ui.io.AnalysisHolder;
-import ru.sstu.vak.emotionrecognition.ui.io.ModelsHolder;
+import ru.sstu.vak.emotionrecognition.ui.io.ConstructorConfig;
 import ru.sstu.vak.emotionrecognition.ui.io.TrueModelEvent;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.ENDPOINT_STATUS_CLASS;
 import static ru.sstu.vak.emotionrecognition.ui.util.ConstructorV2.buildEndpointAnchorPane;
@@ -1454,8 +1455,8 @@ public class MainController {
                 "*.ercc"
             );
             if (configFile != null) {
-                byte[] json = mapper.writeValueAsBytes(ModelsHolder.from(modelContext.getModels()));
-                Files.write(configFile.toPath(), Base64.getEncoder().encode(json));
+                byte[] json = mapper.writeValueAsBytes(ConstructorConfig.from(endpoints, modelContext.getModels()));
+                Files.write(configFile.toPath(), getEncoder().encode(json));
             }
         });
     }
@@ -1475,17 +1476,18 @@ public class MainController {
     private void loadConfiguration(File configFile) throws IOException {
         if (configFile != null && configFile.exists()) {
             byte[] encodedJson = Files.readAllBytes(configFile.toPath());
-            ModelsHolder holder = mapper.readValue(Base64.getDecoder().decode(encodedJson), ModelsHolder.class);
-            addLoadedModels(holder.getModels());
+            ConstructorConfig holder = mapper.readValue(getDecoder().decode(encodedJson), ConstructorConfig.class);
+            addLoadedModels(holder);
         }
     }
 
-    private void addLoadedModels(List<AnalyzableModel> models) {
+    private void addLoadedModels(ConstructorConfig config) {
         int newEndpointsStartId = -1;
         Map<Integer, Endpoint> uniqueEndpoints = new HashMap<>();
         List<Runnable> delayedEndpointIdsUpdates = new ArrayList<>();
+        Map<Integer, Endpoint> newEndpoints = config.getEndpoints();
 
-        for (var model : models) {
+        for (var model : config.getModels()) {
             int modelId = modelContext.getNextId();
 
             ModelPane modelPane = createModelPane(modelId, model.getName(), model.isStrictly());
@@ -1513,6 +1515,7 @@ public class MainController {
                         addLoadedEndpoint(modelId, newEndpointId, modelPane.getEndpointHolder());
                     });
                     endpoints.put(endpoint);
+                    newEndpoints.remove(oldEndpointId);
                     selectEndpointPane.getChildren().add(createSelectEndpointPane(newEndpointId));
                 }
             }
@@ -1530,6 +1533,12 @@ public class MainController {
             }
             delayedEndpointIdsUpdates.forEach(Runnable::run);
         }
+
+        newEndpoints.values().forEach(endpoint -> {
+            int newEndpointId = endpoints.getNextId();
+            endpoints.put(endpoint);
+            selectEndpointPane.getChildren().add(createSelectEndpointPane(newEndpointId));
+        });
     }
 
     private void addLoadedFeatures(int modelId, AutoIncrementMap<? extends Feature> features, FlowPane featuresHolder) {
