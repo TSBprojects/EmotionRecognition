@@ -24,6 +24,7 @@ public class Main {
         server.createContext(path, httpExchange -> {
             log.info("'{}' received event:\n{}", name, requestToString(httpExchange));
             httpExchange.sendResponseHeaders(200, 0);
+            httpExchange.close();
         });
 
         server.start();
